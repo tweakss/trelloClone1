@@ -22,7 +22,7 @@ const { models: { Board, User, List, Card, Workspace, Guest }} = require('../db'
 //   }
 // });
 
-// Get a board and its contents(lists and cards)
+// Get a board
 router.get('/:boardId', async (req, res, next) => {
   const boardId = req.params.boardId;
 
@@ -32,11 +32,8 @@ router.get('/:boardId', async (req, res, next) => {
         id: boardId
       },
       // include: {
-      //   model: List,
-      //   include: Card,
-      //   // separate: true,
-      //   // order: [['position', 'ASC']]
-      // },
+      //   model: User
+      // }
       
     });
     // console.log("board:", board);
@@ -121,9 +118,9 @@ router.post('/newBoard/:userId/:workspaceId', async (req, res, next) => {
 });
 
 // Add a user to a board
-router.put('/:boardId/addMember/:username', async (req, res, next) => {
+router.put('/:boardId/addMember/:emailAddr', async (req, res, next) => {
   const boardId = req.params.boardId;
-  const username = req.params.username;
+  const emailAddr = req.params.emailAddr;
 
   try {
     const board = await Board.findOne({
@@ -134,16 +131,20 @@ router.put('/:boardId/addMember/:username', async (req, res, next) => {
 
     const user = await User.findOne({
       where: {
-        username
+        email: emailAddr
       }
     });
+    console.log("user:", user);
+    if(user === null) {
+      res.send("No user exists with this email address");
+    }
 
     const response = await board.addUsers([user]);
     console.log("After adding a user to a board, response:", response);
     if(response) {
       res.send(user);
     } else {
-      res.send("User does not exist or is already a member");
+      res.send("The user with this email address is already a member");
     }
     
   } catch(err) {

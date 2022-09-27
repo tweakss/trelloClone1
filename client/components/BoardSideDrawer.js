@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import {connect} from 'react-redux'
+import {connect } from 'react-redux'
 import { Link } from 'react-router-dom';
 import { createNewBoard } from '../store/workspace';
 
@@ -9,30 +9,37 @@ const BoardSideDrawer = (props) => {
     user, workspaces, workspaceId,
     createNewBoard
   } = props;
-
-  const [open, setOpen] = useState(false);
-
+  
+  
+  const localStorage = window.localStorage;
+  const [open, setOpen] = useState(parseInt(localStorage.getItem("sideDrawerOpen"), 10));
+  
   useEffect(() => {
     const sideDrawer = document.getElementById('board-side-drawer');
     const openCloseDrawerBtn = document.getElementById('open-close-drawer');
     const gridBoard = document.getElementById('grid-board');
-    // console.log('useEffect, sideDrawer:', sideDrawer);
     
     if(open) {
       gridBoard.style.gridTemplateColumns = '240px';
       sideDrawer.style.width = '240px';
       openCloseDrawerBtn.style.left = '10%' // originally at 80%
-      // console.log('open');
     } else {
       sideDrawer.style.width = '60px';
       openCloseDrawerBtn.style.left = 'calc(30% - 8px)';
       gridBoard.style.gridTemplateColumns = '60px';
     }
-  }) 
+    
+  })
 
   const handleDrawerOpenClose = () => {
-    setOpen((prev) => !prev);
-    // console.log('After setOpen, open:', open);
+    const sideDrawerState = localStorage.getItem("sideDrawerOpen");
+    if(sideDrawerState === "1") {
+      localStorage.setItem("sideDrawerOpen", "0");
+      setOpen(parseInt(localStorage.getItem("sideDrawerOpen"), 10));
+    } else {
+      localStorage.setItem("sideDrawerOpen", "1");
+      setOpen(parseInt(localStorage.getItem("sideDrawerOpen"), 10));
+    }
   };
 
   const [newBoardModal, setNewBoardModal] = useState(false);
@@ -56,7 +63,7 @@ const BoardSideDrawer = (props) => {
   return (
     <div id="board-side-drawer">
     {
-      open ? 
+      (open && workspaces.length) ? 
       <div>
         <div>
           <span>{workspaces.find((workspace) => workspace.id === workspaceId).title}</span>

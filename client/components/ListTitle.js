@@ -7,9 +7,10 @@ import { swapListPositions } from '../store/lists';
 
 const ListTitle = (props) => {
   const {
-    board, workspaces, user,
+    board, workspaces, user, 
     currList, currListIndex, listsState, draggedCard,
     deleteList, getBoard, swapListPositions,
+    swapListTargetPos, handleSwapListTargetIdx,
   } = props;
   const dispatch = useDispatch();
 
@@ -32,8 +33,8 @@ const ListTitle = (props) => {
     if(clickedElem.includes("list-title handle-dropdown")) {
       if( (listTitleDropdown.currDropdown !== "listActionsDropdown") && listTitleDropdown.currDropdown ) {
         setListTitleDropdown({
-          ...listTitleDropdown,
           [listTitleDropdown.currDropdown]: false,
+          currDropdown: "listActionsDropdown",
           listActionsDropdown: true,
           isVisible: true
         });
@@ -58,7 +59,7 @@ const ListTitle = (props) => {
     } else if(clickedElem.includes("list-actions")) {
       if(clickedElem.includes("close-dropdown-btn")) {
         setListTitleDropdown({
-          ...listTitleDropdown,
+          [listTitleDropdown.currDropdown]: false,
           currDropdown: false,
           listActionsDropdown: false,
           isVisible: false,
@@ -92,14 +93,15 @@ const ListTitle = (props) => {
   const [selectListPosition, setSelectListPosition] = useState(`${currListIndex + 1}`);
   const handleSelectListPosition = (event) => {
     setSelectListPosition(event.target.value);
-    // console.log("handleSelectListPosition");
+    console.log(`handleSelectListPosition, after setSelectListPosition, for list[${currListIndex}]`);
   }
 
   const handleSubmitListPosition = (event) => {
     event.preventDefault();
-    console.log("handleSubmitListPosition, selectListPosition", selectListPosition);
+    console.log(`handleSubmitListPosition, list[${currListIndex}] selectListPosition`, selectListPosition);
     
     const swapToIndex = parseInt(selectListPosition, 10) - 1;
+    handleSwapListTargetIdx(swapToIndex, currListIndex);
     swapListPositions(board.id, {
       currListId: currList.id,
       currListPosition: currListIndex + 1,
@@ -107,29 +109,26 @@ const ListTitle = (props) => {
       swapToListId: listsState.lists[swapToIndex].id
     });
     
-    // const listPositions = new Map();
-    // listsState.lists.forEach((list, index) => {
-    //   listPositions.set(list.id, index);
-    // });
-    // console.log("After setting:");
-    // listPositions.forEach((value, key) => console.log("id:", key, "index:", value));
+    setListTitleDropdown({
+      currDropdown: false,
+      listActionsDropdown: false,
+      moveListDropdown: false,
+      isVisible: false,
+    });
 
-    // const swapTargetId = listsState.lists[(parseInt(selectListPosition, 10) - 1)].id;
-    // const swapTargetIndex = listPositions.get(swapTargetId);
-    // console.log("swapTargetId:", swapTargetId, "swapTargetIndex:", swapTargetIndex, "currList.id:", currList.id);
-    // listPositions.set(swapTargetId, currListIndex)
-    // listPositions.set(currList.id, swapTargetIndex);
-
-    // console.log("After swapping:");
-    // listPositions.forEach((value, key) => console.log("id:", key, "index:", value));
-    // dispatch(_swapListPositions(listPositions));
-    // swapListPositions(listPositions);
+    
+    
   }
 
-  const [currListPositions, setCurrListPositions] = useState(null)
   useEffect(() => {
-    // 
-  }, [currListPositions])
+    console.log("useEffect, swapListTargetPos");
+    if(swapListTargetPos) {
+      console.log(`setting `, listsState.lists[currListIndex], "selectListPosition to:", swapListTargetPos);
+      setSelectListPosition(swapListTargetPos);
+      handleSwapListTargetIdx({ swapToIndex: null, currListIndex: null });
+    }
+  }, [swapListTargetPos])
+
 
   const handleMoveListBackBtn = (event) => {
     // Goes back to listActions
@@ -141,17 +140,6 @@ const ListTitle = (props) => {
     });
   }
 
-  // const handleMoveListDropdown = (event) => {
-  //   const clickedElem = event.target.className;
-  //   if(clickedElem.includes("list-title handle-dropdown")) {
-
-  //   } else if() {
-  //     //Handle clicking within dropdown like buttons that change visibility of dropdown
-  //   } else {
-  //     //Handle clicking outside of dropdown
-  //   }
-  // }
-  
  
   const closeListTitleDropdown = (event) => {
     // Handle closing dropdown when clicking outside and its event listener
@@ -163,20 +151,11 @@ const ListTitle = (props) => {
 
     
     if(clicked.className.includes(`list-title handle-dropdown idx${currListIndex}`)) {
-      console.log("clicked list-title handle");
-      document.removeEventListener("click", closeListTitleDropdown);
+      console.log("closeListTitleDropdown, clicked list-title handle");
       return;
     } else if(clicked.className.includes("close-dropdown-btn")) {
       console.log("clicked close-dropdown-btn");
-      document.removeEventListener("click", closeListTitleDropdown);
     }
-    
-    // else if(matches.length > 0) {
-    //   console.log("closeListTitleDropdown, matched regExpBtn");
-    //   document.removeEventListener("click", closeListTitleDropdown);
-    //   return;
-    // }
-
     
     while(clicked = clicked.parentElement) {
       // console.log("clicked", clicked, " parentNode:", clicked.parentNode);
@@ -190,9 +169,7 @@ const ListTitle = (props) => {
 
     
     console.log("clicked outisde of listTitleDropdown")
-    // setListActionsDropdown(false);
     handleListTitleDropdown(event);
-    document.removeEventListener("click", closeListTitleDropdown);
   }
 
   // const [deleteListPrompt, setDeleteListPrompt] = useState(false);
@@ -204,8 +181,7 @@ const ListTitle = (props) => {
   }
 
   const handleDeleteListYes = () => {
-    console.log("handleDeleteListYes, removing eventListener");
-    document.removeEventListener("click", closeListTitleDropdown);
+    console.log("handleDeleteListYes");
     deleteList(board, currList);
   }
 
@@ -215,9 +191,12 @@ const ListTitle = (props) => {
     // As long as a dropdown is visible an eventListener is set
     if(listTitleDropdown.isVisible) {
       document.addEventListener("click", closeListTitleDropdown);
-      console.log("useEffect listActionsDropdown, added event listener closeListTitleDropdown");
+      // console.log("useEffect listActionsDropdown, added event listener closeListTitleDropdown");
     }
 
+    return function cleanUp() {
+      document.removeEventListener("click", closeListTitleDropdown);
+    }
   }, [listTitleDropdown.isVisible]);
 
   // const [listTitleRows, setListTitleRows] = useState(1);
@@ -262,7 +241,7 @@ const ListTitle = (props) => {
   }
   useEffect(() => {
     if(currList.cards.length === 0) {
-      console.log(`ListTitle useEffect ${currList.title} no cards`);
+      // console.log(`ListTitle useEffect ${currList.title} no cards`);
       const boardList = document.querySelector(`.flex-board-list.idx${currListIndex}`);
 
       boardList.addEventListener("dragenter", boardListDragEnter);
@@ -279,7 +258,7 @@ const ListTitle = (props) => {
     }
   })
 
-  // console.log("ListTitle render");
+  console.log("ListTitle render");
 
 
   return (

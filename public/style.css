@@ -120,7 +120,7 @@ nav a {
   margin: 1em;
 }
 
-.autocomplete {
+.share-board-input-wrapper {
   margin: 1em;
   display: inline-block;
 }
@@ -190,7 +190,7 @@ nav a {
   "board-side-drawer  board-navbar" 
   "board-side-drawer  board-lists";
   grid-template-columns: 60px;
-  grid-template-rows: auto 50px;
+  grid-template-rows: auto 50px auto;
 }
 
 #grid-board-lists {
@@ -220,7 +220,7 @@ nav a {
 #board-side-drawer {
   grid-area: board-side-drawer;
   width: 60px;
-  height: calc(100vh - 67px);
+  height: calc(100vh - 56px);
   /* height: 100vh; */
   background-color: lightcoral;
 }
@@ -264,7 +264,7 @@ nav a {
   grid-area: board-navbar;
 }
 
-.members-dropbtn {
+.members-dropdown.btn {
   background-color: #3498DB;
   color: white;
   padding: 16px;
@@ -283,7 +283,7 @@ nav a {
 }
 
 .members-dropdown-content {
-  display: none;
+  display: block;
   position: absolute;
   background-color: #f1f1f1;
   min-width: 160px;
@@ -306,7 +306,7 @@ nav a {
   display: block;
 }
 
-.invite-dropbtn {
+.share-board-btn {
   background-color: #3498DB;
   color: white;
   padding: 16px;
@@ -315,16 +315,16 @@ nav a {
   cursor: pointer;
 }
 
-.invite-dropbtn:hover, .invite-dropbtn:focus {
+.share-board-btn:hover, .share-board-btn:focus {
   background-color: #2980B9;
 }
 
-.invite-dropdown {
+.share-board {
   position: relative;
   display: inline-block;
 }
 
-.invite-dropdown-content {
+.share-board-content {
   /* display: none; */
   position: absolute;
   background-color: #f1f1f1;
@@ -333,21 +333,22 @@ nav a {
   z-index: 1;
 }
 
-.invite-dropdown-content a {
+.share-board-content a {
   color: black;
   padding: 12px 16px;
   text-decoration: none;
   display: block;
 }
 
-.invite-dropdown-content a:hover {background-color: #ddd}
+.share-board-content a:hover {background-color: #ddd}
 
-.autocomplete-form { box-sizing: border-box; }
-.autocomplete-form * { box-sizing: border-box; }
+.share-board-form { box-sizing: border-box; }
+.share-board-form * { box-sizing: border-box; }
 
-.autocomplete {
+.share-board-input-wrapper {
   position: relative;
   display: inline-block;
+  width: 300px;
 }
 .autocomplete-items > input {
   border: 1px solid transparent;
@@ -355,9 +356,16 @@ nav a {
   padding: 10px;
   font-size: 16px;
 }
-#myInput[type=text] {
+#share-board-input-email[type=email] {
   background-color: #f1f1f1;
   width: 100%;
+}
+
+.share-board-err-msg {
+  display: block;
+  width: 100%;
+  font-size: 80%;
+  color: red;
 }
 
 .autocomplete-items {

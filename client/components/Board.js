@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import {connect} from 'react-redux'
 import { Link } from 'react-router-dom';
-import { getBoard } from '../store/board';
+import { getBoard, getBoardMembers } from '../store/board';
 import { getLists } from '../store/lists';
 import { getWorkspaces } from '../store/workspace';
 import Card from './Card';
@@ -15,7 +15,7 @@ import BoardSideDrawer from './BoardSideDrawer';
 
 const Board = (props) => {
   const { 
-    board, getBoard, createNewBoard,
+    board, getBoard, getBoardMembers, createNewBoard,
     user, workspaces, getWorkspaces,
     lists, listsState, getLists,
   } = props;
@@ -25,6 +25,7 @@ const Board = (props) => {
   useEffect(() => {
     // console.log('Board, useEffect, boardId:', boardId);
     getBoard(boardId);
+    getBoardMembers(boardId);
     getLists(boardId);
     getWorkspaces(user.id);
   }, [boardId]);
@@ -37,13 +38,19 @@ const Board = (props) => {
     setAddBoard(false);
   }
 
-  // const [boardTitle, setBoardTitle] = useState('');
-  // const handleBoardTitle = (event) => {
-  //   setBoardTitle(event.target.value);
-  // }
+  const [swapListTargetIdx, setSwapListTargetIdx] = useState({
+    swapToIndex: null,
+    currListIndex: null,
+  });
+
+  const handleSwapListTargetIdx = (swapToIndex, currListIndex) => {
+    
+    setSwapListTargetIdx({ swapToIndex, currListIndex });
+  }
+
   
 
-  console.log("Board, workspaces:", workspaces);
+  console.log("Board RENDER, ");
 
 
   if(!board.id ) {
@@ -72,7 +79,15 @@ const Board = (props) => {
                 data-list-index={`${listIndex}`}
                 data-not-card={"1"}
               >
-                <ListTitle currList={list} currListIndex={listIndex} board={board} workspaces={workspaces} />
+                <div>
+                <ListTitle 
+                  currList={list} currListIndex={listIndex} board={board} 
+                  workspaces={workspaces}
+                  swapListTargetPos={
+                    swapListTargetIdx.swapToIndex === listIndex ? swapListTargetIdx.currListIndex + 1 : null 
+                  }
+                  handleSwapListTargetIdx={handleSwapListTargetIdx}
+                />
                 {
                   list.cards.map((card, cardIndex) => {
                     // console.log("Board, list.cards.map, card:", card);
@@ -91,6 +106,7 @@ const Board = (props) => {
                   })
                 }
                 <AddACard list={list} listIndex={listIndex} user={user} board={board} />
+                </div>
               </div>
             );
           }).concat(<AddAList key={"addAList"}/>)
@@ -115,6 +131,7 @@ const mapState = (state) => {
 const mapDispatch = (dispatch) => {
   return {
     getBoard: (boardId) => dispatch(getBoard(boardId)),
+    getBoardMembers: (boardId) => dispatch(getBoardMembers(boardId)),
     getLists: (boardId) => dispatch(getLists(boardId)),
     getWorkspaces: (userId) => dispatch(getWorkspaces(userId)),
     createNewBoard: (userId, workspaceId, boardTitle) => dispatch(createNewBoard(userId, workspaceId, boardTitle)), 

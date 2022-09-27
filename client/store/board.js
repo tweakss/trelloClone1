@@ -2,30 +2,30 @@ import axios from 'axios'
 
 
 // Functions used for below
-const sortListsAndCards = (board, listPositions) => {
-  console.log("At sortListsAndCards, listPositions:", listPositions);
-  const sortedLists = board.lists.sort((list1, list2) => {
-    return list1.id - list2.id;
-  });
+// const sortListsAndCards = (board, listPositions) => {
+//   console.log("At sortListsAndCards, listPositions:", listPositions);
+//   const sortedLists = board.lists.sort((list1, list2) => {
+//     return list1.id - list2.id;
+//   });
   
-  sortedLists.forEach((list) => {
-    list.cards.sort((card1, card2) => {
-      return card1.id - card2.id;
-    })
-  });
-  // console.log("after regular sort, sortedLists:", sortedLists);
+//   sortedLists.forEach((list) => {
+//     list.cards.sort((card1, card2) => {
+//       return card1.id - card2.id;
+//     })
+//   });
+//   // console.log("after regular sort, sortedLists:", sortedLists);
 
-  if(listPositions) {
-    const currListPositionIndex = listPositions.currListPosition - 1;
-    const moveToIndex = parseInt(listPositions.moveTo, 10) - 1;
-    console.log("listPositions currListPositionIndex:", currListPositionIndex, " moveToIndex:", moveToIndex);
-    const temp = sortedLists[currListPositionIndex];
-    sortedLists[currListPositionIndex] = sortedLists[moveToIndex];
-    // console.log("after first swap sortedLists:", sortedLists);
-    sortedLists[moveToIndex] = temp;
-  }
-  console.log("sortListsAndCards sortedLists:", sortedLists);
-}
+//   if(listPositions) {
+//     const currListPositionIndex = listPositions.currListPosition - 1;
+//     const moveToIndex = parseInt(listPositions.moveTo, 10) - 1;
+//     console.log("listPositions currListPositionIndex:", currListPositionIndex, " moveToIndex:", moveToIndex);
+//     const temp = sortedLists[currListPositionIndex];
+//     sortedLists[currListPositionIndex] = sortedLists[moveToIndex];
+//     // console.log("after first swap sortedLists:", sortedLists);
+//     sortedLists[moveToIndex] = temp;
+//   }
+//   console.log("sortListsAndCards sortedLists:", sortedLists);
+// }
 
 /**
  * ACTION TYPES
@@ -34,6 +34,7 @@ const GET_BOARD = 'GET_BOARD';
 const GET_BOARD_MEMBERS = "GET_BOARD_MEMBERS";
 const ADD_BOARD_MEMBER = "ADD_BOARD_MEMBER";
 const GET_USER_TO_INVITE = "GET_USER_TO_INVITE";
+const SET_ERROR_MSG = "SET_ERROR_MSG";
 
 /**
  * ACTION CREATORS
@@ -60,6 +61,14 @@ const _getUsersToInvite = (users) => {
   }
 }
 
+const _setErrorMsg = (errorMsg) => {
+  return {
+    type: SET_ERROR_MSG,
+    errorMsg
+  }
+}
+
+
 
 /**
  * THUNK CREATORS
@@ -68,18 +77,6 @@ export const getBoard = (boardId) => {
   return async (dispatch) => {
     const { data: board } = await axios.get(`/api/boards/${boardId}`);
     // console.log('getBoard thunk, board:', board);
-
-    // if(listPositions) {
-    //   // sortListsAndCards(board, listPositions);
-    //   dispatch(_getBoard(board, listPositions));
-    // } else {
-    //   // sortListsAndCards(board, null);
-    //   dispatch(_getBoard(board, null));
-    // }
-    
-    // sortListsAndCards(board, null);
-    
-    
     dispatch(_getBoard(board));
   }
 }
@@ -92,18 +89,33 @@ export const getBoardMembers = (boardId) => {
   }
 }
 
-export const addBoardMember = async (boardId, username) => {
-  const response = await axios.put(`/api/boards/${boardId}/addMember/${username}`);
-  // return async (dispatch) => {
-  //   const response = await axios.put(`/api/boards/${boardId}/addMember/${username}`);
-  //   console.log("addBoardMember thunk, response:", response);
+export const addBoardMember = (boardId, emailAddr) => {
+  return async (dispatch) => {
+    const username = emailAddr.split("@")[0];
+    console.log("addBoardMembers thunk, username:", username, " boardId:", boardId);
+    // const response = await axios.put(`/api/boards/${boardId}/addMember/${username}`);
+    const { data: response } = await axios.put(`/api/boards/${boardId}/addMember/${emailAddr}`);
+    console.log("addBoardMember thunk, response:", response);
 
-
-  // }
+    if(typeof response === "string") {
+      dispatch(_setErrorMsg(response));
+    } else {
+      const { data: members } = await axios.get(`/api/boards/${boardId}/members`);
+      dispatch(_getBoardMembers(members));
+    }
+    
+  }
 }
 
-export const removeBoardMember = async (boardId, username) => {
-  const response = await axios.delete(`/api/boards/${boardId}/removeMember/${username}`);
+export const removeBoardMember = (boardId, username) => {
+  return async(dispatch) => {
+    const response = await axios.delete(`/api/boards/${boardId}/removeMember/${username}`);
+    console.log("removeBoardMember thunk, response", response);
+
+    const { data: members } = await axios.get(`/api/boards/${boardId}/members`);
+    dispatch(_getBoardMembers(members));
+  }
+  
 }
 
 export const getUsersToInvite = (usernameOrEmail) => {
@@ -122,6 +134,7 @@ const initialState = {
   members: [],
   guests: [],
   toInvite: [],
+  errorMsg: null
 };
 
 export default function boardReducer(state = initialState, action) {
@@ -139,6 +152,9 @@ export default function boardReducer(state = initialState, action) {
     }
     case GET_USER_TO_INVITE: {
       return { ...state, toInvite: action.users };
+    }
+    case SET_ERROR_MSG: {
+      return { ...state, errorMsg: action.errorMsg };
     }
     default: {
       return state;
