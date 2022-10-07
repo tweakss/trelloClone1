@@ -173,14 +173,15 @@ const NavbarContent = (props) => {
 
 
   
-  console.log("NavbarContent, inviteDropdown:", inviteDropdown, " wasInsideShareDropdown:", wasInsideShareDropdown);
+  // console.log("NavbarContent, inviteDropdown:", inviteDropdown, " wasInsideShareDropdown:", wasInsideShareDropdown);
 
   return (
     <div id="board-navbar">
       <h3>{board.title}</h3>
+      <span>|</span>
 
       <div className="members-dropdown">
-        <button onClick={handleMembersDropdown} className="members-dropdown btn">
+        <button onClick={handleMembersDropdown} className="members-dropdown-btn br-5px pdg-05em">
           Members
         </button>
         
@@ -210,7 +211,7 @@ const NavbarContent = (props) => {
         <button
           type="button"
           onClick={handleShareDropdown}
-          className="share-board-btn"
+          className="share-board-btn br-5px pdg-05em"
         >
           Share
         </button>

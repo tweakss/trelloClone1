@@ -15,17 +15,17 @@ const BoardSideDrawer = (props) => {
   const [open, setOpen] = useState(parseInt(localStorage.getItem("sideDrawerOpen"), 10));
   
   useEffect(() => {
-    const sideDrawer = document.getElementById('board-side-drawer');
-    const openCloseDrawerBtn = document.getElementById('open-close-drawer');
+    const sideDrawer = document.querySelector('.board-side-drawer');
+    // const openCloseDrawerBtn = document.querySelector('.board-side-drawer-handle');
     const gridBoard = document.getElementById('grid-board');
     
     if(open) {
       gridBoard.style.gridTemplateColumns = '240px';
       sideDrawer.style.width = '240px';
-      openCloseDrawerBtn.style.left = '10%' // originally at 80%
+      // openCloseDrawerBtn.style.left = '100%' // originally at 80%
     } else {
       sideDrawer.style.width = '60px';
-      openCloseDrawerBtn.style.left = 'calc(30% - 8px)';
+      // openCloseDrawerBtn.style.left = 'calc(30% - 8px)';
       gridBoard.style.gridTemplateColumns = '60px';
     }
     
@@ -61,24 +61,29 @@ const BoardSideDrawer = (props) => {
   // console.log('BoardSideDrawer, workspaces:', workspaces);
 
   return (
-    <div id="board-side-drawer">
+    <div className="board-side-drawer">
     {
       (open && workspaces.length) ? 
       <div>
-        <div>
-          <span>{workspaces.find((workspace) => workspace.id === workspaceId).title}</span>
+        <div className="board-side-drawer-header">
+          <span className="board-side-drawer-wkspce-title | mgn-05rem">
+            {workspaces.find((workspace) => workspace.id === workspaceId).title}
+          </span>
           <button
-            id="open-close-drawer" 
+            className="board-side-drawer-close-btn | mgn-05rem" 
             type="button"
-            onClick={handleDrawerOpenClose} 
+            onClick={handleDrawerOpenClose}
           >
-            {`>>`}
+            {`<<`}
           </button>
         </div>
-        <div id="side-drawer-boards-header">
-          <h3>Your boards</h3>
+
+        <div className="board-side-drawer-list-boards">
+          <span className="board-side-drawer-list-boards-title | mgn-05rem">
+            Your boards
+          </span>
           <button 
-            id="side-drawer-new-board-btn"
+            className="board-side-drawer-new-board-btn | mgn-05rem"
             type="button"
             onClick={handleNewBoardModal}
           >
@@ -99,9 +104,9 @@ const BoardSideDrawer = (props) => {
           }
         </ul>
       </div> :
-      <div>
+      <div className="board-side-drawer-closed">
         <button
-          id="open-close-drawer" 
+          className="board-side-drawer-open | mgn-05rem" 
           type="button"
           onClick={handleDrawerOpenClose} 
         >

@@ -24,25 +24,27 @@ export const AddAList = (props) => {
     setListTitle('');
   }
 
+  const closeAddList = (event) => {
+    const clickedElem = event.target;
+    // console.log("closeAddList, event.target:", clickedElem);
+    const addListTxtField = document.querySelector(".add-list-input");
+    
+    if(clickedElem !== addListTxtField) {
+      // console.log("clickedElem !== addListTxtField");
+      // document.removeEventListener("click", closeAddList);
+      setNewList(false);
+    }
+  }
+
   useEffect(() => {
     if(newList) {
-      const addListTxtField = document.querySelector(".add-list.txt-field");
-      const addListButton = document.querySelector(".add-list.btn");
-
-      const closeAddList = (event) => {
-        const clickedElem = event.target;
-        // console.log("closeAddList, event.target:", clickedElem);
-        
-        if(clickedElem !== addListTxtField) {
-          // console.log("clickedElem !== addListTxtField");
-          window.removeEventListener("click", closeAddList);
-          setNewList(false);
-        }
-      }
-
-      window.addEventListener("click", closeAddList);
+      document.addEventListener("click", closeAddList);
     } else {
       setListTitle("");
+    }
+
+    return function cleanUp() {
+      document.removeEventListener("click", closeAddList);
     }
   }, [newList])
 
@@ -54,9 +56,9 @@ export const AddAList = (props) => {
     <div>
       {
         newList ?
-        <div>
+        <div className="add-list-wrapper newlist mgn-l-05rem">
           <input
-            className="add-list txt-field"
+            className="add-list-input"
             type="text"
             value={listTitle}
             onChange={handleListTitle}>
@@ -66,14 +68,15 @@ export const AddAList = (props) => {
             <button type="button" onClick={handleNewList}>x</button>
           </div>
         </div> :
-        <button
-          className="add-list btn"
-          type="button"
-          onClick={handleNewList}
-        >
-          Add another list
-        </button>
-        
+        <div className="add-list-wrapper mgn-l-05rem">
+          <button
+            className="add-list btn | usr-slct"
+            type="button"
+            onClick={handleNewList}
+          >
+            Add another list
+          </button>
+        </div>
       }
       
     </div>

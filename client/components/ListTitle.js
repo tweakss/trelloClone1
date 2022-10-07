@@ -30,7 +30,7 @@ const ListTitle = (props) => {
     // listActions
     const clickedElem = event.target.className;
     
-    if(clickedElem.includes("list-title handle-dropdown")) {
+    if(clickedElem.includes("list-title-handle-dropdown")) {
       if( (listTitleDropdown.currDropdown !== "listActionsDropdown") && listTitleDropdown.currDropdown ) {
         setListTitleDropdown({
           [listTitleDropdown.currDropdown]: false,
@@ -142,15 +142,8 @@ const ListTitle = (props) => {
 
  
   const closeListTitleDropdown = (event) => {
-    // Handle closing dropdown when clicking outside and its event listener
     let clicked = event.target;
-
-    // const regExpBtn = /list-actions(-\w+)+ (btn|(\w+-)+btn)/g;
-    // const matches = [ ...clicked.className.matchAll(regExpBtn) ];
-    // console.log("closeListTitleDropdown. matches:", matches);
-
-    
-    if(clicked.className.includes(`list-title handle-dropdown idx${currListIndex}`)) {
+    if(clicked.className.includes(`list-title-handle-dropdown idx${currListIndex}`)) {
       console.log("closeListTitleDropdown, clicked list-title handle");
       return;
     } else if(clicked.className.includes("close-dropdown-btn")) {
@@ -202,11 +195,12 @@ const ListTitle = (props) => {
   // const [listTitleRows, setListTitleRows] = useState(1);
   // const [prevScrollHeight, setPrevScrollHeight] = useState(0);
   useEffect(() => {
-    const listTitleElem = document.querySelector(`.list-title.input.idx${currListIndex}`);
-    listTitleElem.style.height = "auto";
+    const listTitleElem = document.querySelector(`.list-title-input.idx${currListIndex}`);
+    // listTitleElem.style.height = "auto";
     // console.log("listTitleElem computed height:", window.getComputedStyle(listTitleElem).height, " scrollHeight:", listTitleElem.scrollHeight);
     listTitleElem.style.height = listTitleElem.scrollHeight + "px";
     // console.log("After listTitleElem computed height:", listTitleElem.style.height, " scrollHeight:", listTitleElem.scrollHeight);
+
 
   }, [listTitle]);
 
@@ -263,27 +257,27 @@ const ListTitle = (props) => {
 
   return (
     <div
-      className={`list-title wrapper idx${currListIndex}`}
+      className={`list-title wrapper | mgn-l-05rem | idx${currListIndex}`}
       data-list-index={`${currListIndex}`}
       data-not-card={"1"}
     >
       <textarea
-        className={`list-title input idx${currListIndex}`}
+        className={`list-title-input | bg-clr-transparent bdr-none | idx${currListIndex}`}
         rows="1" cols="10"
         value={listTitle}
         onChange={handleListTitle}
         data-list-index={`${currListIndex}`}
         data-not-card={"1"}
+        
       >
       </textarea>
       
-      <div>
+      <div className='list-title-handle-dropdown-wrapper'>
         <button
-          className={`list-title handle-dropdown idx${currListIndex}`}
+          className={`list-title-handle-dropdown | bg-clr-transparent br-025rem bdr-none usr-slct | idx${currListIndex}`}
           type="button"
           onClick={handleListTitleDropdown}
         >
-          =
         </button>       
 
         {

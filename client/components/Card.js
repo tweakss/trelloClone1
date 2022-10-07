@@ -214,9 +214,9 @@ const Card = (props) => {
     event.preventDefault();
     console.log("cardBtnTitleDragEnter event.target:", event.target);
     
-    if (event.target.id === `list${listIndex}-card-${cardIndex}`) {
-      event.target.style.background = "purple";
-    }
+    // if (event.target.id === `list${listIndex}-card-${cardIndex}`) {
+    //   event.target.style.background = "purple";
+    // }
 
     dispatch({ type: "UPDATE_ENTER_LIST_INDEX", enterListIndex: listIndex });
     
@@ -228,9 +228,9 @@ const Card = (props) => {
   const cardBtnTitleDragLeave = (event) => {
     console.log("cardBtnTitleDragLeave, event.target:", event.target);
 
-    if (event.target.id === `list${listIndex}-card-${cardIndex}`) {
-      event.target.style.background = "";
-    }
+    // if (event.target.id === `list${listIndex}-card-${cardIndex}`) {
+    //   event.target.style.background = "";
+    // }
 
 
 
@@ -249,14 +249,14 @@ const Card = (props) => {
     event.target.style.opacity = "";
   }
 
-  const cardSpaceDragOver = (event) => {
-    event.preventDefault();
-    // console.log("cardSpaceDragOver");
-  }
-  const cardSpaceDragEnter = (event) => {
-    event.preventDefault();
-    // console.log("cardSpaceDragEnter");
-  }
+  // const cardSpaceDragOver = (event) => {
+  //   event.preventDefault();
+  //   // console.log("cardSpaceDragOver");
+  // }
+  // const cardSpaceDragEnter = (event) => {
+  //   event.preventDefault();
+  //   // console.log("cardSpaceDragEnter");
+  // }
 
   
 
@@ -271,9 +271,9 @@ const Card = (props) => {
     cardBtnTitle.addEventListener("dragend", cardBtnTitleDragEnd);
     // cardBtnTitle.addEventListener("drop", cardBtnTitleDrop);
 
-    const cardSpace = document.querySelector(`.list${listIndex}-card-${cardIndex}.card-btn-space`);
-    cardSpace.addEventListener("dragover", cardSpaceDragOver);
-    cardSpace.addEventListener("dragenter", cardSpaceDragEnter);
+    // const cardSpace = document.querySelector(`.list${listIndex}-card-${cardIndex}.card-btn-space`);
+    // cardSpace.addEventListener("dragover", cardSpaceDragOver);
+    // cardSpace.addEventListener("dragenter", cardSpaceDragEnter);
 
     return function cleanUp() {
       cardBtnTitle.removeEventListener("dragstart", cardBtnTitleDragStart);
@@ -284,8 +284,8 @@ const Card = (props) => {
       cardBtnTitle.removeEventListener("dragend", cardBtnTitleDragEnd);
       // cardBtnTitle.removeEventListener("drop", cardBtnTitleDrop);
 
-      cardSpace.removeEventListener("dragover", cardSpaceDragOver);
-      cardSpace.removeEventListener("dragenter", cardSpaceDragEnter);
+      // cardSpace.removeEventListener("dragover", cardSpaceDragOver);
+      // cardSpace.removeEventListener("dragenter", cardSpaceDragEnter);
 
     }
   });
@@ -394,16 +394,14 @@ const Card = (props) => {
   return (
     <div className={`list${listIndex}-card-${cardIndex}`}>
       <div 
-        id={`list${listIndex}-card-${cardIndex}`}
-        className="card-btn-wrapper"
-        // draggable="true"
+        className="card-btn-wrapper | mgn-l-05rem bg-clr-transparent"
         data-list-index={`${listIndex}`}
         data-card-index={`${cardIndex}`}
       >
         <button
           type="button"
           // className={`list${listIndex} card-${cardIndex} btn`}
-          className={`card-btn-title list-${listIndex}-card-${cardIndex}`}
+          className={`card-btn-title list-${listIndex}-card-${cardIndex} | bdr-none br-025rem`}
           draggable="true"
           onClick={() => handleOpen(card)}
           data-list-index={`${listIndex}`}
@@ -414,26 +412,12 @@ const Card = (props) => {
 
         <button
           type="button"
+          className="card-btn-rmv | usr-slct"
           onClick={() => removeACard(list.id, card.id, board.id)}
         >
           &times;
         </button>
       </div>
-
-      <button
-        id="filler"
-        style={{width: '255px', height: '30px', opacity: '0.5'}}
-        className={`list${listIndex}-card-${cardIndex} card-btn-space`}
-      > 
-        CARD-BTN-SPACE
-      </button>
-
-      {/* {
-        showPrevSibling ? prevSibling : null
-      } */}
-      
-      
-      
 
 
       {

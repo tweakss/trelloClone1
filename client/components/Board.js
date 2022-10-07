@@ -30,13 +30,60 @@ const Board = (props) => {
     getWorkspaces(user.id);
   }, [boardId]);
 
-  const [addBoard, setAddBoard] = useState(false);
-  const openAddBoard = () => {
-    setAddBoard(true);
+  if(Object.keys(board).length) {
+    console.log("board length > 0", " board:", board);
+    const gridBoardLists = document.querySelector("#grid-board-lists");
+    console.log("gridBoardLists:", gridBoardLists);
   }
-  const closeAddBoard = () => {
-    setAddBoard(false);
+  let handleScroll;
+  let gridBoardLists;
+  const throttleMouseMove = (event) => {
+    // console.log("gridBoardLists mouseMove, movement x,y:", event.movementX, event.movementY);
+    if(!handleScroll) {
+      return;
+    }
+
+    // console.log("throttleMouseMove");
+    // const gridBoardLists = document.querySelector("#grid-board-lists");
+    if(event.movementX > 0) {
+      gridBoardLists.scrollBy(-30, 0);
+    } else if(event.movementX < 0) {
+      gridBoardLists.scrollBy(30, 0);
+    }
+
+    handleScroll = false;
+    setTimeout(() => handleScroll = true, 30);
   }
+  
+  const mouseDownStartScroll = (event) => {
+    // console.log("mouseDownStartScroll, event targ, currTarg:", event.target, event.currentTarget);
+
+    if(event.target.className.includes("board-list-col")) {
+      handleScroll = true;
+      document.addEventListener("mousemove", throttleMouseMove);
+      document.addEventListener("mouseup", mouseUpEndScroll);
+    }
+    
+  }
+  const mouseUpEndScroll = (event) => {
+    // console.log("mouseUpEndScroll");
+
+    handleScroll = false;
+    document.removeEventListener("mousemove", throttleMouseMove);
+    document.removeEventListener("mouseup", mouseUpEndScroll);
+  }
+  // Initial set up for scrolling whenever board state is assigned
+  useEffect(() => {
+    if(Object.keys(board).length) {
+      gridBoardLists = document.querySelector("#grid-board-lists");
+      gridBoardLists.addEventListener("mousedown", mouseDownStartScroll);
+    }
+  }, [board]);
+  
+    
+
+   
+  
 
   const [swapListTargetIdx, setSwapListTargetIdx] = useState({
     swapToIndex: null,
@@ -75,37 +122,40 @@ const Board = (props) => {
             return (
               <div 
                 key={list.id} 
-                className={`flex-board-list idx${listIndex}`}
+                className={`board-list-col | usr-slct | idx${listIndex}`}
                 data-list-index={`${listIndex}`}
                 data-not-card={"1"}
+                
               >
-                <div>
-                <ListTitle 
-                  currList={list} currListIndex={listIndex} board={board} 
-                  workspaces={workspaces}
-                  swapListTargetPos={
-                    swapListTargetIdx.swapToIndex === listIndex ? swapListTargetIdx.currListIndex + 1 : null 
-                  }
-                  handleSwapListTargetIdx={handleSwapListTargetIdx}
-                />
-                {
-                  list.cards.map((card, cardIndex) => {
-                    // console.log("Board, list.cards.map, card:", card);
-                    return (
-                      
-                        <Card
-                          key={card.id}
-                          card={card}
-                          cardIndex={cardIndex}
-                          board={board}
-                          list={list}
-                          listIndex={listIndex}
-                        />
-                      
-                    );
-                  })
-                }
-                <AddACard list={list} listIndex={listIndex} user={user} board={board} />
+                <div className="board-list-bg | mgn-l-05rem br-05rem">
+                  <div className="flex-board-list">
+                    <ListTitle 
+                      currList={list} currListIndex={listIndex} board={board} 
+                      workspaces={workspaces}
+                      swapListTargetPos={
+                        swapListTargetIdx.swapToIndex === listIndex ? swapListTargetIdx.currListIndex + 1 : null 
+                      }
+                      handleSwapListTargetIdx={handleSwapListTargetIdx}
+                    />
+                    {
+                      list.cards.map((card, cardIndex) => {
+                        // console.log("Board, list.cards.map, card:", card);
+                        return (
+                          
+                          <Card
+                            key={card.id}
+                            card={card}
+                            cardIndex={cardIndex}
+                            board={board}
+                            list={list}
+                            listIndex={listIndex}
+                          />
+                          
+                        );
+                      })
+                    }
+                    <AddACard list={list} listIndex={listIndex} user={user} board={board} />
+                  </div>
                 </div>
               </div>
             );
