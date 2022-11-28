@@ -121,7 +121,7 @@ const ListTitle = (props) => {
   }
 
   useEffect(() => {
-    console.log("useEffect, swapListTargetPos");
+    // console.log("ListTitle useEffect, swapListTargetPos");
     if(swapListTargetPos) {
       console.log(`setting `, listsState.lists[currListIndex], "selectListPosition to:", swapListTargetPos);
       setSelectListPosition(swapListTargetPos);
@@ -220,6 +220,9 @@ const ListTitle = (props) => {
       type: "CREATE_FILLER_FOR_NO_CARDS",
       dropTargetListIndex: currListIndex
     });
+
+    const cardBtnTitle = document.querySelector(`.filler`);
+    cardBtnTitle.style.backgroundColor = "#A5AEB6";
   }
   const boardListDragLeave = (event) => {
     console.log("boardListDragLeave event.target:", event.target);
@@ -235,9 +238,9 @@ const ListTitle = (props) => {
   }
   useEffect(() => {
     if(currList.cards.length === 0) {
-      // console.log(`ListTitle useEffect ${currList.title} no cards`);
+      console.log(`ListTitle useEffect ${currList.title} no cards`);
       const boardList = document.querySelector(`.flex-board-list.idx${currListIndex}`);
-
+      
       boardList.addEventListener("dragenter", boardListDragEnter);
       boardList.addEventListener("dragover", boardListDragOver);
       boardList.addEventListener("dragleave", boardListDragLeave);
@@ -252,7 +255,7 @@ const ListTitle = (props) => {
     }
   })
 
-  console.log("ListTitle render");
+  // console.log("ListTitle render");
 
 
   return (

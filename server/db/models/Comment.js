@@ -5,10 +5,18 @@ const Comment = db.define('comment', {
   content: {
     type: Sequelize.TEXT
   },
-  commentTime: {
-    type: Sequelize.DATE,
-    defaultValue: Sequelize.NOW 
+  txtareaHeight: {
+    type: Sequelize.STRING,
+    defaultValue: ""
   },
+  // commentReplier: {
+  //   type: Sequelize.STRING,
+  //   defaultValue: ""
+  // }
+  // isReplyComment: {
+  //   type: Sequelize.BOOLEAN,  
+  //   defaultValue: false
+  // }
 });
 
 module.exports = Comment;

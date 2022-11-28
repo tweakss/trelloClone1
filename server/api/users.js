@@ -19,8 +19,8 @@ router.get('/', async (req, res, next) => {
   }
 });
 
-// Get a user's workspaces and its boards
-router.get('/:userId/workspaces', async(req, res, next) => {
+// Get a user's own workspace and its boards
+router.get('/:userId/ownWorkspace', async(req, res, next) => {
   const userId = req.params.userId;
   // const workspaceId = req.params.workspaceId;
 
@@ -33,8 +33,35 @@ router.get('/:userId/workspaces', async(req, res, next) => {
         model: Board
       }
     });
-
+    
     res.send(userWorkspace);
+  } catch (err) {
+    next(err);
+  }
+});
+
+// Get a user's workspaces and its boards
+router.get('/userId/:userId/workspaces', async(req, res, next) => {
+  const userId = req.params.userId;
+  // const workspaceId = req.params.workspaceId;
+
+  try {
+    const userWorkspaces = await Workspace.findAll({
+      include: [
+        {
+          model: User,
+          where: {
+            id: userId
+          }
+        },
+        {
+          model: Board
+        }
+      ],
+      
+    });
+    
+    res.send(userWorkspaces);
   } catch (err) {
     next(err);
   }

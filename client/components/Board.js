@@ -30,11 +30,6 @@ const Board = (props) => {
     getWorkspaces(user.id);
   }, [boardId]);
 
-  if(Object.keys(board).length) {
-    console.log("board length > 0", " board:", board);
-    const gridBoardLists = document.querySelector("#grid-board-lists");
-    console.log("gridBoardLists:", gridBoardLists);
-  }
   let handleScroll;
   let gridBoardLists;
   const throttleMouseMove = (event) => {
@@ -97,7 +92,7 @@ const Board = (props) => {
 
   
 
-  console.log("Board RENDER, ");
+  console.log("Board RENDER, lists:", lists);
 
 
   if(!board.id ) {
@@ -128,7 +123,7 @@ const Board = (props) => {
                 
               >
                 <div className="board-list-bg | mgn-l-05rem br-05rem">
-                  <div className="flex-board-list">
+                  <div className={`flex-board-list idx${listIndex}` }>
                     <ListTitle 
                       currList={list} currListIndex={listIndex} board={board} 
                       workspaces={workspaces}
@@ -153,7 +148,7 @@ const Board = (props) => {
                           
                         );
                       })
-                    }
+                    } 
                     <AddACard list={list} listIndex={listIndex} user={user} board={board} />
                   </div>
                 </div>

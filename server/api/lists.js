@@ -68,35 +68,88 @@ router.post('/:listId/newCard', async (req, res, next) => {
   }
 });
 
-// Move an existing card to a list
-router.put('/:moveToListId/moveCard/:draggedCardId', async(req, res, next) => {
-  const moveToListId = req.params.moveToListId;
-  const draggedCardId = req.params.draggedCardId;
-  const { newPosition } = req.body.moveCardsInfo;
-  const { moveToCardId } = req.body.moveCardsInfo;
-  console.log("newPosition:", newPosition);
-
+// Move an existing card within the same list
+router.put('/moveCardInCurrList/card/:cardId', async(req, res, next) => {
+  const cardId = req.params.cardId;
+  const { targetCardId, targetPosition } = req.body;
   try {
-    const moveToList = await List.findOne({
+    const currCard = await Card.findOne({
       where: {
-        id: moveToListId
+        id: cardId
+      }
+    });
+    const targetCard = await Card.findOne({
+      where: {
+        id: targetCardId
+      }
+    });
+
+    // const currCardCardPos = currCard.getDataValue("cardPosition");
+    await targetCard.update({ cardPosition: currCard.getDataValue("cardPosition") });
+    await currCard.update({ cardPosition: targetPosition })
+
+    res.send("move card within same list");
+  } catch(err) {
+    next(err);
+  }
+});
+
+// Move an existing card to a different list
+router.put('/targetList/:targetListId/moveCard/:cardId', async(req, res, next) => {
+  const targetListId = req.params.targetListId;
+  const cardId = req.params.cardId;
+  const { 
+    targetPosition, origListId, 
+    targetCardsToMove, origCardsToMove,
+  } = req.body;
+  console.log("targetPosition:", targetPosition, " origListId:", origListId, " targetCardsToMove:", targetCardsToMove, " origCardsToMove:", origCardsToMove);
+  // res.send("move an existing card to a list")
+  try {
+    const targetList = await List.findOne({
+      where: {
+        id: targetListId
       }
     });
     const cardToAdd = await Card.findOne({
       where: {
-        id: draggedCardId
+        id: cardId
       }
     });
-    
-    await cardToAdd.update({ cardPosition: newPosition });
-    const response = await moveToList.addCards([cardToAdd]);
-    res.send(response);
-  } catch(err) {
+    await cardToAdd.update({ cardPosition: targetPosition });
+    const response = await targetList.addCards([cardToAdd]);
+    console.log("after adding card to targetList, response:", response)
 
+    // Update card positions for the targeted list
+    for(let i = 0; i < targetCardsToMove.length; i++) {
+      const cardToUpdate = await Card.findOne({
+        where: {
+          id: targetCardsToMove[i].id
+        }
+      });
+
+      await cardToUpdate.update({ cardPosition: cardToUpdate.getDataValue("cardPosition") + 1 })
+    }
+
+    // Update card positions for orig list
+    for(let i = 0; i < origCardsToMove.length; i++) {
+      const cardToUpdate = await Card.findOne({
+        where: {
+          id: origCardsToMove[i].id
+        }
+      });
+
+      await cardToUpdate.update({ cardPosition: cardToUpdate.getDataValue("cardPosition") - 1});
+    }
+
+
+
+    res.send("move an existing card to a list")
+  } catch(err) {
+    next(err);
   }
 });
 
-// Remove a card from a list
+// Delete a card 
 router.delete('/:listId/removeCard/:cardId', async(req, res, next) => {
   const listId = req.params.listId;
   const cardId = req.params.cardId;
@@ -253,7 +306,7 @@ router.put('/dropDraggedCard', async(req, res, next) => {
         }
       });
       const cardUpdated = await card.update({ cardPosition: index + 1 });
-      console.log("targetListCardToIndex, cardUpdated:", cardUpdated);
+      // console.log("targetListCardToIndex, cardUpdated:", cardUpdated, " getDataValue:", cardUpdated.getDataValue("title"));
     }
     
     // Updating cardPosition for cards on dragged card's list and removing/adding dragged card

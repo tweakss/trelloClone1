@@ -24,6 +24,10 @@ const Card = db.define('card', {
   },
   cardPosition: {
     type: Sequelize.INTEGER
+  },
+  txtareaHeight: {
+    type: Sequelize.STRING,
+    defaultValue: ""
   }
 });
 

@@ -58,7 +58,7 @@ const BoardSideDrawer = (props) => {
   }
 
   
-  // console.log('BoardSideDrawer, workspaces:', workspaces);
+  // console.log('BoardSideDrawer, workspaces:', workspaces, " workspaceId:", workspaceId, );
 
   return (
     <div className="board-side-drawer">

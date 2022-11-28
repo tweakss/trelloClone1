@@ -22,7 +22,7 @@ const _getWorkspaces = (workspaces) => {
  */
 export const getWorkspaces = (userId) => {
   return async (dispatch) => {
-    const response = await axios.get(`/api/users/${userId}/workspaces`);
+    const response = await axios.get(`/api/users/userId/${userId}/workspaces`);
     const workspaces = response.data;
     // console.log("getWorkpsace thunk, workspaces:", workspaces);
 

@@ -1,97 +1,30 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import {connect, useDispatch} from 'react-redux';
 import { 
-  updateCardDescription, removeACard, moveCardToList,
-  dropDraggedCard,
+  dropDraggedCard, updateCardTitle
 } from '../store/lists';
+import CardModal from './CardModal';
+import CardSideMenu from './CardSideMenu';
 
 
 const Card = (props) => {
   const {
-    card, draggedCard, cardIndex, list, listIndex, lists, 
+    card, draggedCard, cardIndex, list, listIndex, lists, listsState,
     board, 
-    updateCardDescription, removeACard, moveCardToList,
-    dropDraggedCard,
+    dropDraggedCard, updateCardTitle
   } = props;
   const dispatch = useDispatch();
 
-  const [cardTitle, setCardTitle] = useState('');
-  const handleCardTitle = (event) => {
-    setCardTitle(event.target.value);
-  }
-  const [cardDescription, setCardDescription] = useState('');
-  const handleCardDescription = (event) => {
-    setCardDescription(event.target.value);
+  const [openCard, setOpenCard] = useState(false);
+  const handleOpenCard = (event) => {
+    // console.log('handleOpenCard, card', card);import axios from 'axios';
+    setOpenCard(true);
   }
 
-  const [open, setOpen] = useState(false);
-  const handleOpen = (card) => {
-    // console.log('handleOpen, card', card);
-    setOpen(true);
-    setCardDescription(card.description);
-    setCardTitle(card.title);
-    // console.log("handleOpen, open:", open);
-    
-  }
-  const handleClose = () => {
-    console.log("Card, handleClose");
-    setOpen(false);
-    // controller.abort();
-  }
 
-  const submitCardDescription = (card, event) => {
-    event.preventDefault()
-    // console.log('submitCardDescription, cardDescription:', cardDescription);
-    // console.log('submitCardDescription, card:', card);
-    updateCardDescription(card, cardDescription, board);
-    window.removeEventListener("click", clickedOutsideOfModal);
-    handleClose();
-    // console.log("end of submitCardDescription");
-  }
-
-  useEffect(() => {
-    if(open) {
-      console.log("useEffect, open:", open);
-      const cardModalCloseBtn = document.querySelector("#card-modal-closeBtn");
-      // const cardModal = document.getElementById("card-modal-content");
-      // const controller = new AbortController();
-
-      cardModalCloseBtn.addEventListener("click", (event) => {
-        // console.log("cardModalCloseBtn");
-        window.removeEventListener("click", clickedOutsideOfModal);
-        handleClose();
-        // controller.abort();
-      });
-
-      window.addEventListener("click", clickedOutsideOfModal);
-    }
-  }, [open]);
-
-  const clickedOutsideOfModal = useCallback((event) => {
-    const cardModalContent = document.getElementById("card-modal-content");
-
-    let elem = event.target;
-    console.log('window clicked, event.target:', elem);
-    // console.log("cardModalContent:", cardModalContent);
-    if(elem.id === cardModalContent.id) {
-      return;
-    }
-
-    while(elem = elem.parentElement) {
-      // console.log("elem:", elem, elem.id);
-      if(elem.id === cardModalContent.id) {
-        console.log("elem == cardModal");
-        return;
-      }
-    
-    }
-    window.removeEventListener("click", clickedOutsideOfModal);
-    handleClose();
-  }, [open]);
-
-  
+  // Drag and drop cards section
   const cardBtnTitleDragStart = (event) => {
-    console.log("Card dragStartHandler event.target:", event.target, " list.cards[cardIndex]:", list.cards[cardIndex]);
+    // console.log("Card dragStartHandler");
 
     event.target.style.opacity = .5;
     // event.dataTransfer.setData("text/plain", event.target.id);
@@ -111,30 +44,16 @@ const Card = (props) => {
         origCardIndex: cardIndex,
         // fillerIndex: null,
       },
-      // draggedListIndex: listIndex,
-      // draggedCardIndex: cardIndex
-
+      
+      // listIndex,
+      // cardIndex,
     });
 
 
   }
 
-  // useEffect(() => {
-  //   console.log("useEffect draggedCard.enterListIndex");
-  //   if(draggedCard.enterListIndex !== draggedCard.origListIndex) {
-  //     console.log("draggedCard.enterListIndex !== draggedCard.origListIndex");
-  //     const cardBtnSpace = document.querySelector(`.list${listIndex}-card-${cardIndex}.card-btn-space`);
-  //     cardBtnSpace.style.display = "none";
-  //     // const cardDiv = document.querySelector(`.list${listIndex}-card-${cardIndex}`);
-  //     // cardDiv.style.display = "none";
-      
-      
-  //   }
-  // }, [draggedCard.enterListIndex])
-
-  const [draggedCardSpace, setDraggedCardSpace] = useState(false);
   const cardBtnTitleDrag = (event) => {
-    // console.log("cardBtnTitleDrag");
+    console.log("cardBtnTitleDrag");
   
     if(lists[listIndex].cards[cardIndex].id !== "filler") {
       console.log("cardBtnTitleDrag, dispatching DRAGGING_SET_FILLER");
@@ -145,23 +64,31 @@ const Card = (props) => {
         // fillerIndex: cardIndex
       })
     }
-    // setDraggedCardSpace(true);
+
+    const cardBtnTitle = document.querySelector(`.filler`);
+    cardBtnTitle.style.backgroundColor = "#A5AEB6";
+    
   }
 
   const cardBtnTitleDragOver = (event) => {
     event.preventDefault();
     event.dataTransfer.dropEffect = "move";
-    console.log("cardBtnTitleDragOver event.target:", event.target); // what you're dragging over
+    // console.log("cardBtnTitleDragOver event.target:", event.target); // what you're dragging over
     
 
     const eventClientHeight = parseInt(event.target.clientHeight, 10);
     const dropTargetListIndex = listIndex;
-    console.log("cardBtnTitleDragOver leaveListIndex:", draggedCard.leaveListIndex, "event.offsetY:", event.offsetY, "cardIndex:", cardIndex, "eventClientHeight:", eventClientHeight);
+    // console.log("cardBtnTitleDragOver leaveListIndex:", draggedCard.leaveListIndex, "event.offsetY:", event.offsetY, "cardIndex:", cardIndex, "eventClientHeight:", eventClientHeight);
     if(draggedCard.leaveListIndex !== dropTargetListIndex) {
-      console.log("draggedCard.leaveListIndex !== dropTargetListIndex");
+      // console.log("draggedCard.leaveListIndex !== dropTargetListIndex");
+      
+      if(list.cards[0].id === "filler" && list.cards.length === 1) {
+        console.log("list.cards.length === 1 && list.cards[0].id === filler")
+        return;
+      }
 
       if( (event.offsetY <= Math.floor(eventClientHeight/2) )  ) {
-        console.log(`event.offsetY <= eventClientHeight/2 `);
+        // console.log(`event.offsetY <= eventClientHeight/2 UP_DIFF_LIST, event.target:`, event.target);
         
         dispatch({ 
           type: "DRAG_OVER_CARDS_UP_DIFF_LIST",
@@ -169,42 +96,55 @@ const Card = (props) => {
           dropTargetListIndex: listIndex
         })
         
-        
+        const cardBtnTitle = document.querySelector(`.filler`);
+        cardBtnTitle.style.backgroundColor = "#A5AEB6";
       } else if( (event.offsetY > Math.floor(eventClientHeight/2) )  ) {
-        console.log(`event.offsetY > Math.floor(eventClientHeight/2) `);
+        // console.log(`event.offsetY > Math.floor(eventClientHeight/2) DOWN_DIFF_LIST`);
         
         dispatch({ 
           type: "DRAG_OVER_CARDS_DOWN_DIFF_LIST",
           dropTargetCardIndex: cardIndex,
           dropTargetListIndex: listIndex
         })
-
+        
+        const cardBtnTitle = document.querySelector(`.filler`);
+        cardBtnTitle.style.backgroundColor = "#A5AEB6";
       }
 
     } else {
       // if(draggedCard.card.listId === list.cards[cardIndex].listId) {
-      console.log(`draggedCard.leaveListIndex ${draggedCard.leaveListIndex} === dropTargetListIndex ${dropTargetListIndex}`);
+      // console.log(`draggedCard.leaveListIndex ${draggedCard.leaveListIndex} === dropTargetListIndex ${dropTargetListIndex}`);
       if( (event.offsetY <= Math.floor(eventClientHeight/2) ) && (draggedCard.leaveCardIndex > cardIndex) ) {
-        console.log(`event.offsetY <= eventClientHeight/2 && (draggedCard.leaveCardIndex > cardIndex)`);
-        console.log("cardBtnTitleDragOver before DRAG_OVER_CARDS_UP, cards:", lists[listIndex].cards)
+        // console.log(`event.offsetY <= eventClientHeight/2 && (draggedCard.leaveCardIndex > cardIndex)`);
+        // console.log("cardBtnTitleDragOver before DRAG_OVER_CARDS_UP, cards:", lists[listIndex].cards)
+        
         dispatch({ 
           type: "DRAG_OVER_CARDS_UP",
           dropTargetCardIndex: cardIndex,
           dropTargetListIndex: listIndex
-        })
+        });
         
+        const cardBtnTitle = document.querySelector(`.card-btn-title.list-${listIndex}-card-${cardIndex}`);
+        cardBtnTitle.style.backgroundColor = "#A5AEB6";
         
       } else if( (event.offsetY > Math.floor(eventClientHeight/2) ) && (draggedCard.leaveCardIndex < cardIndex) ) {
-        console.log(`event.offsetY > Math.floor(eventClientHeight/2) && (draggedCard.leaveCardIndex < cardIndex)`);
+        // console.log(`event.offsetY > Math.floor(eventClientHeight/2) && (draggedCard.leaveCardIndex < cardIndex)`);
         dispatch({ 
           type: "DRAG_OVER_CARDS_DOWN",
           dropTargetCardIndex: cardIndex,
           dropTargetListIndex: listIndex
         })
 
+        const cardBtnTitle = document.querySelector(`.card-btn-title.list-${listIndex}-card-${cardIndex}`);
+        cardBtnTitle.style.backgroundColor = "#A5AEB6";
+
       } 
-      // else {
-      //   console.log("NOT TOP OR BOTTOM same list, offsetY:", event.offsetY);
+      // else if(listsState.fillerIndex !== null) {
+      //   console.log("REMOVING FILLERS FROM DRAG DIFF LIST");
+      //   dispatch({
+      //     type: "DRAG_IN_OUT_RMV_FILLER",
+      //     listIndex
+      //   })
       // }
     }
     
@@ -212,68 +152,47 @@ const Card = (props) => {
 
   const cardBtnTitleDragEnter = (event) => {
     event.preventDefault();
-    console.log("cardBtnTitleDragEnter event.target:", event.target);
+    // console.log("cardBtnTitleDragEnter event.target:", event.target);
     
-    // if (event.target.id === `list${listIndex}-card-${cardIndex}`) {
-    //   event.target.style.background = "purple";
-    // }
-
-    dispatch({ type: "UPDATE_ENTER_LIST_INDEX", enterListIndex: listIndex });
+    dispatch({ 
+      type: "UPDATE_ENTER_LIST_INDEX",
+      enterListIndex: listIndex,
+      
+    });
     
     if(listIndex !== draggedCard.leaveListIndex) {
       dispatch({ type: "ENTER_DIFF_LIST_REMOVE_FILLER" })
     }
+    
   }
   
   const cardBtnTitleDragLeave = (event) => {
-    console.log("cardBtnTitleDragLeave, event.target:", event.target);
-
-    // if (event.target.id === `list${listIndex}-card-${cardIndex}`) {
-    //   event.target.style.background = "";
-    // }
-
-
-
+    // console.log("cardBtnTitleDragLeave, event.target:", event.target);
+    
     dispatch({
       type: "UPDATE_DRAGGED_LEAVE_INDEXES",
       leaveCardIndex: cardIndex,
       leaveListIndex: listIndex,
+      
     });
 
-    
   }
 
-  const cardBtnTitleDragEnd = (event) => {
-    console.log("cardBtnTitleDragEnd");
-    setDraggedCardSpace(false);
-    event.target.style.opacity = "";
-  }
-
-  // const cardSpaceDragOver = (event) => {
-  //   event.preventDefault();
-  //   // console.log("cardSpaceDragOver");
+  // const cardBtnTitleDragEnd = (event) => {
+  //   console.log("cardBtnTitleDragEnd");
+  //   // setDraggedCardSpace(false);
+  //   // event.target.style.opacity = "";
   // }
-  // const cardSpaceDragEnter = (event) => {
-  //   event.preventDefault();
-  //   // console.log("cardSpaceDragEnter");
-  // }
-
-  
 
   useEffect(() => {
-    // const cardBtnWrapper = document.querySelector(`#list${listIndex}-card-${cardIndex}`);
     const cardBtnTitle = document.querySelector(`.card-btn-title.list-${listIndex}-card-${cardIndex}`);
     cardBtnTitle.addEventListener("dragstart", cardBtnTitleDragStart);
     cardBtnTitle.addEventListener("drag", cardBtnTitleDrag);
     cardBtnTitle.addEventListener("dragover", cardBtnTitleDragOver);
     cardBtnTitle.addEventListener("dragenter", cardBtnTitleDragEnter);
     cardBtnTitle.addEventListener("dragleave", cardBtnTitleDragLeave);
-    cardBtnTitle.addEventListener("dragend", cardBtnTitleDragEnd);
+    // cardBtnTitle.addEventListener("dragend", cardBtnTitleDragEnd);
     // cardBtnTitle.addEventListener("drop", cardBtnTitleDrop);
-
-    // const cardSpace = document.querySelector(`.list${listIndex}-card-${cardIndex}.card-btn-space`);
-    // cardSpace.addEventListener("dragover", cardSpaceDragOver);
-    // cardSpace.addEventListener("dragenter", cardSpaceDragEnter);
 
     return function cleanUp() {
       cardBtnTitle.removeEventListener("dragstart", cardBtnTitleDragStart);
@@ -281,44 +200,26 @@ const Card = (props) => {
       cardBtnTitle.removeEventListener("dragover", cardBtnTitleDragOver);
       cardBtnTitle.removeEventListener("dragenter", cardBtnTitleDragEnter);
       cardBtnTitle.removeEventListener("dragleave", cardBtnTitleDragLeave);
-      cardBtnTitle.removeEventListener("dragend", cardBtnTitleDragEnd);
+      // cardBtnTitle.removeEventListener("dragend", cardBtnTitleDragEnd);
       // cardBtnTitle.removeEventListener("drop", cardBtnTitleDrop);
-
-      // cardSpace.removeEventListener("dragover", cardSpaceDragOver);
-      // cardSpace.removeEventListener("dragenter", cardSpaceDragEnter);
 
     }
   });
 
   const docDragEnter = (event) => {
     event.preventDefault();
+    // console.log("docDragEnter, event.target:", event.target);
   }
   const docDragOver = (event) => {
     event.preventDefault();
     // console.log("docDragOver, event.target:", event.target, "draggedCard.enterListIndex:", draggedCard.enterListIndex);
 
-    // if(event.target.dataset.listIndex && event.target.dataset.notCard) {
-    //   console.log("event.target.dataset.listIndex && event.target.dataset.notCard")
-    //   const targetListIndex = event.target.dataset.listIndex;
-    //   const targetBoardList = document.querySelector(`.flex-board-list.idx${targetListIndex}`);
-
-    // }
-    
-    
   }
   const docHandleCardDrop = (event) => {
     event.preventDefault();
-    console.log("docHandleCardDrop, currList:", lists[listIndex], "cardIndex:", cardIndex, "event.target:", event.target);
+    console.log("docHandleCardDrop, event.target:", event.target);
 
-    // if(!event.target.className.includes("card-btn-title")) {
-    //   const cardFillerIndex = lists[listIndex].cards.findIndex((card) => card.title === "filler");
-    //   console.log("cardFillerIndex:", cardFillerIndex);
-    //   dispatch({
-    //     type: "DROP_DRAGGED_TO_FILLER",
-    //     cardFillerIndex,
-    //     currListIndex: listIndex
-    //   });
-    // } 
+    
 
     event.target.style.background = "";
     
@@ -361,106 +262,166 @@ const Card = (props) => {
       });
     }
     
-    
-    
-
-    
   }
+
+
   useEffect(() => {
-    // if(list.cards[cardIndex].title === "filler")
-    if(card.title === "filler") {
-      console.log("useEffect isFiller, adding eventListeners");
+    if(card.title === "") {
+      // console.log("useEffect isFiller, adding eventListeners");
       document.addEventListener("dragenter", docDragEnter);
       document.addEventListener("dragover", docDragOver);
       document.addEventListener("drop", docHandleCardDrop);
+      
 
       return function cleanUp() {
         document.removeEventListener("dragenter", docDragEnter);
         document.removeEventListener("dragover", docDragOver);
         document.removeEventListener("drop", docHandleCardDrop);
+      
       }
     }
   })
+  // End of drag and drop cards section
+  
+  const [openSideMenu, setOpenSideMenu] = useState(false);
+  const handleCardSideMenu = (event) => {
+    event.stopPropagation();
+    setOpenSideMenu(true);
+    
+  }
 
-  
+  const [cardTitle, setCardTitle] = useState(card.title);
+  const handleCardTitle = (event) => {
+    setCardTitle(event.target.value);
+  }
 
-  
-  
+  const submitCardTitle = async(event) => {
+    event.preventDefault();
 
-  
+    updateCardTitle(card.id, cardTitle, listIndex);
+    setOpenSideMenu(false);
+  }
+
+  useEffect(() => {
+    if(openSideMenu) {
+      const cardBtnTitleHeight = document.querySelector(`.card-btn-title.list-${listIndex}-card-${cardIndex}`).offsetHeight;
+      const cardBtnTitleWidth = document.querySelector(`.card-btn-title.list-${listIndex}-card-${cardIndex}`).offsetWidth;
+
+      const bdrAndPdg = 4;
+      const initialTxtareaHeight = 38;
+      const cardBtnTxtarea = document.querySelector(".card-btn-txtarea");
+      if(parseInt(cardBtnTitleHeight, 10) + bdrAndPdg === initialTxtareaHeight) {
+        cardBtnTxtarea.style.height = `${parseInt(cardBtnTitleHeight, 10) * 3 + bdrAndPdg}px`;
+      } else {
+        cardBtnTxtarea.style.height = `${parseInt(cardBtnTitleHeight, 10) + bdrAndPdg}px`;
+      }
+
+      // cardBtnTxtarea.style.height = `${parseInt(cardBtnTitleHeight, 10) }px`;
+      
+      cardBtnTxtarea.style.width = cardBtnTitleWidth + "px";
+
+      cardBtnTxtarea.focus();
+      cardBtnTxtarea.setSelectionRange(cardBtnTxtarea.textLength + 1, cardBtnTxtarea.textLength);
+
+    }
+  }, [openSideMenu])
+
+  const autoResizeTxtArea = (event) => {
+    const txtArea = event.target;
+    const offset = txtArea.offsetHeight - txtArea.clientHeight;
+    const defaultHeight = 106; // cardBtnTitleHeight * 3 + bdrAndPdg
+
+    if(parseInt(txtArea.scrollHeight, 10) + offset !== defaultHeight) {
+      txtArea.style.height = 'auto';
+    } else {
+      return;
+    }
+    
+    txtArea.style.height = txtArea.scrollHeight + offset + 'px';
+
+  }
+
+
   console.log('Card RENDER');
-
   
   return (
-    <div className={`list${listIndex}-card-${cardIndex}`}>
-      <div 
-        className="card-btn-wrapper | mgn-l-05rem bg-clr-transparent"
-        data-list-index={`${listIndex}`}
-        data-card-index={`${cardIndex}`}
-      >
-        <button
-          type="button"
-          // className={`list${listIndex} card-${cardIndex} btn`}
-          className={`card-btn-title list-${listIndex}-card-${cardIndex} | bdr-none br-025rem`}
+    <div className={`card-btn-wrapper list${listIndex}-card-${cardIndex}`}>
+      <CardSideMenu
+        openSideMenu={openSideMenu} setOpenSideMenu={setOpenSideMenu}
+        setCardTitle={setCardTitle} currList={list} currBoard={board}
+        currCard={card} cardIndex={cardIndex} currLists={lists}
+      />
+      
+      {
+        openSideMenu ?
+        <div className="card-btn-edit-title | mgn-l-05rem">
+          <textarea 
+            className="card-btn-txtarea | br-025rem"
+            value={cardTitle}
+            onChange={handleCardTitle}
+            onKeyDown={autoResizeTxtArea}
+          >
+          </textarea>
+          <div>
+            <button
+              className="card-btn-submit-btn | bdr-none br-025rem pdg-4x8px fnt-sz-14px"
+              onClick={submitCardTitle}
+            >
+              Save
+            </button>
+          </div>
+          
+        </div> : null
+      }
+
+      {      
+        card.title !== "" ? 
+        <div
+          className={`card-btn-title list-${listIndex}-card-${cardIndex} | mgn-l-05rem bdr-none br-025rem  `}
           draggable="true"
-          onClick={() => handleOpen(card)}
+          onClick={handleOpenCard}
+          data-list-index={`${listIndex}`}
+          data-card-index={`${cardIndex}`}
+        >
+          <p className="card-btn-title-txt">{card.title}</p>
+          
+          
+          <div className="card-btn-rmv-wrapper">
+            <button
+              type="button"
+              className="card-btn-rmv | bdr-none br-025rem bg-clr-transparent usr-slct"
+              onClick={handleCardSideMenu}
+            >
+            </button>
+            
+          </div>
+        </div> :
+        <div
+          className={`card-btn-title list-${listIndex}-card-${cardIndex} filler | mgn-l-05rem bdr-none br-025rem  `}
+          draggable="true"
           data-list-index={`${listIndex}`}
           data-card-index={`${cardIndex}`}
         >
           {card.title}
-        </button>
+          
+          <div className="card-btn-rmv-wrapper | ">
+            <button
+              type="button"
+              className="card-btn-rmv | bdr-none br-025rem bg-clr-transparent usr-slct"
+            >
+            
+            </button>
+          </div>    
+        </div>
 
-        <button
-          type="button"
-          className="card-btn-rmv | usr-slct"
-          onClick={() => removeACard(list.id, card.id, board.id)}
-        >
-          &times;
-        </button>
-      </div>
-
-
-      {
-        open ?
-        <div id="card-modal">
-          <dialog id="card-modal-content" open={open ? "open" : null}>
-            <div id="card-modal-close">
-              <div id="card-modal-closeBtn">&times;</div>
-            </div>
-            <form onSubmit={(event) => submitCardDescription(card, event)}>
-              <input
-                className="card-title"
-                type="text"
-                value={cardTitle}
-                onChange={handleCardTitle}
-                autoFocus 
-              >
-              </input>
-
-              <label htmlFor="card-description">Description:</label>
-              <textarea 
-                id="card-description"
-                name="cardDescription"
-                rows="5" cols="33"
-                value={cardDescription}
-                onChange={handleCardDescription}
-                placeholder="Add a more detailed description..."
-              >
-              </textarea>
-
-              <button
-                type="submit"
-              >
-                Save Description
-              </button>
-            </form>
-          </dialog>
-        </div> : null
       }
-        
 
+      <CardModal 
+        card={card} openCard={openCard} setOpenCard={setOpenCard}
+        board={board} list={list} 
+      />
 
-      
+            
     </div>
   )
 }
@@ -469,15 +430,14 @@ const mapState = (state) => {
   return {
     lists: state.lists.lists,
     draggedCard: state.lists.draggedCard,
+    listsState: state.lists,
   }
 }
 
 const mapDispatch = (dispatch) => {
   return {
-    updateCardDescription: (card, cardDescription, board) => dispatch(updateCardDescription(card, cardDescription, board)),
-    removeACard: (listId, cardId, boardId) => dispatch(removeACard(listId, cardId, boardId)),
-    moveCardToList: (moveCardsInfo) => dispatch(moveCardToList(moveCardsInfo)),
     dropDraggedCard: (dropInfo) => dispatch(dropDraggedCard(dropInfo)),
+    updateCardTitle: (cardId, cardTitle, listIndex) => dispatch(updateCardTitle(cardId, cardTitle, listIndex)),
   }
 }
 

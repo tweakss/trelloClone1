@@ -42,10 +42,37 @@ const Workspace = props => {
 
 
   return (
-    <div className="workspace-layout">
+    <div className="workspace-layout-grid">
       <Navbar user={user} />
       <WorkspaceSideDrawer />
-      <div className="grid-board-links">
+      <div className="workspaces-display-section">
+        <h3>YOUR WORKSPACES</h3>
+        <div className="workspaces-display-wrapper">
+          {
+            workspaces.map((workspace) => {
+              return (
+                <div key={workspace.id} className="workspaces-display"> 
+                  <div className="workspaces-display-header">
+                    <h4>{workspace.title}</h4>
+                  </div>
+                  <div className="workspaces-display-boards">
+                    {
+                      workspace.boards.map((board) => {
+                        return (
+                          <Link to={`/board/${board.id}`} key={board.id}>{board.title}</Link>
+                        )
+                      })
+                    }
+                  </div>
+                </div>
+              )
+            })
+          }
+        </div>
+      </div>
+      
+
+      {/* <div className="grid-board-links">
         <h4> Boards </h4>
         {
           workspaces[0].boards.map((board) => {
@@ -56,7 +83,7 @@ const Workspace = props => {
             )
           })
         }
-      </div>
+      </div> */}
       
           
            

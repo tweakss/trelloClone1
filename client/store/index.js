@@ -6,12 +6,14 @@ import authReducer from './auth'
 import workspacesReducer from './workspace';
 import boardReducer from './board';
 import listsReducer from './lists';
+import commentsReducer from './comments';
 
 const reducer = combineReducers({
   auth: authReducer,
   workspaces: workspacesReducer, 
   board: boardReducer,
   lists: listsReducer,
+  comments: commentsReducer,
 })
 const middleware = composeWithDevTools(
   applyMiddleware(thunkMiddleware, createLogger({collapsed: true}))

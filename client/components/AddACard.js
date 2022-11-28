@@ -89,7 +89,7 @@ const AddACard = (props) => {
   return (
     <div>
       <textarea
-        className="add-card-txt-area mgn-l-05rem"
+        className="add-card-txt-area | mgn-l-05rem"
         value={cardTitle}
         onChange={handleCardTitle}
         placeholder="Enter a title for this card..."

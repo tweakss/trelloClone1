@@ -14,30 +14,46 @@ async function seed() {
   console.log('db synced!')
 
   // Creating Users
-  const users = await Promise.all([
-    User.create({ 
-      username: 'cody',
-      password: '123', 
-      email: 'cody@email.com'
-    }),
-    User.create({ 
-      username: 'murphy',
-      password: '123',
-      email: 'murphy@email.com'
-    }),
-    User.create({
-      username: 'ben',
-      password: '123',
-      email: 'ben@email.com',
-    })
-  ]);
+  const cody = await User.create({ 
+    username: 'cody',
+    password: '123', 
+    email: 'cody@email.com'
+  });
+  const murphy = await User.create({ 
+    username: 'murphy',
+    password: '123',
+    email: 'murphy@email.com'
+  });
+  const ben = await User.create({
+    username: 'ben',
+    password: '123',
+    email: 'ben@email.com',
+  });
+    
+  // const users = await Promise.all([
+  //   User.create({ 
+  //     username: 'cody',
+  //     password: '123', 
+  //     email: 'cody@email.com'
+  //   }),
+  //   User.create({ 
+  //     username: 'murphy',
+  //     password: '123',
+  //     email: 'murphy@email.com'
+  //   }),
+  //   User.create({
+  //     username: 'ben',
+  //     password: '123',
+  //     email: 'ben@email.com',
+  //   })
+  // ]);
   
 
   const workspaces = await Promise.all([
-    Workspace.create({ title: 'wkspce1', owner: users[0].dataValues.id }),
-    Workspace.create({ title: 'wkspce2', owner: users[1].dataValues.id }),
-    Workspace.create({ title: 'wkspce3', owner: users[2].dataValues.id }),
-    Workspace.create({ title: 'my workspace', owner: users[1].dataValues.id }),
+    Workspace.create({ title: 'wkspce1', owner: cody.dataValues.id }),
+    Workspace.create({ title: 'wkspce2', owner: murphy.dataValues.id }),
+    Workspace.create({ title: 'wkspce3', owner: ben.dataValues.id }),
+    Workspace.create({ title: 'my workspace', owner: murphy.dataValues.id }),
   ]);
 
   const boards = await Promise.all([
@@ -142,18 +158,20 @@ async function seed() {
     })
   ]);
 
-  await users[0].addBoards([boards[0]]);
-  await users[1].addBoards([boards[1]]);
-  await boards[0].addUsers([users[1]]);
-  await users[2].addBoards([boards[2]]);
+  // cody, murphy, ben
+  await cody.addBoards([boards[0]]);
+  await cody.addBoards([boards[1]]);
+  await murphy.addBoards([boards[1]]);
+  await boards[0].addUsers([murphy]);
+  await ben.addBoards([boards[2]]);
 
-  await workspaces[0].addUsers([users[0], users[1]]);
+  await workspaces[0].addUsers([cody]);
   await workspaces[0].addBoards([boards[0]]);
-  await workspaces[1].addUsers([users[1]]);
+  await workspaces[1].addUsers([murphy, cody]);
   await workspaces[1].addBoards([boards[1], boards[2]]);
-  await workspaces[2].addUsers([users[0], users[2]]);
+  await workspaces[2].addUsers([cody, ben]);
   await workspaces[2].addBoards([boards[3]]);
-  await workspaces[3].addUsers([users[1]]);
+  await workspaces[3].addUsers([murphy]);
   await workspaces[3].addBoards([boards[4]]);
 
   await boards[0].addLists([lists[0], lists[1], lists[2]]);
@@ -162,26 +180,26 @@ async function seed() {
   await boards[1].addGuests([guests[1], guests[2], guests[3]]);
 
   await lists[0].addCards([ cards[0], cards[1] ]);
-  await lists[1].addCards([ cards[2], cards[3] ]); //lists[1] add cards[2,3]
-  await lists[2].addCards([ cards[4], cards[5], cards[6] ]); //lists[2] add cards[4,5,6]
-  await lists[3].addCards([ cards[7], cards[8] ]); // lists[3] add cards[7,8]
+  await lists[1].addCards([ cards[2], cards[3] ]); 
+  await lists[2].addCards([ cards[4], cards[5], cards[6] ]); 
+  await lists[3].addCards([ cards[7], cards[8] ]);
 
   await cards[0].addComments([comments[0], comments[1]]);
   await cards[1].addComments([comments[3], comments[2], comments[0]]);
   await cards[2].addComments([comments[1]]);
   await cards[3].addComments([comments[2], comments[0]]);
 
-  await users[0].addComments([comments[0], comments[1]]);
-  await users[1].addComments([comments[3], comments[2]]);
+  await cody.addComments([comments[0], comments[1]]);
+  await murphy.addComments([comments[3], comments[2]]);
   
   console.log('seeded data successfully');
 
-  return {
-    users: {
-      cody: users[0],
-      murphy: users[1]
-    }
-  }
+  // return {
+  //   users: {
+  //     cody: users[0],
+  //     murphy: users[1]
+  //   }
+  // }
 }
 
 /*

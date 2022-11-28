@@ -112,7 +112,7 @@ const NavbarContent = (props) => {
   
     
     return function cleanUp() {
-      console.log("shareDropdown cleanup");
+      // console.log("shareDropdown cleanup");
       // document.removeEventListener("click", closeInviteDropdown);
       document.removeEventListener("mousedown", mouseDownEvent);
       document.removeEventListener("mouseup", mouseUpEvent);

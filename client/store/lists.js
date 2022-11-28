@@ -2,17 +2,11 @@ import axios from 'axios';
 
 
 const GET_LISTS = "GET_LISTS";
-const SWAP_LIST_POSITIONS = "SWAP_LIST_POSITIONS";
+// const SWAP_LIST_POSITIONS = "SWAP_LIST_POSITIONS";
 const DRAG_OVER_CARDS_UP = "DRAG_OVER_CARDS_UP";
 const DRAG_OVER_CARDS_DOWN = "DRAG_OVER_CARDS_DOWN";
 const DROP_DRAGGED_CARD = "DROP_DRAGGED_CARD";
-
-// const CREATE_NEW_LIST = "CREATE_NEW_LIST";
-// const DELETE_LIST = "DELETE_LIST";
-// const CREATE_CARD_AND_ADD_TO_LIST = "CREATE_CARD_AND_ADD_TO_LIST";
-// const MOVE_CARD_TO_LIST = "MOVE_CARD_TO_LIST";
-// const UPDATE_CARD_DESCRIPTION = "UPDATE_CARD_DESCRIPTION";
-// const REMOVE_A_CARD = "REMOVE_A_CARD";
+const UPDATE_CARD = "UPDATE_CARD";
 
 const _getLists = (lists) => {
   return {
@@ -21,13 +15,12 @@ const _getLists = (lists) => {
   }
 }
 
-export const _swapListPositions = (listPositions) => {
-  console.log("_swapListPositions");
-  return {
-    type: SWAP_LIST_POSITIONS,
-    listPositions
-  }
-}
+// const _swapListPositions = (listPositions) => {
+//   return {
+//     type: SWAP_LIST_POSITIONS,
+//     listPositions
+//   }
+// }
 
 const _dropDraggedCard = (moveToListIndex, cardIndex) => {
   return {
@@ -38,71 +31,13 @@ const _dropDraggedCard = (moveToListIndex, cardIndex) => {
   }
 }
 
-export const dropDraggedCard = (dropInfo) => {
-  console.log("dropDraggedCard thunk, dropInfo.targetListCardToIndex:", dropInfo.targetListCardToIndex);
-  return async(dispatch) => {
-    const response = await axios({
-      method: 'put',
-      url: '/api/lists/dropDraggedCard',
-      data: {
-        targetListCardToIndex: dropInfo.targetListCardToIndex,
-        draggedListCardToIndex: dropInfo.draggedListCardToIndex ? dropInfo.draggedListCardToIndex: null,
-        draggedCardId: dropInfo.draggedCardId ? dropInfo.draggedCardId : null,
-        listId: dropInfo.listId ? dropInfo.listId: null,
-        draggedListId: dropInfo.draggedListId ? dropInfo.draggedListId : null,
-        cardGoingToDiffList: dropInfo.cardGoingToDiffList ? dropInfo.cardGoingToDiffList : false
-      }
-    })
-
-    // dispatch(_dropDraggedCard(dropInfo.moveToListIndex, dropInfo.moveToCardIndex));
-    dispatch(_dropDraggedCard(dropInfo.moveToListIndex, dropInfo.cardIndex));
+const _updateCard = (updatedCard, listIndex, cardId) => {
+  return {
+    type: UPDATE_CARD,
+    updatedCard,
+    listIndex, cardId
   }
 }
-
-
-// const _createNewList = (lists) => {
-//   return {
-//     type: CREATE_NEW_LIST,
-//     lists
-//   }
-// }
-
-// const _deleteList = (lists) => {
-//   return {
-//     type: DELETE_LIST,
-//     lists
-//   }
-  
-// }
-
-// const _createCardAndAddToList = (lists) => {
-//   return {
-//     type: CREATE_CARD_AND_ADD_TO_LIST,
-//     lists
-//   }
-// }
-
-// const _moveCardToList = (lists) => {
-//   return {
-//     type: MOVE_CARD_TO_LIST,
-//     lists
-//   }
-// }
-
-// const _updateCardDescription = (lists) => {
-//   return {
-//     type: UPDATE_CARD_DESCRIPTION,
-//     lists
-//   }
-// }
-
-// const _removeACard = (lists) => {
-//   return {
-//     type: REMOVE_A_CARD,
-//     lists
-//   }
-// }
-
 
 export const getLists = (boardId) => {
   return async(dispatch) => {
@@ -175,11 +110,12 @@ export const createCardAndAddToList = (list, cardTitle, user, board) => {
 
 }
 
+// not using this?
 export const moveCardToList = (moveCardsInfo) => {
   return async(dispatch) => {
-    const { moveToListId, draggedCardId, boardId } = moveCardsInfo;
-    console.log("moveCardToList, moveToListId:", moveToListId, " draggedCardId:", draggedCardId, " boardId:", boardId);
-    const response = await axios.put(`/api/lists/${moveToListId}/moveCard/${draggedCardId}`, {
+    const { targetListId   } = moveCardsInfo;
+    console.log("moveCardToList, targetListId:", targetListId, " cardId:", cardId, " boardId:", boardId);
+    const response = await axios.put(`/api/lists/targetList/${targetListId}/moveCard/${cardId}`, {
       moveCardsInfo
     });
     // console.log("moveCardToList, response:", response);
@@ -191,12 +127,31 @@ export const moveCardToList = (moveCardsInfo) => {
   }
 }
 
-export const updateCardDescription = (card, cardDescription, board) => {
+export const updateCardTitle = (cardId, cardTitle, listIndex) => {
+  return async(dispatch) => {
+    const { data: updatedCard } = await axios({
+      method: 'put',
+      url: `/api/cards/card/${cardId}/updateTitle`,
+      data: {
+        title: cardTitle
+      
+      }
+    });
+    console.log("updateCardTitle thunk, updatedCard:", updatedCard);
+
+    dispatch(_updateCard(updatedCard, listIndex, cardId));
+  }
+}
+
+export const updateCardDescription = (card, cardDescription, board, txtareaHeight) => {
+  // console.log('updateCardDescription, card:', card, "cardDescription:", cardDescription);
   return async (dispatch) => {
     const cardId = card.id;
-    // console.log('updateCardDescription, cardId, cardDescription:', cardId, cardDescription);
-    const cardUpdated = await axios.put(`/api/cards/${cardId}/description`, {description: cardDescription});
-    // console.log('cardUpdated:', cardUpdated);
+    const { data: cardUpdated } = await axios.put(`/api/cards/${cardId}/description`, {
+      description: cardDescription,
+      txtareaHeight
+    });
+    console.log('updateCardDescription thunk, cardUpdated:', cardUpdated);
 
     const boardId = board.id;
     const { data: lists } = await axios.get(`/api/lists/boardId/${boardId}`);
@@ -218,10 +173,32 @@ export const removeACard = (listId, cardId, boardId) => {
   }
 }
 
+export const dropDraggedCard = (dropInfo) => {
+  console.log("dropDraggedCard thunk, dropInfo.targetListCardToIndex:", dropInfo.targetListCardToIndex);
+  return async(dispatch) => {
+    const response = await axios({
+      method: 'put',
+      url: '/api/lists/dropDraggedCard',
+      data: {
+        targetListCardToIndex: dropInfo.targetListCardToIndex,
+        draggedListCardToIndex: dropInfo.draggedListCardToIndex ? dropInfo.draggedListCardToIndex: null,
+        draggedCardId: dropInfo.draggedCardId ? dropInfo.draggedCardId : null,
+        listId: dropInfo.listId ? dropInfo.listId: null,
+        draggedListId: dropInfo.draggedListId ? dropInfo.draggedListId : null,
+        cardGoingToDiffList: dropInfo.cardGoingToDiffList ? dropInfo.cardGoingToDiffList : false
+      }
+    })
+
+    // dispatch(_dropDraggedCard(dropInfo.moveToListIndex, dropInfo.moveToCardIndex));
+    dispatch(_dropDraggedCard(dropInfo.moveToListIndex, dropInfo.cardIndex));
+  }
+}
+
 const inititalState = {
   lists: [],
   draggedCard: {},
-  // enterListIndex: null
+  fillerIndex: null,
+  leftCurrList: false,
 }
 
 export default function listsReducer(state = inititalState, action) {
@@ -234,14 +211,41 @@ export default function listsReducer(state = inititalState, action) {
       const currList = state.lists[action.dropTargetListIndex];
       const newList = { ...currList };
       const newCards = [ ...currList.cards ];
+
+      if(newCards[action.dropTargetCardIndex + 1].id !== "filler" ) {
+        const filteredCards = newCards.filter((card) => {
+          return card.id !== "filler";
+        });
+
+        filteredCards.splice(action.dropTargetCardIndex, 0, { 
+          id: "filler",
+          title: "",
+          description: ""
+        });
+        
+
+        newList.cards = filteredCards;
+        const newLists = state.lists.map((list, index) => {
+          if(index === action.dropTargetListIndex) {
+            return newList;
+          }
+          return list;
+        });
+
+        return { 
+          ...state, 
+          lists: newLists,
+        };
+      }
+
       if(newCards[action.dropTargetCardIndex].id !== "filler") {
         newCards[action.dropTargetCardIndex + 1] = newCards[action.dropTargetCardIndex];
       }
       
       newCards[action.dropTargetCardIndex] = { 
         id: "filler",
-        title: "filler",
-        // listId: newList.id,
+        title: "",
+        description: "",
       };
       
       newList.cards = newCards;
@@ -255,22 +259,46 @@ export default function listsReducer(state = inititalState, action) {
       
       return { 
         ...state, 
-        lists: newLists,
-        // draggedCard: { ...state.draggedCard, cardIndex: action.dropTargetCardIndex } 
+        lists: newLists, 
       };
     }
     case DRAG_OVER_CARDS_DOWN: {
       const currList = state.lists[action.dropTargetListIndex];
-      // const dropTarget = currList[action.dropTargetCardIndex]; // needed?
       const newList = { ...currList };
-      const newCards = [ ...currList.cards ];
+      let newCards = [ ...currList.cards ];
+
+      if(newCards[action.dropTargetCardIndex - 1].id !== "filler") {
+        const filteredCards = newCards.filter((card) => {
+          return card.id !== "filler";
+        });
+        
+        filteredCards.splice(action.dropTargetCardIndex, 0, { 
+          id: "filler",
+          title: "",
+          description: ""
+        });
+        
+        newList.cards = filteredCards;
+        const newLists = state.lists.map((list, index) => {
+          if(index === action.dropTargetListIndex) {
+            return newList;
+          }
+          return list;
+        });
+
+        return { 
+          ...state, 
+          lists: newLists,
+        };
+      }
+
       if(newCards[action.dropTargetCardIndex].id !== "filler") {
         newCards[action.dropTargetCardIndex - 1] = newCards[action.dropTargetCardIndex];
       }
       newCards[action.dropTargetCardIndex] = {
         id: "filler",
-        title: "filler",
-        // listId: newList.id,
+        title: "",
+        description: "",
       };
 
       newList.cards = newCards;
@@ -287,19 +315,31 @@ export default function listsReducer(state = inititalState, action) {
       const targetList = state.lists[action.dropTargetListIndex];
       const newList = { ...targetList };
       // const newCards = [ ...targetList.cards ];
-      // console.log("DRAG_OVER_CARDS_UP_DIFF_LIST currList.cards:", currList.cards);
+      // console.log("DRAG_OVER_CARDS_UP_DIFF_LIST targetList:", targetList);
+
       let newCards;
-      if(state.fillerToRemove ) {
+      let removedFiller = false;
+      if(state.fillerIndex !== null) {
         newCards = targetList.cards.filter((card, index) => {
-          // console.log("DRAG_OVER_CARDS_UP a new card:", card);
-          return index !== state.fillerToRemove
+          return card.id !== "filler"
         });
-        // console.log("DRAG_OVER_CARDS_UP, fillerToRemove true, newCards:", newCards);
+        removedFiller = true;
       } else {
         newCards = [ ...targetList.cards ];
       }
-      if(newCards[action.dropTargetCardIndex].id !== "filler") {
-        newCards.splice(action.dropTargetCardIndex, 0, { id: "filler", title: "filler" });
+
+      // const newCards = [ ...targetList.cards ];
+      // console.log("newCards:", newCards);
+      let dropTargetCardIndex = action.dropTargetCardIndex;
+      if(action.dropTargetCardIndex === newCards.length) {
+        // console.log("action.dropTargetCardIndex === newCards.length, action.dropTargetCardIndex:", action.dropTargetCardIndex, " newCards.length:", newCards.length)
+        dropTargetCardIndex = action.dropTargetCardIndex - 1;
+      }
+
+      // console.log("before adding filler dropTargetCardIndex:", dropTargetCardIndex)
+      if(newCards[dropTargetCardIndex].id !== "filler") {
+        console.log("dropTargetCard not filler, dropTargetCardIndex:", dropTargetCardIndex)
+        newCards.splice(dropTargetCardIndex, 0, { id: "filler", title: "", description: "", });
       }
 
       newList.cards = newCards;
@@ -310,23 +350,43 @@ export default function listsReducer(state = inititalState, action) {
         return list;
       });
 
-      if(state.fillerToRemove) {
-        return { ...state, lists: newLists, fillerToRemove: null }
+      if(removedFiller) {
+        return { ...state, lists: newLists, fillerIndex: null }
       }
-      return { ...state, lists: newLists };
+
+      return { ...state, lists: newLists, fillerIndex: dropTargetCardIndex };
     }
     case "DRAG_OVER_CARDS_DOWN_DIFF_LIST": {
       const targetList = state.lists[action.dropTargetListIndex];
       const newList = { ...targetList };
+      
+      // let newCards;
+      // let removedFiller = false;
+      // if(state.fillerIndex !== null) {
+      //   newCards = targetList.cards.filter((card, index) => {
+      //     console.log("DRAG_OVER_CARDS_DOWN_DIFF_LIST fillerIndex !== null");
+      //     return index !== state.fillerIndex
+      //   });
+      //   removedFiller = true;
+      //   // console.log("DRAG_OVER_CARDS_UP, fillerIndex true, newCards:", newCards);
+      // } else {
+      //   newCards = [ ...targetList.cards ];
+      // }
+
+      // console.log("DRAG_OVER_CARDS_DOWN_DIFF_LIST after filter, newCards:", newCards);
+      // newCards.splice(action.dropTargetCardIndex + 1, 0, { id: "filler", title: "filler", description: "", });
+
       const newCards = [ ...targetList.cards ];
       if( (action.dropTargetCardIndex === newCards.length - 1) && (newCards[action.dropTargetCardIndex].id !== "filler") ) {
-        newCards.splice(action.dropTargetCardIndex + 1, 0, { id: "filler", title: "filler" })
+        newCards.splice(action.dropTargetCardIndex + 1, 0, { id: "filler", title: "", description: "", })
       } else if( (action.dropTargetCardIndex !== newCards.length - 1) ) {
         if(newCards[action.dropTargetCardIndex + 1].id !== "filler") {
-          newCards.splice(action.dropTargetCardIndex + 1, 0, { id: "filler", title: "filler" });
+          newCards.splice(action.dropTargetCardIndex + 1, 0, { id: "filler", title: "", description: "", });
         }
         
       }
+      
+
 
       newList.cards = newCards;
       const newLists = state.lists.map((list, index) => {
@@ -336,29 +396,20 @@ export default function listsReducer(state = inititalState, action) {
         return list;
       });
 
-      return { ...state, lists: newLists, fillerToRemove: action.dropTargetCardIndex + 1 };
+      // if(removedFiller) {
+      //   return { ...state, lists: newLists, fillerIndex: null }
+      // }
+
+      return { ...state, lists: newLists, fillerIndex: action.dropTargetCardIndex + 1 };
     }
     case "DRAGGED_START": {
-      // const currList = state.lists[action.draggedListIndex];
-      // const newList = { ...currList };
-      // const newCards = [ ...currList.cards ];
-      // newCards[action.draggedCardIndex] = { id: "filler", title: "filler" };
-
-      // newList.cards = newCards;
-      // const newLists = state.lists.map((list, index) => {
-      //   if(index === action.draggedListIndex) {
-      //     return newList;
-      //   }
-      //   return list;
-      // });
-
       return { ...state, draggedCard: action.draggedCard }
     }
     case "DRAGGING_SET_FILLER": {
       const currList = state.lists[action.listIndex];
       const newList = { ...currList };
       const newCards = [ ...currList.cards ];
-      newCards[action.cardIndex] = { id: "filler", title: "filler" };
+      newCards[action.cardIndex] = { id: "filler", title: "", description: "", };
 
       newList.cards = newCards;
       const newLists = state.lists.map((list, index) => {
@@ -411,13 +462,26 @@ export default function listsReducer(state = inititalState, action) {
       return { ...state, lists: newLists };
     }
     case "UPDATE_DRAGGED_LEAVE_INDEXES": {
+      // if(state.draggedCard.enterListIndex !== action.leaveListIndex) {
+      //   return { 
+      //     ...state,
+      //     draggedCard: { 
+      //       ...state.draggedCard,
+      //       leaveCardIndex: action.leaveCardIndex,
+      //       // leaveListIndex: action.leaveListIndex
+      //     },
+          
+      //   }
+      // }
+      
       return { 
         ...state,
         draggedCard: { 
           ...state.draggedCard,
           leaveCardIndex: action.leaveCardIndex,
           leaveListIndex: action.leaveListIndex
-        }
+        },
+        leftCurrList: true
       }
     }
     case "UPDATE_ENTER_LIST_INDEX": {
@@ -426,51 +490,61 @@ export default function listsReducer(state = inititalState, action) {
         draggedCard: { 
           ...state.draggedCard,
           enterListIndex: action.enterListIndex,
-        }
+        },
+        leftCurrList: false,
       }
     }
+    
     case "ENTER_DIFF_LIST_REMOVE_FILLER": {
-      // const origList = state.lists[state.draggedCard.origListIndex];
-      // const newList = { ...origList };
-      // const newCards = origList.cards.filter((card) => {
-      //   return card.id !== state.draggedCard.card.id;
-      // })
-      // console.log("ENTER_DIFF_LIST_REMOVE_FILLER reducer", "\nleaveListIndex:", state.draggedCard.leaveListIndex )
+      
       const leaveList = state.lists[state.draggedCard.leaveListIndex];
-      const newList = { ...leaveList };
+      const newLeaveList = { ...leaveList };
       let newCards;
-      // if(state.draggedCard.leaveListIndex === state.draggedCard.origListIndex) {
-      //   newCards = leaveList.cards.filter((card) => {
-      //     return card.id !== state.draggedCard.card.id;
-      //   });
-      // } else {
-      //   newCards = leaveList.cards.filter((card) => {
-      //     return card.id !== "filler";
-      //   });
-      // }
+      
       newCards = leaveList.cards.filter((card) => {
         return card.id !== "filler";
       });
       
-      newList.cards = newCards;
+      newLeaveList.cards = newCards;
       const newLists = state.lists.map((list, index) => {
         if(index === state.draggedCard.leaveListIndex) {
-          return newList;
+          return newLeaveList;
         }
         return list;
       });
       
-      return { ...state, lists: newLists };
+      return { ...state, lists: newLists, fillerIndex: null };
     }
     case "CREATE_FILLER_FOR_NO_CARDS": {
       const newList = { ...state.lists[action.dropTargetListIndex] };
-      const newCards = [{ id: 'filler', title: 'filler' }];
+      const newCards = [{ id: 'filler', title: '', description: '' }];
       newList.cards = newCards;
 
       const newLists = state.lists.map((list, index) => {
         if(index === action.dropTargetListIndex) {
           return newList;
         }
+        return list;
+      });
+
+      return { ...state, lists: newLists };
+    }
+    case UPDATE_CARD: {
+      const newList = { ...state.lists[action.listIndex] };
+      const newCards = state.lists[action.listIndex].cards.map((card) => {
+        if(card.id === action.cardId) {
+          return action.updatedCard;
+        }
+
+        return card;
+      });
+      newList.cards = newCards;
+
+      const newLists = state.lists.map((list, index) => {
+        if(index === action.listIndex) {
+          return newList;
+        }
+
         return list;
       });
 
@@ -486,24 +560,7 @@ export default function listsReducer(state = inititalState, action) {
     //   // console.log("listsReducer newLists:", newLists);
     //   return { ...state, lists: newLists, listPositions }
     // }
-    // case CREATE_NEW_LIST: {
-    //   return { ...state, lists: action.lists }
-    // }
-    // case DELETE_LIST: {
-    //   return { ...state, lists: action.lists }
-    // }
-    // case CREATE_CARD_AND_ADD_TO_LIST: {
-    //   return { ...state, lists: action.lists }
-    // }
-    // case MOVE_CARD_TO_LIST: {
-    //   return { ...state, lists: action.lists }
-    // }
-    // case UPDATE_CARD_DESCRIPTION: {
-    //   return { ...state, lists: action.lists }
-    // }
-    // case REMOVE_A_CARD: {
-    //   return { ...state, lists: action.lists }
-    // } 
+    
     default: {
       return state;
     }
