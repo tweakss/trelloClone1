@@ -9,3 +9,5 @@ COPY . /home/app
 CMD cd /home/app; \
     npm run seed; \
     npm run start-server;
+
+#comment
