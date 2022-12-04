@@ -3,6 +3,7 @@ const { models: {User, Workspace }} = require('../db')
 module.exports = router
 
 router.post('/login', async (req, res, next) => {
+  console.log("auth, req.body:", req.body);
   try {
     res.send({ token: await User.authenticate(req.body)}); 
   } catch (err) {

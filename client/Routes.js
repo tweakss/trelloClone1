@@ -6,7 +6,6 @@ import Workspace from './components/Workspace';
 import Board from './components/Board';
 import {me} from './store'
 
-import Box from '@mui/material/Box';
 
 /**
  * COMPONENT
