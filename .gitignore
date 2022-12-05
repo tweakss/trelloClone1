@@ -6,4 +6,5 @@ npm-debug.log
 yarn-error.log
 package-lock.json
 docker-compose.yaml
+Dockerfile
 CHANGELOG.md
