@@ -7,6 +7,7 @@ const DRAG_OVER_CARDS_UP = "DRAG_OVER_CARDS_UP";
 const DRAG_OVER_CARDS_DOWN = "DRAG_OVER_CARDS_DOWN";
 const DROP_DRAGGED_CARD = "DROP_DRAGGED_CARD";
 const UPDATE_CARD = "UPDATE_CARD";
+const UPDATE_LIST_TITLE = "UPDATE_LIST_TITLE";
 
 const _getLists = (lists) => {
   return {
@@ -14,13 +15,6 @@ const _getLists = (lists) => {
     lists
   }
 }
-
-// const _swapListPositions = (listPositions) => {
-//   return {
-//     type: SWAP_LIST_POSITIONS,
-//     listPositions
-//   }
-// }
 
 const _dropDraggedCard = (moveToListIndex, cardIndex) => {
   return {
@@ -38,6 +32,15 @@ const _updateCard = (updatedCard, listIndex, cardId) => {
     listIndex, cardId
   }
 }
+
+const _updateListTitle = (listId, updatedList, currListIndex) => {
+  return {
+    type: UPDATE_LIST_TITLE,
+    listId, currListIndex,
+    updatedList
+  }
+}
+
 
 export const getLists = (boardId) => {
   return async(dispatch) => {
@@ -75,17 +78,18 @@ export const deleteList = (board, list) => {
   }
 }
 
-export const swapListPositions = (boardId, swapListsInfo) => {
+export const moveList = (boardId, moveListInfo) => {
+  console.log("moveList thunk, boardId:", boardId, " moveListInfo:", moveListInfo)
   return async (dispatch) => {
     const { data: updatedLists} = await axios({
       method: 'put',
-      url: `/api/lists/boardId/${boardId}/swapListPositions`,
+      url: `/api/lists/board/${boardId}/moveList`,
       data: {
-        swapListsInfo
+        moveListInfo
       }
     });
-    console.log("updatedLists from swapping:", updatedLists);
-    // sortListsAndCards(board, listPositions);
+    console.log("updatedLists from moveList:", updatedLists);
+    // // sortListsAndCards(board, listPositions);
     dispatch(_getLists(updatedLists));
   }
 }
@@ -191,6 +195,21 @@ export const dropDraggedCard = (dropInfo) => {
 
     // dispatch(_dropDraggedCard(dropInfo.moveToListIndex, dropInfo.moveToCardIndex));
     dispatch(_dropDraggedCard(dropInfo.moveToListIndex, dropInfo.cardIndex));
+  }
+}
+
+export const updateListTitle = (listId, newListTitle, currListIndex) => {
+  console.log("updateListTitle thunk, listId:", listId, " newListTitle:", newListTitle, " currListIndex:", currListIndex)
+  return async(dispatch) => {
+    const { data: updatedList } = await axios({
+      method: 'put',
+      url: `/api/lists/list/${listId}/updateListTitle`,
+      data: {
+        title: newListTitle
+      }
+    });
+    
+    dispatch(_updateListTitle(listId, updatedList, currListIndex));
   }
 }
 
@@ -462,17 +481,6 @@ export default function listsReducer(state = inititalState, action) {
       return { ...state, lists: newLists };
     }
     case "UPDATE_DRAGGED_LEAVE_INDEXES": {
-      // if(state.draggedCard.enterListIndex !== action.leaveListIndex) {
-      //   return { 
-      //     ...state,
-      //     draggedCard: { 
-      //       ...state.draggedCard,
-      //       leaveCardIndex: action.leaveCardIndex,
-      //       // leaveListIndex: action.leaveListIndex
-      //     },
-          
-      //   }
-      // }
       
       return { 
         ...state,
@@ -550,16 +558,12 @@ export default function listsReducer(state = inititalState, action) {
 
       return { ...state, lists: newLists };
     }
-    // case SWAP_LIST_POSITIONS: {
-    //   const listPositions = action.listPositions;
-    //   const newLists = new Array(state.lists.length);
-    //   state.lists.forEach((list) => {
-    //     const index = listPositions.get(list.id);
-    //     newLists[index] = list;
-    //   });
-    //   // console.log("listsReducer newLists:", newLists);
-    //   return { ...state, lists: newLists, listPositions }
-    // }
+    case UPDATE_LIST_TITLE: {
+      const newLists = [ ...state.lists ];
+      newLists.splice(action.currListIndex, 1, action.updatedList);
+
+      return { ...state, lists: newLists }
+    }
     
     default: {
       return state;

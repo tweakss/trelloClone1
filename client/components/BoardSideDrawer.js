@@ -2,11 +2,11 @@ import React, { useState, useEffect } from 'react'
 import {connect } from 'react-redux'
 import { Link } from 'react-router-dom';
 import { createNewBoard } from '../store/workspace';
-
+import BoardSideDrawerBoardLink from './BoardSideDrawerBoardLink';
 
 const BoardSideDrawer = (props) => {
   const {
-    user, workspaces, workspaceId,
+    user, currBoard, workspaces, boardWorkspaceId,
     createNewBoard
   } = props;
   
@@ -24,9 +24,9 @@ const BoardSideDrawer = (props) => {
       sideDrawer.style.width = '240px';
       // openCloseDrawerBtn.style.left = '100%' // originally at 80%
     } else {
-      sideDrawer.style.width = '60px';
+      sideDrawer.style.width = '30px';
       // openCloseDrawerBtn.style.left = 'calc(30% - 8px)';
-      gridBoard.style.gridTemplateColumns = '60px';
+      gridBoard.style.gridTemplateColumns = '30px';
     }
     
   })
@@ -52,13 +52,16 @@ const BoardSideDrawer = (props) => {
     setNewBoardTitle(event.target.value);
   }
 
+  const currWorkspaceIndex = workspaces.findIndex((workspace) => workspace.id === boardWorkspaceId);
+  const boardWorkspace = workspaces[currWorkspaceIndex];
   const handleCreateNewBoard = () => {
     handleNewBoardModal();
-    createNewBoard(user.id, workspaces.id, newBoardTitle);
+    createNewBoard(user.id, boardWorkspace.id, newBoardTitle);
   }
 
   
-  // console.log('BoardSideDrawer, workspaces:', workspaces, " workspaceId:", workspaceId, );
+  
+  // console.log('BoardSideDrawer, workspaces:', workspaces, " boardWorkspaceId:", boardWorkspaceId, " boardWorkspace:", boardWorkspace);
 
   return (
     <div className="board-side-drawer">
@@ -67,14 +70,13 @@ const BoardSideDrawer = (props) => {
       <div>
         <div className="board-side-drawer-header">
           <span className="board-side-drawer-wkspce-title | mgn-05rem">
-            {workspaces.find((workspace) => workspace.id === workspaceId).title}
+            { boardWorkspace ? boardWorkspace.title : "Loading..." }
           </span>
           <button
-            className="board-side-drawer-close-btn | mgn-05rem" 
-            type="button"
+            className="board-side-drawer-close-btn | mgn-05rem br-025rem bdr-none bg-clr-transparent" 
             onClick={handleDrawerOpenClose}
           >
-            {`<<`}
+            
           </button>
         </div>
 
@@ -83,34 +85,41 @@ const BoardSideDrawer = (props) => {
             Your boards
           </span>
           <button 
-            className="board-side-drawer-new-board-btn | mgn-05rem"
+            className="board-side-drawer-new-board-btn | mgn-05rem br-025rem bdr-none bg-clr-transparent"
             type="button"
             onClick={handleNewBoardModal}
           >
             +
           </button>
         </div>
-        <ul>
+
+        <div className="board-side-drawer-board-links">
+        <ul className="board-side-drawer-board-links-ul">
           {
-            workspaces.find((workspace) => {
-              return workspace.id === workspaceId;
-            }).boards.map((board) => {
+            boardWorkspace ? boardWorkspace.boards.map((board, index) => {
               return (
-                <li key={board.id}>
-                  <Link to={`/board/${board.id}`}>{board.title}</Link>
+                <li className="board-side-drawer-board-links-li" 
+                  key={board.id}
+                >
+                  <BoardSideDrawerBoardLink 
+                    board={board} currWorkspaceIndex={currWorkspaceIndex}
+                    boardIndex={index} currBoard={currBoard}
+                  />
+                  
                 </li>
               );
-            })
+            }) : null
           }
         </ul>
+        </div>
       </div> :
       <div className="board-side-drawer-closed">
         <button
-          className="board-side-drawer-open | mgn-05rem" 
+          className="board-side-drawer-open-btn | mgn-05rem bdr-none" 
           type="button"
           onClick={handleDrawerOpenClose} 
         >
-          {`>>`}
+          {`>`}
         </button>
 
       </div>
@@ -158,15 +167,15 @@ const BoardSideDrawer = (props) => {
 
 const mapState = (state) => {
   return {
-    board: state.board.board,
-    user: state.auth,
-    workspaces: state.workspaces
+    currBoard: state.board.board,
+    user: state.auth.user,
+    workspaces: state.workspaces.workspaces
   }
 }
 
 const mapDispatch = (dispatch) => {
   return {
-    createNewBoard: (userId, workspaceId, boardTitle) => dispatch(createNewBoard(userId, workspaceId, boardTitle)),
+    createNewBoard: (userId, boardWorkspaceId, boardTitle) => dispatch(createNewBoard(userId, boardWorkspaceId, boardTitle)),
   }
 }
 

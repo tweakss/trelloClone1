@@ -15,12 +15,11 @@ import BoardSideDrawer from './BoardSideDrawer';
 
 const Board = (props) => {
   const { 
-    board, getBoard, getBoardMembers, createNewBoard,
+    board, getBoard, getBoardMembers,
     user, workspaces, getWorkspaces,
     lists, listsState, getLists,
   } = props;
-  // const boards = workspace.boards; // workspace is an array of workspaces and its boards
-
+  
   const boardId = props.match.params.boardId;
   useEffect(() => {
     // console.log('Board, useEffect, boardId:', boardId);
@@ -80,22 +79,22 @@ const Board = (props) => {
    
   
 
-  const [swapListTargetIdx, setSwapListTargetIdx] = useState({
-    swapToIndex: null,
-    currListIndex: null,
-  });
+  // const [swapListTargetIdx, setSwapListTargetIdx] = useState({
+  //   swapToIndex: null,
+  //   currListIndex: null,
+  // });
 
-  const handleSwapListTargetIdx = (swapToIndex, currListIndex) => {
+  // const handleSwapListTargetIdx = (swapToIndex, currListIndex) => {
     
-    setSwapListTargetIdx({ swapToIndex, currListIndex });
-  }
+  //   setSwapListTargetIdx({ swapToIndex, currListIndex });
+  // }
 
   
 
-  console.log("Board RENDER, lists:", lists);
+  // console.log("Board RENDER, lists:", lists);
 
 
-  if(!board.id ) {
+  if(!board.id) {
     // console.log('!board.id || !boards');
     return (
       <div>
@@ -107,7 +106,7 @@ const Board = (props) => {
   return (
     <div id="grid-board">
       <Navbar user={user} />
-      <BoardSideDrawer workspaceId={board.workspaceId} />
+      <BoardSideDrawer boardWorkspaceId={board.workspaceId} />
       <NavbarContent />
 
       
@@ -127,10 +126,10 @@ const Board = (props) => {
                     <ListTitle 
                       currList={list} currListIndex={listIndex} board={board} 
                       workspaces={workspaces}
-                      swapListTargetPos={
-                        swapListTargetIdx.swapToIndex === listIndex ? swapListTargetIdx.currListIndex + 1 : null 
-                      }
-                      handleSwapListTargetIdx={handleSwapListTargetIdx}
+                      // swapListTargetPos={
+                      //   swapListTargetIdx.swapToIndex === listIndex ? swapListTargetIdx.currListIndex + 1 : null 
+                      // }
+                      // handleSwapListTargetIdx={handleSwapListTargetIdx}
                     />
                     {
                       list.cards.map((card, cardIndex) => {
@@ -168,8 +167,8 @@ const mapState = (state) => {
     board: state.board.board,
     lists: state.lists.lists,
     listsState: state.lists,
-    user: state.auth,
-    workspaces: state.workspaces
+    user: state.auth.user,
+    workspaces: state.workspaces.workspaces
   }
 };
 
@@ -179,7 +178,6 @@ const mapDispatch = (dispatch) => {
     getBoardMembers: (boardId) => dispatch(getBoardMembers(boardId)),
     getLists: (boardId) => dispatch(getLists(boardId)),
     getWorkspaces: (userId) => dispatch(getWorkspaces(userId)),
-    createNewBoard: (userId, workspaceId, boardTitle) => dispatch(createNewBoard(userId, workspaceId, boardTitle)), 
   }
 }
 

@@ -255,26 +255,52 @@ router.delete('/:boardId/deleteList/:listId', async(req, res, next) => {
   }
 });
 
-router.put('/boardId/:boardId/swapListPositions', async(req, res, next) => {
-  const boardId = req.params.boardId;
-  const { swapListsInfo } = req.body;
-  // console.log("swapListsInfo:", swapListsInfo, "\nboardId:", boardId);
+
+// Move a list within same board or to a different board
+router.put('/board/:boardId/moveList', async(req, res, next) => {
+  const boardId = parseInt(req.params.boardId, 10);
+  const { moveListInfo } = req.body;
+  const targetBoardId = parseInt(moveListInfo.targetBoardId, 10);
+  console.log("moveListInfo:", moveListInfo, "\nboardId:", boardId, typeof boardId, "targetBoardId:", targetBoardId, typeof targetBoardId);
   try {
     const currList = await List.findOne({
       where: {
-        id: swapListsInfo.currListId
+        id: moveListInfo.currListId
       },
     });
     // console.log("currList:", currList);
-    await currList.update({ listPosition: swapListsInfo.swapToPosition });
-
-    const swapToList = await List.findOne({
+    
+    const targetList = await List.findOne({
       where: {
-        id: swapListsInfo.swapToListId
+        id: moveListInfo.targetListId
       }
     });
-    // console.log("swapToList:", swapToList);
-    await swapToList.update({ listPosition: swapListsInfo.currListPosition });
+    
+    
+    // console.log("targetList:", targetList);
+    if(boardId === targetBoardId) {
+      const currListUpdated = await currList.update({ listPosition: moveListInfo.targetListPosition });
+      const targetListUpdated = await targetList.update({ listPosition: moveListInfo.currListPosition });      
+      // console.log("currListUpdated:", currListUpdated, "\ntargetListUpdated:", targetListUpdated);
+    } else {
+      const targetBoard = await Board.findOne({
+        where: {
+          id: targetBoardId
+        }
+      });
+
+      for(const [listId, index] of Object.entries(moveListInfo.targetListsToAdjust)) {
+        const list = await List.findOne({
+          where: {
+            id: parseInt(listId, 10)
+          }
+        });
+        await list.update({ listPosition: index + 1 });
+      }
+      
+      await currList.update({ listPosition: moveListInfo.targetListPosition });
+      await targetBoard.addLists([currList]);
+    }
 
     const updatedLists = await List.findAll({
       where: {
@@ -282,10 +308,10 @@ router.put('/boardId/:boardId/swapListPositions', async(req, res, next) => {
       },
       include: Card,
       order: [['listPosition', 'ASC']]
-    })
+    });
     // console.log("updatedLists:", updatedLists);
-    
     res.send(updatedLists);
+    
   } catch (err) {
     next(err)
   }
@@ -356,7 +382,32 @@ router.put('/dropDraggedCard', async(req, res, next) => {
   } catch(err) {
     next(err);
   }
-})
+});
+
+// Update a list's title
+router.put('/list/:listId/updateListTitle', async(req, res, next) => {
+  const listId = req.params.listId;
+  try {
+    const list = await List.findOne({
+      where: {
+        id: listId
+      }
+    });
+
+    await list.update(req.body);
+    const updatedList = await List.findOne({
+      where: {
+        id: listId
+      },
+      include: {
+        model: Card
+      }
+    })
+    res.send(updatedList);
+  } catch(err) {
+    next(err);
+  }
+});
 
 
 module.exports = router;

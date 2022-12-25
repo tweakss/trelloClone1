@@ -14,7 +14,7 @@ const Navbar = (props) => {
   // console.log("Navbar, user:", user);
   
   return (
-    <div className="navbar-main">
+    <div className="navbar">
       <nav>
         {isLoggedIn ? (
           <div>
@@ -43,7 +43,8 @@ const Navbar = (props) => {
  */
 const mapState = state => {
   return {
-    isLoggedIn: !!state.auth.id
+    // isLoggedIn: !!state.auth.id
+    isLoggedIn: !!state.auth.user
   }
 }
 

@@ -1,15 +1,17 @@
 import React, { useState, useEffect, } from 'react';
 import { connect, useDispatch} from 'react-redux';
+import ListTitleMoveList from './ListTitleMoveList';
 import { deleteList } from '../store/lists';
 import { getBoard } from '../store/board';
-import { swapListPositions } from '../store/lists';
+import { updateListTitle } from '../store/lists';
+
 
 
 const ListTitle = (props) => {
   const {
     board, workspaces, user, 
-    currList, currListIndex, listsState, draggedCard,
-    deleteList, getBoard, swapListPositions,
+    currList, currListIndex, listsState, draggedCard, lists,
+    deleteList, getBoard, swapListPositions, updateListTitle,
     swapListTargetPos, handleSwapListTargetIdx,
   } = props;
   const dispatch = useDispatch();
@@ -65,7 +67,7 @@ const ListTitle = (props) => {
           isVisible: false,
         });
       } else if(clickedElem.includes("move-list")) {
-        console.log("handleListTitleDropdown, move-list true");
+        // console.log("handleListTitleDropdown, move-list true");
         setListTitleDropdown({
           ...listTitleDropdown,
           currDropdown: "moveListDropdown",
@@ -78,7 +80,7 @@ const ListTitle = (props) => {
       
     } else {
       // clicked outside of the dropdown then close whichever dropdown is opened
-      console.log("handleListTitleDropdown, clicked outside of dropdown");
+      // console.log("handleListTitleDropdown, clicked outside of dropdown");
       
       setListTitleDropdown({
         ...listTitleDropdown,
@@ -90,46 +92,6 @@ const ListTitle = (props) => {
 
   }
 
-  const [selectListPosition, setSelectListPosition] = useState(`${currListIndex + 1}`);
-  const handleSelectListPosition = (event) => {
-    setSelectListPosition(event.target.value);
-    console.log(`handleSelectListPosition, after setSelectListPosition, for list[${currListIndex}]`);
-  }
-
-  const handleSubmitListPosition = (event) => {
-    event.preventDefault();
-    console.log(`handleSubmitListPosition, list[${currListIndex}] selectListPosition`, selectListPosition);
-    
-    const swapToIndex = parseInt(selectListPosition, 10) - 1;
-    handleSwapListTargetIdx(swapToIndex, currListIndex);
-    swapListPositions(board.id, {
-      currListId: currList.id,
-      currListPosition: currListIndex + 1,
-      swapToPosition: parseInt(selectListPosition, 10),
-      swapToListId: listsState.lists[swapToIndex].id
-    });
-    
-    setListTitleDropdown({
-      currDropdown: false,
-      listActionsDropdown: false,
-      moveListDropdown: false,
-      isVisible: false,
-    });
-
-    
-    
-  }
-
-  useEffect(() => {
-    // console.log("ListTitle useEffect, swapListTargetPos");
-    if(swapListTargetPos) {
-      console.log(`setting `, listsState.lists[currListIndex], "selectListPosition to:", swapListTargetPos);
-      setSelectListPosition(swapListTargetPos);
-      handleSwapListTargetIdx({ swapToIndex: null, currListIndex: null });
-    }
-  }, [swapListTargetPos])
-
-
   const handleMoveListBackBtn = (event) => {
     // Goes back to listActions
     setListTitleDropdown({
@@ -139,6 +101,7 @@ const ListTitle = (props) => {
       currDropdown: "listActionsDropdown",
     });
   }
+  
 
  
   const closeListTitleDropdown = (event) => {
@@ -161,7 +124,7 @@ const ListTitle = (props) => {
     }
 
     
-    console.log("clicked outisde of listTitleDropdown")
+    // console.log("clicked outisde of listTitleDropdown")
     handleListTitleDropdown(event);
   }
 
@@ -192,8 +155,6 @@ const ListTitle = (props) => {
     }
   }, [listTitleDropdown.isVisible]);
 
-  // const [listTitleRows, setListTitleRows] = useState(1);
-  // const [prevScrollHeight, setPrevScrollHeight] = useState(0);
   useEffect(() => {
     const listTitleElem = document.querySelector(`.list-title-input.idx${currListIndex}`);
     // listTitleElem.style.height = "auto";
@@ -238,7 +199,7 @@ const ListTitle = (props) => {
   }
   useEffect(() => {
     if(currList.cards.length === 0) {
-      console.log(`ListTitle useEffect ${currList.title} no cards`);
+      // console.log(`ListTitle useEffect ${currList.title} no cards`);
       const boardList = document.querySelector(`.flex-board-list.idx${currListIndex}`);
       
       boardList.addEventListener("dragenter", boardListDragEnter);
@@ -255,7 +216,35 @@ const ListTitle = (props) => {
     }
   })
 
-  // console.log("ListTitle render");
+  const submitListTitle = (event) => {
+    // console.log("submitListTitle, event.target:", event.target);
+    updateListTitle(currList.id, listTitle, currListIndex);
+
+    if(event.target.classList[0] !== "list-title-input") {
+      setListTitleFocused(false);
+    }
+    
+  }
+
+  const [listTitleFocused, setListTitleFocused] = useState(false);
+  const onClickListTitle = (event) => {
+    event.stopPropagation();
+    // console.log("onClickListTitle, activeElement:", document.activeElement);
+    setListTitleFocused(true);
+  }
+
+  useEffect(() => {
+    if(listTitle.length > 0 && listTitleFocused) {
+      document.addEventListener("click", submitListTitle);
+
+      return function cleanUp() {
+        document.removeEventListener("click", submitListTitle);
+      }
+    }
+  }, [listTitle, listTitleFocused]);
+
+
+  console.log("ListTitle render, listTitle:", listTitle, " listTitleFocused:", listTitleFocused);
 
 
   return (
@@ -269,6 +258,7 @@ const ListTitle = (props) => {
         rows="1" cols="10"
         value={listTitle}
         onChange={handleListTitle}
+        onClick={onClickListTitle}
         data-list-index={`${currListIndex}`}
         data-not-card={"1"}
         
@@ -343,74 +333,13 @@ const ListTitle = (props) => {
 
         {
           listTitleDropdown.moveListDropdown ?
-          <div className="list-title-dropdown">
-            <form onSubmit={handleSubmitListPosition}>
-              <div className="move-list">
-                <div className="move-list-header" id="move-list-header">
-                  <button
-                    type="button"
-                    onClick={handleMoveListBackBtn}
-                  >
-                    &lt;
-                  </button>
-                  <span>Move List</span>
-                  <button
-                    type="button"
-                    onClick={handleListTitleDropdown}
-                    className="move-list-header close-dropdown-btn"
-                  >
-                    &times;
-                  </button>
-                </div>
-
-                <div className="move-list-board">
-                  {/* <span>Board</span> */}
-                  <label htmlFor="select-board">Board</label>
-                  <select id="select-board">
-                    {
-                      workspaces.map((workspace) => {
-                        return (
-                          <optgroup key={workspace.id} label={workspace.title}>
-                            {
-                              workspace.boards.map((board) => {
-                                return (
-                                  <option key={board.id}>{board.title}</option>
-                                )
-                              })
-                            }
-                          </optgroup>
-                        );
-
-                        
-                      })
-                      
-                    }
-                  </select>
-                  <label htmlFor="select-list-position">Position</label>
-                  <select
-                    id="select-list-position"
-                    value={selectListPosition}
-                    onChange={handleSelectListPosition}
-                  >
-                    {
-                      listsState.lists.map((list, index) => {
-                        return (
-                          <option
-                            key={list.id}
-                            value={`${index + 1}`}
-                          >
-                            {currListIndex === index ? `${index + 1} (current)` : `${index + 1}`}
-                          </option>
-                        )
-                      })
-                    }
-                  </select>
-                  <button type="submit">Move</button>
-                </div>
-              </div>
-            </form>
-            
-          </div> : null
+          <ListTitleMoveList
+            currListIndex={currListIndex} currList={currList}
+            workspaces={workspaces} currLists={lists} board={board}
+            handleListTitleDropdown={handleListTitleDropdown}
+            setListTitleDropdown={setListTitleDropdown}
+            handleMoveListBackBtn={handleMoveListBackBtn}
+          /> : null
         }
       </div>
       
@@ -423,9 +352,10 @@ const mapState = (state) => {
   return {
     board: state.board.board,
     listsState: state.lists,
+    lists: state.lists.lists,
     draggedCard: state.lists.draggedCard,
-    workspaces: state.workspaces,
-    user: state.auth,
+    workspaces: state.workspaces.workspaces,
+    user: state.auth.user,
   }
 }
 
@@ -433,7 +363,7 @@ const mapDispatch = (dispatch) => {
   return {
     deleteList: (board, list) => dispatch(deleteList(board, list)),
     getBoard: (boardId, listPositions) => dispatch(getBoard(boardId, listPositions)),
-    swapListPositions: (boardId, swapListsInfo) => dispatch(swapListPositions(boardId, swapListsInfo)),
+    updateListTitle: (listId, newListTitle, currListIndex) => dispatch(updateListTitle(listId, newListTitle, currListIndex)),
   }
 }
 

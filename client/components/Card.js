@@ -418,7 +418,7 @@ const Card = (props) => {
 
       <CardModal 
         card={card} openCard={openCard} setOpenCard={setOpenCard}
-        board={board} list={list} 
+        board={board} list={list} listIndex={listIndex}
       />
 
             

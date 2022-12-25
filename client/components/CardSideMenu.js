@@ -30,7 +30,7 @@ const CardSideMenu = (props) => {
       method: 'get',
       url: `/api/lists/boardId/${boardId}`,
     });
-    console.log("CardSideMenu, getLists:", lists)
+    // console.log("cardSideMenu getLists:", lists)
     return lists;
   }
   useEffect(() => {
@@ -41,26 +41,50 @@ const CardSideMenu = (props) => {
           setSelectedBoardLists(lists);
         }
       )();
-      
-      // getLists(currBoard.id); // get lists for local state
-      
+        
     }
   }, [openSideMenu]);
 
   const [selectBoard, setSelectBoard] = useState(currBoard.title);
   const handleSelectBoard = (event) => {
-    // console.log("handleSelectBoard, event.target:", event.target.selectedOptions[0].dataset.boardId);
+    // console.log("handleSelectBoard, workspaces:", workspaces);
     const boardId = event.target.selectedOptions[0].dataset.boardId;
+
     (
       async() => {
         const lists = await getLists(boardId);
-        setSelectedBoardLists(lists);
-        setSelectedList(lists[0]);
-        setSelectList(lists[0].title);
-        setSelectPosition(lists[0].cards.length + 1);
+
+        if(lists.length > 0) {
+          const selectListDisplayVal = document.querySelector(".card-side-menu-move-card-select-list-display-value");
+          selectListDisplayVal.innerText = lists[0].title;
+          const selectPositionDisplayVal = document.querySelector(".card-side-menu-move-card-select-position-display-value");
+          selectPositionDisplayVal.innerText = lists[0].cards.length + 1;
+
+          setSelectedBoardLists(lists);
+          setSelectedList(lists[0]);
+          setSelectList(lists[0].title);
+          setSelectPosition(lists[0].cards.length + 1);
+        } else {
+          // console.log("selected board has no lists")
+
+          const selectListDisplayVal = document.querySelector(".card-side-menu-move-card-select-list-display-value");
+          selectListDisplayVal.innerText = "No lists";
+          const selectPositionDisplayVal = document.querySelector(".card-side-menu-move-card-select-position-display-value");
+          selectPositionDisplayVal.innerText = "N/A";
+
+          setSelectedBoardLists([]);
+          setSelectedList({});
+          // setSelectList("");
+          // setSelectPosition(lists[0].cards.length + 1);
+        }
+        
       }
     )();
     
+    const selectBoardDisplayVal = document.querySelector(".card-side-menu-move-card-select-board-display-value");
+    selectBoardDisplayVal.innerText = event.target.value;
+    
+
     setSelectBoard(event.target.value);
 
   }
@@ -69,14 +93,29 @@ const CardSideMenu = (props) => {
 
   const [selectList, setSelectList] = useState(currList.title);
   const handleSelectList = (event) => {
-    console.log("handleSelectList, selectedIndex:", event.target.selectedIndex, " selectedBoardLists:", selectedBoardLists[event.target.selectedIndex] )
+    // console.log("handleSelectList, selectedIndex:", event.target.selectedIndex, " selectedBoardLists:", selectedBoardLists[event.target.selectedIndex] )
+    
+    const selectListDisplayVal = document.querySelector(".card-side-menu-move-card-select-list-display-value");
+    selectListDisplayVal.innerText = event.target.value;
+    
+    const selectPositionDisplayVal = document.querySelector(".card-side-menu-move-card-select-position-display-value");
+    if(selectedBoardLists[event.target.selectedIndex].id !== currList.id) {
+      selectPositionDisplayVal.innerText = selectedBoardLists[event.target.selectedIndex].cards.length + 1;
+      setSelectPosition(selectedBoardLists[event.target.selectedIndex].cards.length + 1);
+    } else {
+      selectPositionDisplayVal.innerText = `${cardIndex + 1}`
+      setSelectPosition(`${cardIndex + 1}`);
+    }
+    
     setSelectedList(selectedBoardLists[event.target.selectedIndex]);
-    setSelectPosition(selectedBoardLists[event.target.selectedIndex].cards.length + 1);
     setSelectList(event.target.value);
   }
 
   const [selectPosition, setSelectPosition] = useState(`${cardIndex + 1}`);
   const handleSelectPosition = (event) => {
+    const displayVal = document.querySelector(".card-side-menu-move-card-select-position-display-value");
+    displayVal.innerText = event.target.value;
+    
     setSelectPosition(event.target.value);
   }
 
@@ -102,14 +141,14 @@ const CardSideMenu = (props) => {
         origListId, targetListId, targetPosition,
         targetCardsToMove, origCardsToMove
       });
-      console.log("submitMoveCard origList !== targetList, response:", response);
+      // console.log("submitMoveCard origList !== targetList, response:", response);
     } else {
       const targetCardId = currList.cards[targetPosition - 1].id;
       // console.log("targetCardId:", targetCardId);
       const response = await axios.put(`/api/lists/moveCardInCurrList/card/${currCard.id}`, {
         targetCardId, targetPosition
       });
-      console.log("submitMoveCard origList === targetList, response:", response);
+      // console.log("submitMoveCard origList === targetList, response:", response);
     }
     
     
@@ -124,6 +163,7 @@ const CardSideMenu = (props) => {
     setMoveCardMenu(false);
     
   }
+
 
 
   // console.log("CardSideMenu RENDER, selectList:", selectList, " currList:", currList, " selectPosition:", selectPosition, selectList === currList.title)
@@ -200,13 +240,17 @@ const CardSideMenu = (props) => {
                 </div>
                 <h5 className="card-side-menu-move-card-select-h5">Select destination</h5>
                 <form onSubmit={submitMoveCard}>
-                  <label 
-                    htmlFor="card-side-menu-select-board"
-                    className="card-side-menu-select-board-label | fnt-sz-14px label-clr "
+                  <span
+                    className="card-side-menu-move-card-select-board-label | fnt-sz-14px label-clr "
                   >
                     Board
-                  </label>
-                  <div>
+                  </span>
+                  <div className="card-side-menu-move-card-select-board-container">
+                    <span
+                      className="card-side-menu-move-card-select-board-display-value"
+                    >
+                      {currBoard.title}
+                    </span>
                     <select
                       id="card-side-menu-select-board" 
                       className="card-side-menu-move-card-select-board"
@@ -238,81 +282,110 @@ const CardSideMenu = (props) => {
                       }
                     </select>
                   </div>
-                  <label 
-                    htmlFor="card-side-menu-select-list"
-                    className="card-side-menu-select-list-label | fnt-sz-14px label-clr"
-                  >
-                    List
-                  </label>
-                  <div>
-                    <select
-                      id="card-side-menu-select-list"
-                      className="card-side-menu-move-card-select-list"
-                      value={selectList}
-                      onChange={handleSelectList}
-                    >
-                      {
-                        selectedBoardLists.map((list, index) => {
-                          return (
-                            <option
-                              key={list.id}
-                              value={list.title}
-                            >
-                              {currList.id === list.id ? `${list.title} (current)` : `${list.title}`}
-                            </option>
-                          )
-                        })
-                      }
-                    </select>
-                  </div>
 
-                  <label
-                    htmlFor="card-side-menu-select-position"
-                    className="card-side-menu-select-position-label | fnt-sz-14px label-clr"
-                  >
-                    Position
-                  </label>
-                  <div>
-                    <select
-                      id="card-side-menu-select-position"
-                      className="card-side-menu-move-card-select-position"
-                      value={selectPosition}
-                      onChange={handleSelectPosition}
-                    >
-                      {
-                        selectedList.cards.map((card, index) => {
-                          return (
-                            <option
-                              key={card.id}
-                              value={`${index + 1}`}
-                            >
-                              {cardIndex === index ? `${index + 1} (current)` : `${index + 1}`}
-                            </option>
-                          );
-                
-                        })
-                          
-                        
-                      }
-
-                      {
-                        currList.cards.length > 1 ?
-                        <option 
-                        key={"lastPos"} 
-                        value={`${selectedList.cards.length + 1}`}
+                  <div className="card-side-menu-move-card-select-list-pos-wrapper">
+                    <div className="card-side-menu-move-card-select-list-wrapper">
+                      <span
+                        className="card-side-menu-move-card-select-list-label | fnt-sz-14px label-clr"
                       >
-                        {`${selectedList.cards.length + 1}`}
-                      </option> : null
-                      }
-                      
-                    </select>
+                        List
+                      </span>
+                      <div className="card-side-menu-move-card-select-list-container">
+                        <span
+                          className="card-side-menu-move-card-select-list-display-value"
+                        >
+                          {currList.title}
+                        </span>
+                        {
+                          selectedBoardLists.length > 0 ?
+                          <select
+                            id="card-side-menu-select-list"
+                            className="card-side-menu-move-card-select-list"
+                            value={selectList}
+                            onChange={handleSelectList}
+                          >
+                            {
+                              
+                              selectedBoardLists.map((list, index) => {
+                                return (
+                                  <option
+                                    key={list.id}
+                                    value={list.title}
+                                  >
+                                    {currList.id === list.id ? `${list.title} (current)` : `${list.title}`}
+                                  </option>
+                                )
+                              })
+                            }
+                          </select> : null
+                        }
+                      </div>
+                    </div>
+
+                    <div className="card-side-menu-move-card-select-position-wrapper">
+                      <span
+                        className="card-side-menu-move-card-select-position-label | fnt-sz-14px label-clr"
+                      >
+                        Position
+                      </span>
+                      <div className="card-side-menu-move-card-select-position-container">
+                        <span
+                          className="card-side-menu-move-card-select-position-display-value"
+                        >
+                          {cardIndex + 1}
+                        </span>
+                        {
+                          Object.keys(selectedList).length > 0 ?
+                          <select
+                            id="card-side-menu-select-position"
+                            className="card-side-menu-move-card-select-position"
+                            value={selectPosition}
+                            onChange={handleSelectPosition}
+                          >
+                            {
+                            
+                              selectedList.cards.map((card, index) => {
+                                return (
+                                  <option
+                                    key={card.id}
+                                    value={`${index + 1}`}
+                                  >
+                                    {cardIndex === index ? `${index + 1} (current)` : `${index + 1}`}
+                                  </option>
+                                );
+                              })
+                            }
+
+                            {
+                              ( (currList.cards.length > 1) && (selectedList.id !== currList.id) ) ?
+                              <option 
+                                key={"lastPos"} 
+                                value={`${selectedList.cards.length + 1}`}
+                              >
+                                {`${selectedList.cards.length + 1}`}
+                              </option> : null
+                            }
+                            
+                          </select> : null
+                        }
+                      </div>
+                    </div>
                   </div>
-                  <button
-                    type="submit"
-                    className="card-side-menu-move-card-submit-btn | bdr-none br-025rem pdg-4x8px fnt-sz-14px"
-                  >
-                    Move
-                  </button>
+                  {
+                    selectedBoardLists.length > 0 ?
+                    <button
+                      type="submit"
+                      className="card-side-menu-move-card-submit-btn | bdr-none br-025rem pdg-4x8px fnt-sz-14px"
+                    >
+                      Move 
+                    </button> :
+                    <button
+                      disabled
+                      className="card-side-menu-move-card-submit-btn | bdr-none br-025rem pdg-4x8px fnt-sz-14px"
+                    >
+                      Move 
+                    </button>
+                  }
                 </form>
               </div> : null
             }
@@ -331,7 +404,7 @@ const CardSideMenu = (props) => {
 
 const mapState = (state) => {
   return {
-    workspaces: state.workspaces,
+    workspaces: state.workspaces.workspaces,
   }
 }
 

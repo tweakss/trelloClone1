@@ -1,4 +1,5 @@
 import React from 'react';
+import axios from 'axios';
 
 // Used in: CardUserComment.js
 export const parseComment = (strToParse) => {
@@ -73,4 +74,14 @@ export const parseComment = (strToParse) => {
   // console.log("parsedStrs:", parsedStrs);
 
   return parsedStrs;
+}
+
+// Get lists of a board, doesn't change redux state
+export const getLists = async(boardId) => {
+  const { data: lists } = await axios({
+    method: 'get',
+    url: `/api/lists/boardId/${boardId}`,
+  });
+  // console.log("cardSideMenu getLists:", lists)
+  return lists;
 }

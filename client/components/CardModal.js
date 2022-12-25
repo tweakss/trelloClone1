@@ -1,14 +1,14 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import {connect} from 'react-redux';
 import axios from 'axios';
-import { updateCardDescription } from '../store/lists';
+import { updateCardDescription, updateCardTitle } from '../store/lists';
 import { CardUserComment } from './CardUserComment';
 
 const CardModal = (props) => {
   const {
     card, openCard, setOpenCard, 
-    board, user, list,
-    updateCardDescription, createCardComment, 
+    board, user, list, listIndex,
+    updateCardDescription, updateCardTitle, 
   } = props;
 
   const [getComments, setGetComments] = useState([]);
@@ -49,6 +49,8 @@ const CardModal = (props) => {
   }
 
   const closeCardModal = (event) => {
+    updateCardTitle(card.id, cardTitle, listIndex);
+
     setOpenCard(false);
     setCardDescription(card.description);
     setCardTitle(card.title);
@@ -459,7 +461,7 @@ const CardModal = (props) => {
 
 const mapState = (state) => {
   return {
-    user: state.auth,
+    user: state.auth.user,
     // lists: state.lists.lists,
   }
 }
@@ -467,7 +469,7 @@ const mapState = (state) => {
 const mapDispatch = (dispatch) => {
   return {
     updateCardDescription: (card, cardDescription, board, txtareaHeight) => dispatch(updateCardDescription(card, cardDescription, board, txtareaHeight)),
-    
+    updateCardTitle: (cardId, cardTitle, listIndex) => dispatch(updateCardTitle(cardId, cardTitle, listIndex)),
   }
 }
 

@@ -72,15 +72,21 @@ const AddACard = (props) => {
         data-list-index={`${listIndex}`}
         data-not-card={"1"}
       >
-        <button
-          className="add-card-btn | mgn-l-05rem usr-slct"
-          type="button"
+        <div 
+          className="add-card-btn-container | mgn-l-05rem bdr-none br-025rem"
           onClick={handleAddCard}
-          data-list-index={`${listIndex}`}
-          data-not-card={"1"}
         >
-          Add a card
-        </button>
+          <span className="add-card-btn-plus-icon">+</span>
+          <button
+            className="add-card-btn | bdr-none bg-clr-transparent usr-slct"
+            type="button"
+            
+            data-list-index={`${listIndex}`}
+            data-not-card={"1"}
+          >
+            Add a card
+          </button>
+        </div>
       </div>
     )
   }
@@ -97,13 +103,16 @@ const AddACard = (props) => {
       >
       </textarea>
       <div>
-        <button
-          type="button"
-          className="add-card-btn mgn-l-05rem"
-          onClick={handleAddCard}
-        >
-          Add a card
-        </button>
+        <div className="add-card-btn-after-container | mgn-l-05rem bdr-none br-025rem">
+          <button
+            type="button"
+            className="add-card-btn-after | bdr-none br-025rem pdg-4x8px usr-slct"
+            onClick={handleAddCard}
+          >
+            Add a card
+          </button>
+        </div>
+        
       </div>
       
     </div>
