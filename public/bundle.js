@@ -2160,7 +2160,8 @@ const mapState = state => {
   return {
     // Being 'logged in' for our purposes will be defined has having a state.auth that has a truthy id.
     // Otherwise, state.auth will be an empty object, and state.auth.id will be falsey
-    isLoggedIn: !!state.auth.id
+    // isLoggedIn: !!state.auth.user.id
+    isLoggedIn: !!state.auth.user
   };
 };
 const mapDispatch = dispatch => {
@@ -2253,13 +2254,17 @@ const AddACard = props => {
       id: `list${listIndex}`,
       "data-list-index": `${listIndex}`,
       "data-not-card": "1"
-    }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("button", {
-      className: "add-card-btn | mgn-l-05rem usr-slct",
+    }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("div", {
+      className: "add-card-btn-container | mgn-l-05rem bdr-none br-025rem",
+      onClick: handleAddCard
+    }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("span", {
+      className: "add-card-btn-plus-icon"
+    }, "+"), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("button", {
+      className: "add-card-btn | bdr-none bg-clr-transparent usr-slct",
       type: "button",
-      onClick: handleAddCard,
       "data-list-index": `${listIndex}`,
       "data-not-card": "1"
-    }, "Add a card"));
+    }, "Add a card")));
   }
   return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("div", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("textarea", {
     className: "add-card-txt-area | mgn-l-05rem",
@@ -2267,11 +2272,13 @@ const AddACard = props => {
     onChange: handleCardTitle,
     placeholder: "Enter a title for this card...",
     onKeyDown: autoGrowTxtArea
-  }), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("div", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("button", {
+  }), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("div", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("div", {
+    className: "add-card-btn-after-container | mgn-l-05rem bdr-none br-025rem"
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("button", {
     type: "button",
-    className: "add-card-btn mgn-l-05rem",
+    className: "add-card-btn-after | bdr-none br-025rem pdg-4x8px usr-slct",
     onClick: handleAddCard
-  }, "Add a card")));
+  }, "Add a card"))));
 };
 const mapDispatch = dispatch => {
   return {
@@ -2356,11 +2363,15 @@ const AddAList = props => {
     onClick: handleNewList
   }, "x"))) : /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("div", {
     className: "add-list-wrapper mgn-l-05rem"
-  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("button", {
-    className: "add-list btn | usr-slct",
-    type: "button",
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("div", {
+    className: "add-list-btn-container | bdr-none br-025rem",
     onClick: handleNewList
-  }, "Add another list")));
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("span", {
+    className: "add-list-btn-plus-icon"
+  }, "+"), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("button", {
+    className: "add-list-btn | bdr-none bg-clr-transparent usr-slct",
+    type: "button"
+  }, "Add another list"))));
 };
 const mapState = state => {
   return {
@@ -2391,7 +2402,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "./node_modules/react/index.js");
 /* harmony import */ var react_redux__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! react-redux */ "./node_modules/react-redux/es/index.js");
 /* harmony import */ var _store__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../store */ "./client/store/index.js");
-/* harmony import */ var _Navbar__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./Navbar */ "./client/components/Navbar.js");
+/* harmony import */ var react_router_dom__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! react-router-dom */ "./node_modules/react-router-dom/esm/react-router-dom.js");
 
 
 
@@ -2404,46 +2415,136 @@ const AuthForm = props => {
   const {
     name,
     displayName,
-    handleSubmit,
-    error
+    handleAuthenticate,
+    error,
+    validateUsername,
+    userExists
   } = props;
-  return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("div", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_Navbar__WEBPACK_IMPORTED_MODULE_3__["default"], null), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("div", {
+  const dispatch = (0,react_redux__WEBPACK_IMPORTED_MODULE_1__.useDispatch)();
+  const [showPwInput, setShowPwInput] = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(false);
+  const [showUsernameInput, setShowUsernameInput] = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(true);
+  const [usernameInput, setUsernameInput] = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)("");
+  const handleUsernameInput = event => {
+    setUsernameInput(event.target.value);
+  };
+  const handleValidateUsername = async () => {
+    if (usernameInput.length === 0) {
+      return;
+    }
+    const response = await validateUsername(usernameInput);
+    // console.log("handleValidateUsername, response:", response);
+    if (response) {
+      setShowPwInput(true);
+      setShowUsernameInput(false);
+    }
+  };
+  const [pwInput, setPwInput] = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)("");
+  const handlePwInput = event => {
+    setPwInput(event.target.value);
+  };
+  const [emailInput, setEmailInput] = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)("");
+  const handleEmailInput = event => {
+    setEmailInput(event.target.value);
+  };
+  const handleSubmit = event => {
+    event.preventDefault();
+    const formName = event.target.name;
+    handleAuthenticate(usernameInput, pwInput, emailInput, formName);
+  };
+  const handleToSignup = () => {
+    dispatch({
+      type: "CLEAR_AUTH_STATE"
+    });
+  };
+  const handleToLogin = () => {
+    setShowPwInput(false);
+    setShowUsernameInput(true);
+    dispatch({
+      type: "CLEAR_AUTH_STATE"
+    });
+  };
+  console.log("AuthForm RENDER, auth.error:", error);
+  return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("div", {
+    id: "login-signup-page"
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("div", {
+    className: "auth-form-wrapper"
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("div", {
+    className: "auth-form-main-title"
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("h1", {
+    className: "auth-form-main-title-txt"
+  }, "TrelloClone1")), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("div", {
+    className: "auth-form-container"
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("div", {
     className: "auth-form"
-  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("h2", null, "AuthForm"), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("form", {
+  }, displayName === "Login" && userExists ? /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("h4", {
+    className: "auth-form-login-title-after-txt"
+  }, "Login to continue to:", /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("div", {
+    className: "login-title-after-txt-container"
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("b", null, "Trello"))) : name === "signup" ? /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("h4", {
+    className: "auth-form-signup-title-txt"
+  }, "Sign up for your account") : /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("h4", {
+    className: "auth-form-login-title-txt"
+  }, "Login to Trello"), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("form", {
+    className: "auth-form-form",
     onSubmit: handleSubmit,
     name: name
-  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("div", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("label", {
-    htmlFor: "username"
-  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("small", null, "Username")), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("input", {
+  }, showUsernameInput ? /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("div", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("input", {
+    className: "auth-form-input-username",
     name: "username",
-    type: "text"
-  })), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("div", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("label", {
-    htmlFor: "password"
-  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("small", null, "Password")), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("input", {
+    type: "text",
+    value: usernameInput,
+    onChange: handleUsernameInput,
+    placeholder: "Enter username"
+  })) : /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("div", {
+    className: "auth-form-input-username-after-container"
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("span", {
+    className: "auth-form-input-username-after"
+  }, usernameInput)), !showPwInput && name === "login" ? /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("div", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("button", {
+    type: "button",
+    className: "auth-form-continue-btn | bdr-none br-025rem",
+    onClick: handleValidateUsername
+  }, "Continue")) : null, showPwInput || name === "signup" ? /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("div", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("input", {
+    className: "auth-form-input-pw",
     name: "password",
-    type: "password"
-  })), name === 'signup' ? /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("div", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("label", {
-    htmlFor: "email"
-  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("small", null, "Email")), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("input", {
+    type: "password",
+    value: pwInput,
+    onChange: handlePwInput,
+    placeholder: "Enter password"
+  })) : null, name === 'signup' ? /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("div", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("input", {
+    className: "auth-form-input-email",
     name: "email",
-    type: "email"
-  })) : null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("div", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("button", {
+    type: "email",
+    value: emailInput,
+    onChange: handleEmailInput,
+    placeholder: "Enter email address"
+  })) : null, displayName === "Login" && userExists ? /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("div", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("button", {
+    className: "auth-form-submit-login-btn | bdr-none br-025rem",
     type: "submit"
-  }, displayName)), error && error.response && /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("div", null, " ", error.response.data, " "))));
+  }, displayName)) : displayName === "Sign Up" ? /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("div", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("button", {
+    className: "auth-form-submit-signup-btn | bdr-none br-025rem",
+    type: "submit"
+  }, displayName)) : null, error && error.response && /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("div", null, " ", error.response.data, " ")), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("hr", {
+    className: "auth-form-separator"
+  }), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("div", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(react_router_dom__WEBPACK_IMPORTED_MODULE_3__.Link, {
+    className: "auth-form-to-login | text-decoration-none",
+    to: "/login",
+    onClick: handleToLogin
+  }, "Login"), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("div", {
+    className: "auth-form-separate-login-signup-container"
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("span", {
+    className: "auth-form-separate-login-signup"
+  })), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(react_router_dom__WEBPACK_IMPORTED_MODULE_3__.Link, {
+    className: "auth-form-to-signup | text-decoration-none",
+    to: "/signup",
+    onClick: handleToSignup
+  }, "Sign Up"))))));
 };
-
-/**
- * CONTAINER
- *   Note that we have two different sets of 'mapStateToProps' functions -
- *   one for Login, and one for Signup. However, they share the same 'mapDispatchToProps'
- *   function, and share the same Component. This is a good example of how we
- *   can stay DRY with interfaces that are very similar to each other!
- */
 const mapLogin = state => {
   return {
     name: 'login',
     displayName: 'Login',
-    error: state.auth.error
+    error: state.auth.error,
+    userExists: state.auth.userExists
   };
 };
 const mapSignup = state => {
@@ -2455,17 +2556,21 @@ const mapSignup = state => {
 };
 const mapDispatch = dispatch => {
   return {
-    handleSubmit(evt) {
-      evt.preventDefault();
-      const formName = evt.target.name;
-      const username = evt.target.username.value;
-      const password = evt.target.password.value;
-      let email = '';
-      if (evt.target.email) {
-        email = evt.target.email.value;
-      }
-      dispatch((0,_store__WEBPACK_IMPORTED_MODULE_2__.authenticate)(username, password, email, formName));
-    }
+    // handleSubmit(evt) {
+    //   evt.preventDefault()
+    //   const formName = evt.target.name
+    //   const username = evt.target.username.value
+    //   const password = evt.target.password.value
+
+    //   let email = '';
+    //   if(evt.target.email) {
+    //     email = evt.target.email.value;
+    //   }
+
+    //   dispatch(authenticate(username, password, email, formName))
+    // },
+    handleAuthenticate: (username, password, email, formName) => dispatch((0,_store__WEBPACK_IMPORTED_MODULE_2__.authenticate)(username, password, email, formName)),
+    validateUsername: username => dispatch((0,_store__WEBPACK_IMPORTED_MODULE_2__.validateUsername)(username))
   };
 };
 const Login = (0,react_redux__WEBPACK_IMPORTED_MODULE_1__.connect)(mapLogin, mapDispatch)(AuthForm);
@@ -2514,7 +2619,6 @@ const Board = props => {
     board,
     getBoard,
     getBoardMembers,
-    createNewBoard,
     user,
     workspaces,
     getWorkspaces,
@@ -2522,8 +2626,6 @@ const Board = props => {
     listsState,
     getLists
   } = props;
-  // const boards = workspace.boards; // workspace is an array of workspaces and its boards
-
   const boardId = props.match.params.boardId;
   (0,react__WEBPACK_IMPORTED_MODULE_0__.useEffect)(() => {
     // console.log('Board, useEffect, boardId:', boardId);
@@ -2573,17 +2675,19 @@ const Board = props => {
       gridBoardLists.addEventListener("mousedown", mouseDownStartScroll);
     }
   }, [board]);
-  const [swapListTargetIdx, setSwapListTargetIdx] = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)({
-    swapToIndex: null,
-    currListIndex: null
-  });
-  const handleSwapListTargetIdx = (swapToIndex, currListIndex) => {
-    setSwapListTargetIdx({
-      swapToIndex,
-      currListIndex
-    });
-  };
-  console.log("Board RENDER, lists:", lists);
+
+  // const [swapListTargetIdx, setSwapListTargetIdx] = useState({
+  //   swapToIndex: null,
+  //   currListIndex: null,
+  // });
+
+  // const handleSwapListTargetIdx = (swapToIndex, currListIndex) => {
+
+  //   setSwapListTargetIdx({ swapToIndex, currListIndex });
+  // }
+
+  // console.log("Board RENDER, lists:", lists);
+
   if (!board.id) {
     // console.log('!board.id || !boards');
     return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("div", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("h4", null, "Loading boards..."));
@@ -2593,7 +2697,7 @@ const Board = props => {
   }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_Navbar__WEBPACK_IMPORTED_MODULE_9__["default"], {
     user: user
   }), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_BoardSideDrawer__WEBPACK_IMPORTED_MODULE_11__["default"], {
-    workspaceId: board.workspaceId
+    boardWorkspaceId: board.workspaceId
   }), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_NavbarContent__WEBPACK_IMPORTED_MODULE_10__["default"], null), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("div", {
     id: "grid-board-lists"
   }, lists.map((list, listIndex) => {
@@ -2610,9 +2714,11 @@ const Board = props => {
       currList: list,
       currListIndex: listIndex,
       board: board,
-      workspaces: workspaces,
-      swapListTargetPos: swapListTargetIdx.swapToIndex === listIndex ? swapListTargetIdx.currListIndex + 1 : null,
-      handleSwapListTargetIdx: handleSwapListTargetIdx
+      workspaces: workspaces
+      // swapListTargetPos={
+      //   swapListTargetIdx.swapToIndex === listIndex ? swapListTargetIdx.currListIndex + 1 : null 
+      // }
+      // handleSwapListTargetIdx={handleSwapListTargetIdx}
     }), list.cards.map((card, cardIndex) => {
       // console.log("Board, list.cards.map, card:", card);
       return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_Card__WEBPACK_IMPORTED_MODULE_5__["default"], {
@@ -2638,8 +2744,8 @@ const mapState = state => {
     board: state.board.board,
     lists: state.lists.lists,
     listsState: state.lists,
-    user: state.auth,
-    workspaces: state.workspaces
+    user: state.auth.user,
+    workspaces: state.workspaces.workspaces
   };
 };
 const mapDispatch = dispatch => {
@@ -2647,8 +2753,7 @@ const mapDispatch = dispatch => {
     getBoard: boardId => dispatch((0,_store_board__WEBPACK_IMPORTED_MODULE_2__.getBoard)(boardId)),
     getBoardMembers: boardId => dispatch((0,_store_board__WEBPACK_IMPORTED_MODULE_2__.getBoardMembers)(boardId)),
     getLists: boardId => dispatch((0,_store_lists__WEBPACK_IMPORTED_MODULE_3__.getLists)(boardId)),
-    getWorkspaces: userId => dispatch((0,_store_workspace__WEBPACK_IMPORTED_MODULE_4__.getWorkspaces)(userId)),
-    createNewBoard: (userId, workspaceId, boardTitle) => dispatch(createNewBoard(userId, workspaceId, boardTitle))
+    getWorkspaces: userId => dispatch((0,_store_workspace__WEBPACK_IMPORTED_MODULE_4__.getWorkspaces)(userId))
   };
 };
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ((0,react_redux__WEBPACK_IMPORTED_MODULE_1__.connect)(mapState, mapDispatch)(Board));
@@ -2668,8 +2773,9 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ });
 /* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "./node_modules/react/index.js");
 /* harmony import */ var react_redux__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! react-redux */ "./node_modules/react-redux/es/index.js");
-/* harmony import */ var react_router_dom__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! react-router-dom */ "./node_modules/react-router-dom/esm/react-router-dom.js");
 /* harmony import */ var _store_workspace__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../store/workspace */ "./client/store/workspace.js");
+/* harmony import */ var _BoardSideDrawerBoardLink__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./BoardSideDrawerBoardLink */ "./client/components/BoardSideDrawerBoardLink.js");
+
 
 
 
@@ -2677,8 +2783,9 @@ __webpack_require__.r(__webpack_exports__);
 const BoardSideDrawer = props => {
   const {
     user,
+    currBoard,
     workspaces,
-    workspaceId,
+    boardWorkspaceId,
     createNewBoard
   } = props;
   const localStorage = window.localStorage;
@@ -2692,9 +2799,9 @@ const BoardSideDrawer = props => {
       sideDrawer.style.width = '240px';
       // openCloseDrawerBtn.style.left = '100%' // originally at 80%
     } else {
-      sideDrawer.style.width = '60px';
+      sideDrawer.style.width = '30px';
       // openCloseDrawerBtn.style.left = 'calc(30% - 8px)';
-      gridBoard.style.gridTemplateColumns = '60px';
+      gridBoard.style.gridTemplateColumns = '30px';
     }
   });
   const handleDrawerOpenClose = () => {
@@ -2715,12 +2822,14 @@ const BoardSideDrawer = props => {
   const handleNewBoardTitle = event => {
     setNewBoardTitle(event.target.value);
   };
+  const currWorkspaceIndex = workspaces.findIndex(workspace => workspace.id === boardWorkspaceId);
+  const boardWorkspace = workspaces[currWorkspaceIndex];
   const handleCreateNewBoard = () => {
     handleNewBoardModal();
-    createNewBoard(user.id, workspaces.id, newBoardTitle);
+    createNewBoard(user.id, boardWorkspace.id, newBoardTitle);
   };
 
-  // console.log('BoardSideDrawer, workspaces:', workspaces, " workspaceId:", workspaceId, );
+  // console.log('BoardSideDrawer, workspaces:', workspaces, " boardWorkspaceId:", boardWorkspaceId, " boardWorkspace:", boardWorkspace);
 
   return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("div", {
     className: "board-side-drawer"
@@ -2728,33 +2837,38 @@ const BoardSideDrawer = props => {
     className: "board-side-drawer-header"
   }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("span", {
     className: "board-side-drawer-wkspce-title | mgn-05rem"
-  }, workspaces.find(workspace => workspace.id === workspaceId).title), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("button", {
-    className: "board-side-drawer-close-btn | mgn-05rem",
-    type: "button",
+  }, boardWorkspace ? boardWorkspace.title : "Loading..."), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("button", {
+    className: "board-side-drawer-close-btn | mgn-05rem br-025rem bdr-none bg-clr-transparent",
     onClick: handleDrawerOpenClose
-  }, `<<`)), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("div", {
+  })), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("div", {
     className: "board-side-drawer-list-boards"
   }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("span", {
     className: "board-side-drawer-list-boards-title | mgn-05rem"
   }, "Your boards"), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("button", {
-    className: "board-side-drawer-new-board-btn | mgn-05rem",
+    className: "board-side-drawer-new-board-btn | mgn-05rem br-025rem bdr-none bg-clr-transparent",
     type: "button",
     onClick: handleNewBoardModal
-  }, "+")), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("ul", null, workspaces.find(workspace => {
-    return workspace.id === workspaceId;
-  }).boards.map(board => {
+  }, "+")), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("div", {
+    className: "board-side-drawer-board-links"
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("ul", {
+    className: "board-side-drawer-board-links-ul"
+  }, boardWorkspace ? boardWorkspace.boards.map((board, index) => {
     return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("li", {
+      className: "board-side-drawer-board-links-li",
       key: board.id
-    }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(react_router_dom__WEBPACK_IMPORTED_MODULE_3__.Link, {
-      to: `/board/${board.id}`
-    }, board.title));
-  }))) : /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("div", {
+    }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_BoardSideDrawerBoardLink__WEBPACK_IMPORTED_MODULE_3__["default"], {
+      board: board,
+      currWorkspaceIndex: currWorkspaceIndex,
+      boardIndex: index,
+      currBoard: currBoard
+    }));
+  }) : null))) : /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("div", {
     className: "board-side-drawer-closed"
   }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("button", {
-    className: "board-side-drawer-open | mgn-05rem",
+    className: "board-side-drawer-open-btn | mgn-05rem bdr-none",
     type: "button",
     onClick: handleDrawerOpenClose
-  }, `>>`)), newBoardModal ? /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("div", {
+  }, `>`)), newBoardModal ? /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("div", {
     id: "new-board-modal"
   }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("dialog", {
     id: "new-board-modal-content",
@@ -2781,17 +2895,174 @@ const BoardSideDrawer = props => {
 };
 const mapState = state => {
   return {
-    board: state.board.board,
-    user: state.auth,
-    workspaces: state.workspaces
+    currBoard: state.board.board,
+    user: state.auth.user,
+    workspaces: state.workspaces.workspaces
   };
 };
 const mapDispatch = dispatch => {
   return {
-    createNewBoard: (userId, workspaceId, boardTitle) => dispatch((0,_store_workspace__WEBPACK_IMPORTED_MODULE_2__.createNewBoard)(userId, workspaceId, boardTitle))
+    createNewBoard: (userId, boardWorkspaceId, boardTitle) => dispatch((0,_store_workspace__WEBPACK_IMPORTED_MODULE_2__.createNewBoard)(userId, boardWorkspaceId, boardTitle))
   };
 };
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ((0,react_redux__WEBPACK_IMPORTED_MODULE_1__.connect)(mapState, mapDispatch)(BoardSideDrawer));
+
+/***/ }),
+
+/***/ "./client/components/BoardSideDrawerBoardLink.js":
+/*!*******************************************************!*\
+  !*** ./client/components/BoardSideDrawerBoardLink.js ***!
+  \*******************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "./node_modules/react/index.js");
+/* harmony import */ var react_redux__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! react-redux */ "./node_modules/react-redux/es/index.js");
+/* harmony import */ var react_router_dom__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! react-router-dom */ "./node_modules/react-router-dom/esm/react-router-dom.js");
+/* harmony import */ var _store_workspace__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../store/workspace */ "./client/store/workspace.js");
+
+
+
+
+const BoardSideDrawerBoardLink = props => {
+  const {
+    board,
+    boardIndex,
+    currWorkspaceIndex,
+    currBoard,
+    deleteABoard
+  } = props;
+  const [deleteBoardMenu, setDeleteBoardMenu] = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(false);
+  const handleDeleteBoardMenu = () => {
+    // Close every other menu that is opened
+    if (deleteConfirm) {
+      setDeleteConfirm(false);
+    }
+    setDeleteBoardMenu(prev => !prev);
+  };
+  const closeDeleteBoardMenu = () => {
+    const actionsBtn = document.querySelector(`.board-side-drawer-board-link-actions-btn.idx${boardIndex}`);
+    actionsBtn.style.visibility = "hidden";
+    setDeleteBoardMenu(false);
+  };
+  const handleClickedOutsideOfDeleteBoardMenu = event => {
+    // console.log("clickedOutsideOfDeleteBoardMenu, event.target:", event.target)
+    const clickedElem = event.target;
+    if (!clickedElem.className.includes("board-side-drawer-board-link-delete-board-menu")) {
+      const actionsBtn = document.querySelector(`.board-side-drawer-board-link-actions-btn.idx${boardIndex}`);
+      actionsBtn.style.visibility = "hidden";
+      setDeleteBoardMenu(false);
+    }
+  };
+  (0,react__WEBPACK_IMPORTED_MODULE_0__.useEffect)(() => {
+    // Close current deleteBoardMenu and open the other deleteBoardMenu
+    if (deleteBoardMenu) {
+      document.addEventListener("click", handleClickedOutsideOfDeleteBoardMenu);
+      return function cleanUp() {
+        document.removeEventListener("click", handleClickedOutsideOfDeleteBoardMenu);
+      };
+    }
+  }, [deleteBoardMenu]);
+  const [deleteConfirm, setDeleteConfirm] = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(false);
+  const closeDeleteConfirm = () => {
+    const actionsBtn = document.querySelector(`.board-side-drawer-board-link-actions-btn.idx${boardIndex}`);
+    actionsBtn.style.visibility = "hidden";
+    setDeleteConfirm(false);
+    setDeleteBoardMenu(false);
+  };
+  const backDeleteConfirm = () => {
+    setDeleteConfirm(false);
+  };
+  const handleDeleteABoard = () => {
+    deleteABoard(currWorkspaceIndex, board.id);
+    if (board.id === currBoard.id) {
+      window.location.assign(`/workspace`);
+    }
+    handleDeleteBoardMenu();
+  };
+  const mouseOverBoardLink = () => {
+    // console.log("mouseOverBoardLink, event.target:", event.target);
+    const actionsBtn = document.querySelector(`.board-side-drawer-board-link-actions-btn.idx${boardIndex}`);
+    actionsBtn.style.visibility = "visible";
+    const boardLinkContainer = document.querySelector(`.board-side-drawer-board-link-container.idx${boardIndex}`);
+    boardLinkContainer.style.backgroundColor = "#E5F0EB";
+  };
+  const mouseOutBoardLink = () => {
+    const actionsBtn = document.querySelector(`.board-side-drawer-board-link-actions-btn.idx${boardIndex}`);
+    actionsBtn.style.visibility = "hidden";
+    const boardLinkContainer = document.querySelector(`.board-side-drawer-board-link-container.idx${boardIndex}`);
+    boardLinkContainer.style.backgroundColor = "";
+  };
+  const mouseOutDelBoardMenu = event => {
+    event.stopPropagation();
+  };
+
+  // console.log("BoardSideDrawerBoardLink, deleteBoardMenu:", deleteBoardMenu, " deleteConfirm:", deleteConfirm);
+
+  return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("div", {
+    className: `board-side-drawer-board-link-container idx${boardIndex}`,
+    onMouseOver: mouseOverBoardLink,
+    onMouseOut: mouseOutBoardLink
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(react_router_dom__WEBPACK_IMPORTED_MODULE_3__.Link, {
+    to: `/board/${board.id}`,
+    className: "board-side-drawer-board-link"
+  }, board.title), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("div", {
+    className: "board-side-drawer-board-link-actions-btn-wrapper"
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("button", {
+    className: `board-side-drawer-board-link-actions-btn idx${boardIndex} | bg-clr-transparent br-025rem bdr-none usr-slct`,
+    onClick: handleDeleteBoardMenu
+  }), deleteBoardMenu ? /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("div", {
+    className: "board-side-drawer-board-link-delete-board-menu-wrapper | br-025rem",
+    onMouseOut: mouseOutDelBoardMenu
+  }, deleteConfirm ? /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(react__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("div", {
+    className: "board-side-drawer-board-link-delete-board-menu-confirm-title-wrapper"
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("div", {
+    className: "board-side-drawer-board-link-delete-board-menu-confirm-title"
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("button", {
+    className: "board-side-drawer-board-link-delete-board-menu-confirm-title-left | bdr-none bg-clr-transparent menu-title-clr",
+    onClick: backDeleteConfirm
+  }), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("span", {
+    className: "board-side-drawer-board-link-delete-board-menu-confirm-title-txt | menu-title-clr"
+  }, "Delete board?"), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("button", {
+    className: "board-side-drawer-board-link-delete-board-menu-confirm-close-btn | bdr-none bg-clr-transparent",
+    onClick: closeDeleteConfirm
+  }, "\xD7"))), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("div", {
+    className: "board-side-drawer-board-link-delete-board-menu-confirm-delete"
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("p", {
+    className: "board-side-drawer-board-link-delete-board-menu-confirm-delete-txt"
+  }, "Deleting a board means it's gone forever."), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("button", {
+    className: "board-side-drawer-board-link-delete-board-menu-confirm-delete-btn | bdr-none br-025rem",
+    onClick: handleDeleteABoard
+  }, "Delete"))) : /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(react__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("div", {
+    className: "board-side-drawer-board-link-delete-board-menu-title-wrapper"
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("div", {
+    className: "board-side-drawer-board-link-delete-board-menu-title"
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("span", {
+    className: "board-side-drawer-board-link-delete-board-menu-title-txt | menu-title-clr"
+  }, board.title), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("button", {
+    className: "board-side-drawer-board-link-delete-board-menu-title-close-btn | bdr-none bg-clr-transparent",
+    onClick: closeDeleteBoardMenu
+  }, "\xD7"))), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("div", {
+    className: "board-side-drawer-board-link-delete-board-menu-actions"
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("div", {
+    className: "board-side-drawer-board-link-delete-board-menu-actions-del"
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("button", {
+    className: "board-side-drawer-board-link-delete-board-menu-actions-del-btn | bdr-none bg-clr-transparent",
+    onClick: () => setDeleteConfirm(true)
+  }, "Delete Board"), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("button", {
+    className: "board-side-drawer-board-link-delete-board-menu-actions-del-btn-right | bdr-none bg-clr-transparent"
+  }))))) : null));
+};
+const mapDispatch = dispatch => {
+  return {
+    deleteABoard: (currWorkspaceIndex, boardId) => dispatch((0,_store_workspace__WEBPACK_IMPORTED_MODULE_2__.deleteABoard)(currWorkspaceIndex, boardId))
+  };
+};
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ((0,react_redux__WEBPACK_IMPORTED_MODULE_1__.connect)(null, mapDispatch)(BoardSideDrawerBoardLink));
 
 /***/ }),
 
@@ -3165,7 +3436,8 @@ const Card = props => {
     openCard: openCard,
     setOpenCard: setOpenCard,
     board: board,
-    list: list
+    list: list,
+    listIndex: listIndex
   }));
 };
 const mapState = state => {
@@ -3215,8 +3487,9 @@ const CardModal = props => {
     board,
     user,
     list,
+    listIndex,
     updateCardDescription,
-    createCardComment
+    updateCardTitle
   } = props;
   const [getComments, setGetComments] = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)([]);
   const getCardComments = async () => {
@@ -3249,6 +3522,7 @@ const CardModal = props => {
     setCardComment(event.target.value);
   };
   const closeCardModal = event => {
+    updateCardTitle(card.id, cardTitle, listIndex);
     setOpenCard(false);
     setCardDescription(card.description);
     setCardTitle(card.title);
@@ -3543,14 +3817,15 @@ const CardModal = props => {
 };
 const mapState = state => {
   return {
-    user: state.auth
+    user: state.auth.user
     // lists: state.lists.lists,
   };
 };
 
 const mapDispatch = dispatch => {
   return {
-    updateCardDescription: (card, cardDescription, board, txtareaHeight) => dispatch((0,_store_lists__WEBPACK_IMPORTED_MODULE_3__.updateCardDescription)(card, cardDescription, board, txtareaHeight))
+    updateCardDescription: (card, cardDescription, board, txtareaHeight) => dispatch((0,_store_lists__WEBPACK_IMPORTED_MODULE_3__.updateCardDescription)(card, cardDescription, board, txtareaHeight)),
+    updateCardTitle: (cardId, cardTitle, listIndex) => dispatch((0,_store_lists__WEBPACK_IMPORTED_MODULE_3__.updateCardTitle)(cardId, cardTitle, listIndex))
   };
 };
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ((0,react_redux__WEBPACK_IMPORTED_MODULE_1__.connect)(mapState, mapDispatch)(CardModal));
@@ -3610,7 +3885,7 @@ const CardSideMenu = props => {
       method: 'get',
       url: `/api/lists/boardId/${boardId}`
     });
-    console.log("CardSideMenu, getLists:", lists);
+    // console.log("cardSideMenu getLists:", lists)
     return lists;
   };
   (0,react__WEBPACK_IMPORTED_MODULE_0__.useEffect)(() => {
@@ -3619,33 +3894,63 @@ const CardSideMenu = props => {
         const lists = await getLists(currBoard.id);
         setSelectedBoardLists(lists);
       })();
-
-      // getLists(currBoard.id); // get lists for local state
     }
   }, [openSideMenu]);
   const [selectBoard, setSelectBoard] = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(currBoard.title);
   const handleSelectBoard = event => {
-    // console.log("handleSelectBoard, event.target:", event.target.selectedOptions[0].dataset.boardId);
+    // console.log("handleSelectBoard, workspaces:", workspaces);
     const boardId = event.target.selectedOptions[0].dataset.boardId;
     (async () => {
       const lists = await getLists(boardId);
-      setSelectedBoardLists(lists);
-      setSelectedList(lists[0]);
-      setSelectList(lists[0].title);
-      setSelectPosition(lists[0].cards.length + 1);
+      if (lists.length > 0) {
+        const selectListDisplayVal = document.querySelector(".card-side-menu-move-card-select-list-display-value");
+        selectListDisplayVal.innerText = lists[0].title;
+        const selectPositionDisplayVal = document.querySelector(".card-side-menu-move-card-select-position-display-value");
+        selectPositionDisplayVal.innerText = lists[0].cards.length + 1;
+        setSelectedBoardLists(lists);
+        setSelectedList(lists[0]);
+        setSelectList(lists[0].title);
+        setSelectPosition(lists[0].cards.length + 1);
+      } else {
+        // console.log("selected board has no lists")
+
+        const selectListDisplayVal = document.querySelector(".card-side-menu-move-card-select-list-display-value");
+        selectListDisplayVal.innerText = "No lists";
+        const selectPositionDisplayVal = document.querySelector(".card-side-menu-move-card-select-position-display-value");
+        selectPositionDisplayVal.innerText = "N/A";
+        setSelectedBoardLists([]);
+        setSelectedList({});
+        // setSelectList("");
+        // setSelectPosition(lists[0].cards.length + 1);
+      }
     })();
+
+    const selectBoardDisplayVal = document.querySelector(".card-side-menu-move-card-select-board-display-value");
+    selectBoardDisplayVal.innerText = event.target.value;
     setSelectBoard(event.target.value);
   };
   const [selectedList, setSelectedList] = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(currList);
   const [selectList, setSelectList] = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(currList.title);
   const handleSelectList = event => {
-    console.log("handleSelectList, selectedIndex:", event.target.selectedIndex, " selectedBoardLists:", selectedBoardLists[event.target.selectedIndex]);
+    // console.log("handleSelectList, selectedIndex:", event.target.selectedIndex, " selectedBoardLists:", selectedBoardLists[event.target.selectedIndex] )
+
+    const selectListDisplayVal = document.querySelector(".card-side-menu-move-card-select-list-display-value");
+    selectListDisplayVal.innerText = event.target.value;
+    const selectPositionDisplayVal = document.querySelector(".card-side-menu-move-card-select-position-display-value");
+    if (selectedBoardLists[event.target.selectedIndex].id !== currList.id) {
+      selectPositionDisplayVal.innerText = selectedBoardLists[event.target.selectedIndex].cards.length + 1;
+      setSelectPosition(selectedBoardLists[event.target.selectedIndex].cards.length + 1);
+    } else {
+      selectPositionDisplayVal.innerText = `${cardIndex + 1}`;
+      setSelectPosition(`${cardIndex + 1}`);
+    }
     setSelectedList(selectedBoardLists[event.target.selectedIndex]);
-    setSelectPosition(selectedBoardLists[event.target.selectedIndex].cards.length + 1);
     setSelectList(event.target.value);
   };
   const [selectPosition, setSelectPosition] = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(`${cardIndex + 1}`);
   const handleSelectPosition = event => {
+    const displayVal = document.querySelector(".card-side-menu-move-card-select-position-display-value");
+    displayVal.innerText = event.target.value;
     setSelectPosition(event.target.value);
   };
   const submitMoveCard = async event => {
@@ -3673,7 +3978,7 @@ const CardSideMenu = props => {
         targetCardsToMove,
         origCardsToMove
       });
-      console.log("submitMoveCard origList !== targetList, response:", response);
+      // console.log("submitMoveCard origList !== targetList, response:", response);
     } else {
       const targetCardId = currList.cards[targetPosition - 1].id;
       // console.log("targetCardId:", targetCardId);
@@ -3681,8 +3986,9 @@ const CardSideMenu = props => {
         targetCardId,
         targetPosition
       });
-      console.log("submitMoveCard origList === targetList, response:", response);
+      // console.log("submitMoveCard origList === targetList, response:", response);
     }
+
     window.location.reload();
   };
   const closeSideMenu = event => {
@@ -3735,10 +4041,13 @@ const CardSideMenu = props => {
     className: "card-side-menu-move-card-select-h5"
   }, "Select destination"), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("form", {
     onSubmit: submitMoveCard
-  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("label", {
-    htmlFor: "card-side-menu-select-board",
-    className: "card-side-menu-select-board-label | fnt-sz-14px label-clr "
-  }, "Board"), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("div", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("select", {
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("span", {
+    className: "card-side-menu-move-card-select-board-label | fnt-sz-14px label-clr "
+  }, "Board"), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("div", {
+    className: "card-side-menu-move-card-select-board-container"
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("span", {
+    className: "card-side-menu-move-card-select-board-display-value"
+  }, currBoard.title), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("select", {
     id: "card-side-menu-select-board",
     className: "card-side-menu-move-card-select-board",
     value: selectBoard,
@@ -3754,10 +4063,17 @@ const CardSideMenu = props => {
         "data-board-id": board.id
       }, currBoard.id === board.id ? `${board.title} (current)` : `${board.title}`);
     }));
-  }))), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("label", {
-    htmlFor: "card-side-menu-select-list",
-    className: "card-side-menu-select-list-label | fnt-sz-14px label-clr"
-  }, "List"), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("div", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("select", {
+  }))), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("div", {
+    className: "card-side-menu-move-card-select-list-pos-wrapper"
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("div", {
+    className: "card-side-menu-move-card-select-list-wrapper"
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("span", {
+    className: "card-side-menu-move-card-select-list-label | fnt-sz-14px label-clr"
+  }, "List"), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("div", {
+    className: "card-side-menu-move-card-select-list-container"
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("span", {
+    className: "card-side-menu-move-card-select-list-display-value"
+  }, currList.title), selectedBoardLists.length > 0 ? /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("select", {
     id: "card-side-menu-select-list",
     className: "card-side-menu-move-card-select-list",
     value: selectList,
@@ -3767,10 +4083,15 @@ const CardSideMenu = props => {
       key: list.id,
       value: list.title
     }, currList.id === list.id ? `${list.title} (current)` : `${list.title}`);
-  }))), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("label", {
-    htmlFor: "card-side-menu-select-position",
-    className: "card-side-menu-select-position-label | fnt-sz-14px label-clr"
-  }, "Position"), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("div", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("select", {
+  })) : null)), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("div", {
+    className: "card-side-menu-move-card-select-position-wrapper"
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("span", {
+    className: "card-side-menu-move-card-select-position-label | fnt-sz-14px label-clr"
+  }, "Position"), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("div", {
+    className: "card-side-menu-move-card-select-position-container"
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("span", {
+    className: "card-side-menu-move-card-select-position-display-value"
+  }, cardIndex + 1), Object.keys(selectedList).length > 0 ? /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("select", {
     id: "card-side-menu-select-position",
     className: "card-side-menu-move-card-select-position",
     value: selectPosition,
@@ -3780,17 +4101,20 @@ const CardSideMenu = props => {
       key: card.id,
       value: `${index + 1}`
     }, cardIndex === index ? `${index + 1} (current)` : `${index + 1}`);
-  }), currList.cards.length > 1 ? /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("option", {
+  }), currList.cards.length > 1 && selectedList.id !== currList.id ? /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("option", {
     key: "lastPos",
     value: `${selectedList.cards.length + 1}`
-  }, `${selectedList.cards.length + 1}`) : null)), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("button", {
+  }, `${selectedList.cards.length + 1}`) : null) : null))), selectedBoardLists.length > 0 ? /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("button", {
     type: "submit",
+    className: "card-side-menu-move-card-submit-btn | bdr-none br-025rem pdg-4x8px fnt-sz-14px"
+  }, "Move") : /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("button", {
+    disabled: true,
     className: "card-side-menu-move-card-submit-btn | bdr-none br-025rem pdg-4x8px fnt-sz-14px"
   }, "Move"))) : null)) : null);
 };
 const mapState = state => {
   return {
-    workspaces: state.workspaces
+    workspaces: state.workspaces.workspaces
   };
 };
 const mapDispatch = dispatch => {
@@ -4036,8 +4360,10 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ });
 /* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "./node_modules/react/index.js");
 /* harmony import */ var react_redux__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! react-redux */ "./node_modules/react-redux/es/index.js");
-/* harmony import */ var _store_lists__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../store/lists */ "./client/store/lists.js");
-/* harmony import */ var _store_board__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../store/board */ "./client/store/board.js");
+/* harmony import */ var _ListTitleMoveList__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./ListTitleMoveList */ "./client/components/ListTitleMoveList.js");
+/* harmony import */ var _store_lists__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../store/lists */ "./client/store/lists.js");
+/* harmony import */ var _store_board__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../store/board */ "./client/store/board.js");
+
 
 
 
@@ -4052,9 +4378,11 @@ const ListTitle = props => {
     currListIndex,
     listsState,
     draggedCard,
+    lists,
     deleteList,
     getBoard,
     swapListPositions,
+    updateListTitle,
     swapListTargetPos,
     handleSwapListTargetIdx
   } = props;
@@ -4107,7 +4435,7 @@ const ListTitle = props => {
           isVisible: false
         });
       } else if (clickedElem.includes("move-list")) {
-        console.log("handleListTitleDropdown, move-list true");
+        // console.log("handleListTitleDropdown, move-list true");
         setListTitleDropdown({
           ...listTitleDropdown,
           currDropdown: "moveListDropdown",
@@ -4118,7 +4446,8 @@ const ListTitle = props => {
       }
     } else {
       // clicked outside of the dropdown then close whichever dropdown is opened
-      console.log("handleListTitleDropdown, clicked outside of dropdown");
+      // console.log("handleListTitleDropdown, clicked outside of dropdown");
+
       setListTitleDropdown({
         ...listTitleDropdown,
         currDropdown: false,
@@ -4127,40 +4456,6 @@ const ListTitle = props => {
       });
     }
   };
-  const [selectListPosition, setSelectListPosition] = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(`${currListIndex + 1}`);
-  const handleSelectListPosition = event => {
-    setSelectListPosition(event.target.value);
-    console.log(`handleSelectListPosition, after setSelectListPosition, for list[${currListIndex}]`);
-  };
-  const handleSubmitListPosition = event => {
-    event.preventDefault();
-    console.log(`handleSubmitListPosition, list[${currListIndex}] selectListPosition`, selectListPosition);
-    const swapToIndex = parseInt(selectListPosition, 10) - 1;
-    handleSwapListTargetIdx(swapToIndex, currListIndex);
-    swapListPositions(board.id, {
-      currListId: currList.id,
-      currListPosition: currListIndex + 1,
-      swapToPosition: parseInt(selectListPosition, 10),
-      swapToListId: listsState.lists[swapToIndex].id
-    });
-    setListTitleDropdown({
-      currDropdown: false,
-      listActionsDropdown: false,
-      moveListDropdown: false,
-      isVisible: false
-    });
-  };
-  (0,react__WEBPACK_IMPORTED_MODULE_0__.useEffect)(() => {
-    // console.log("ListTitle useEffect, swapListTargetPos");
-    if (swapListTargetPos) {
-      console.log(`setting `, listsState.lists[currListIndex], "selectListPosition to:", swapListTargetPos);
-      setSelectListPosition(swapListTargetPos);
-      handleSwapListTargetIdx({
-        swapToIndex: null,
-        currListIndex: null
-      });
-    }
-  }, [swapListTargetPos]);
   const handleMoveListBackBtn = event => {
     // Goes back to listActions
     setListTitleDropdown({
@@ -4187,7 +4482,8 @@ const ListTitle = props => {
         return;
       }
     }
-    console.log("clicked outisde of listTitleDropdown");
+
+    // console.log("clicked outisde of listTitleDropdown")
     handleListTitleDropdown(event);
   };
 
@@ -4214,9 +4510,6 @@ const ListTitle = props => {
       document.removeEventListener("click", closeListTitleDropdown);
     };
   }, [listTitleDropdown.isVisible]);
-
-  // const [listTitleRows, setListTitleRows] = useState(1);
-  // const [prevScrollHeight, setPrevScrollHeight] = useState(0);
   (0,react__WEBPACK_IMPORTED_MODULE_0__.useEffect)(() => {
     const listTitleElem = document.querySelector(`.list-title-input.idx${currListIndex}`);
     // listTitleElem.style.height = "auto";
@@ -4258,7 +4551,7 @@ const ListTitle = props => {
   };
   (0,react__WEBPACK_IMPORTED_MODULE_0__.useEffect)(() => {
     if (currList.cards.length === 0) {
-      console.log(`ListTitle useEffect ${currList.title} no cards`);
+      // console.log(`ListTitle useEffect ${currList.title} no cards`);
       const boardList = document.querySelector(`.flex-board-list.idx${currListIndex}`);
       boardList.addEventListener("dragenter", boardListDragEnter);
       boardList.addEventListener("dragover", boardListDragOver);
@@ -4272,9 +4565,28 @@ const ListTitle = props => {
       };
     }
   });
-
-  // console.log("ListTitle render");
-
+  const submitListTitle = event => {
+    // console.log("submitListTitle, event.target:", event.target);
+    updateListTitle(currList.id, listTitle, currListIndex);
+    if (event.target.classList[0] !== "list-title-input") {
+      setListTitleFocused(false);
+    }
+  };
+  const [listTitleFocused, setListTitleFocused] = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(false);
+  const onClickListTitle = event => {
+    event.stopPropagation();
+    // console.log("onClickListTitle, activeElement:", document.activeElement);
+    setListTitleFocused(true);
+  };
+  (0,react__WEBPACK_IMPORTED_MODULE_0__.useEffect)(() => {
+    if (listTitle.length > 0 && listTitleFocused) {
+      document.addEventListener("click", submitListTitle);
+      return function cleanUp() {
+        document.removeEventListener("click", submitListTitle);
+      };
+    }
+  }, [listTitle, listTitleFocused]);
+  console.log("ListTitle render, listTitle:", listTitle, " listTitleFocused:", listTitleFocused);
   return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("div", {
     className: `list-title wrapper | mgn-l-05rem | idx${currListIndex}`,
     "data-list-index": `${currListIndex}`,
@@ -4285,6 +4597,7 @@ const ListTitle = props => {
     cols: "10",
     value: listTitle,
     onChange: handleListTitle,
+    onClick: onClickListTitle,
     "data-list-index": `${currListIndex}`,
     "data-not-card": "1"
   }), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("div", {
@@ -4323,8 +4636,141 @@ const ListTitle = props => {
     onClick: handleDeleteListYes
   }, "Yes"), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("button", {
     type: "submit"
-  }, "No")))), listTitleDropdown.moveListDropdown ? /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("div", {
-    className: "list-title-dropdown"
+  }, "No")))), listTitleDropdown.moveListDropdown ? /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_ListTitleMoveList__WEBPACK_IMPORTED_MODULE_2__["default"], {
+    currListIndex: currListIndex,
+    currList: currList,
+    workspaces: workspaces,
+    currLists: lists,
+    board: board,
+    handleListTitleDropdown: handleListTitleDropdown,
+    setListTitleDropdown: setListTitleDropdown,
+    handleMoveListBackBtn: handleMoveListBackBtn
+  }) : null));
+};
+const mapState = state => {
+  return {
+    board: state.board.board,
+    listsState: state.lists,
+    lists: state.lists.lists,
+    draggedCard: state.lists.draggedCard,
+    workspaces: state.workspaces.workspaces,
+    user: state.auth.user
+  };
+};
+const mapDispatch = dispatch => {
+  return {
+    deleteList: (board, list) => dispatch((0,_store_lists__WEBPACK_IMPORTED_MODULE_3__.deleteList)(board, list)),
+    getBoard: (boardId, listPositions) => dispatch((0,_store_board__WEBPACK_IMPORTED_MODULE_4__.getBoard)(boardId, listPositions)),
+    updateListTitle: (listId, newListTitle, currListIndex) => dispatch((0,_store_lists__WEBPACK_IMPORTED_MODULE_3__.updateListTitle)(listId, newListTitle, currListIndex))
+  };
+};
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ((0,react_redux__WEBPACK_IMPORTED_MODULE_1__.connect)(mapState, mapDispatch)(ListTitle));
+
+/***/ }),
+
+/***/ "./client/components/ListTitleMoveList.js":
+/*!************************************************!*\
+  !*** ./client/components/ListTitleMoveList.js ***!
+  \************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "./node_modules/react/index.js");
+/* harmony import */ var react_redux__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! react-redux */ "./node_modules/react-redux/es/index.js");
+/* harmony import */ var _store_lists__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../store/lists */ "./client/store/lists.js");
+/* harmony import */ var _functions_utilityFunctions__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../functions/utilityFunctions */ "./client/functions/utilityFunctions.js");
+
+
+
+
+const ListTitleMoveList = props => {
+  const {
+    currListIndex,
+    currList,
+    workspaces,
+    currLists,
+    board,
+    handleListTitleDropdown,
+    setListTitleDropdown,
+    handleMoveListBackBtn,
+    moveList
+  } = props;
+  (0,react__WEBPACK_IMPORTED_MODULE_0__.useEffect)(() => {
+    // Repositions menu if it goes over right side of screen
+    const rootElemWidth = document.documentElement.clientWidth;
+    const moveListElem = document.querySelector(".list-title-dropdown-move-list");
+    const rightWidthPos = moveListElem.getBoundingClientRect().right;
+    if (rightWidthPos > rootElemWidth) {
+      moveListElem.style.right = "10px";
+    }
+  }, []);
+  const [selectBoard, setSelectBoard] = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(board.title);
+  const [selectedBoardId, setSelectedBoardId] = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(board.id);
+  const [selectedBoardLists, setSelectedBoardLists] = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(currLists);
+  const handleSelectBoard = event => {
+    // console.log("handleSelectBoard, selectedBoardId:", event.target.selectedOptions[0].dataset.boardId);
+    const boardId = event.target.selectedOptions[0].dataset.boardId;
+    setSelectedBoardId(boardId);
+    (async () => {
+      const lists = await (0,_functions_utilityFunctions__WEBPACK_IMPORTED_MODULE_3__.getLists)(boardId);
+      console.log("getLists:", lists);
+      setSelectedBoardLists(lists);
+      setSelectListPosition("1");
+    })();
+    setSelectBoard(event.target.value);
+  };
+  const [selectListPosition, setSelectListPosition] = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(`${currListIndex + 1}`);
+  const handleSelectListPosition = event => {
+    setSelectListPosition(event.target.value);
+    // console.log(`handleSelectListPosition, after setSelectListPosition, for list[${currListIndex}]`);
+  };
+
+  const handleSubmitListPosition = event => {
+    event.preventDefault();
+    console.log(`handleSubmitListPosition, selectedBoardId`, selectedBoardId, typeof selectedBoardId, " selectedBoardLists:", selectedBoardLists);
+    if (selectListPosition === `${currListIndex + 1}` && board.id === selectedBoardId) {
+      return;
+    }
+    let targetListIndex = parseInt(selectListPosition, 10) - 1;
+    // console.log("targetListIndex:", targetListIndex)
+
+    // Map the listIds to adjust to indexes here
+    let targetListsToAdjust = {};
+    if (board.id !== selectedBoardId) {
+      selectedBoardLists.forEach((list, index) => {
+        if (targetListIndex === selectedBoardLists.length) {
+          targetListsToAdjust[list.id] = index;
+        } else if (index >= targetListIndex) {
+          targetListsToAdjust[list.id] = index + 1;
+        }
+      });
+    }
+    // console.log("targetListsToAdjust:", targetListsToAdjust);
+
+    moveList(board.id, {
+      currListId: currList.id,
+      currListPosition: currListIndex + 1,
+      targetListPosition: parseInt(selectListPosition, 10),
+      targetListId: selectedBoardLists[targetListIndex] ? selectedBoardLists[targetListIndex].id : 0,
+      targetBoardId: selectedBoardId,
+      targetListsToAdjust
+    });
+    setListTitleDropdown({
+      currDropdown: false,
+      listActionsDropdown: false,
+      moveListDropdown: false,
+      isVisible: false
+    });
+  };
+
+  // console.log("ListTitleMoveList render")
+
+  return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("div", {
+    className: "list-title-dropdown-move-list"
   }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("form", {
     onSubmit: handleSubmitListPosition
   }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("div", {
@@ -4340,52 +4786,53 @@ const ListTitle = props => {
     onClick: handleListTitleDropdown,
     className: "move-list-header close-dropdown-btn"
   }, "\xD7")), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("div", {
-    className: "move-list-board"
+    className: "move-list-select-"
   }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("label", {
     htmlFor: "select-board"
   }, "Board"), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("select", {
-    id: "select-board"
+    id: "select-board",
+    className: "move-list-select-board",
+    value: selectBoard,
+    onChange: handleSelectBoard
   }, workspaces.map(workspace => {
     return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("optgroup", {
       key: workspace.id,
       label: workspace.title
     }, workspace.boards.map(board => {
       return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("option", {
-        key: board.id
+        key: board.id,
+        value: board.title,
+        "data-board-id": board.id
       }, board.title);
     }));
   })), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("label", {
     htmlFor: "select-list-position"
   }, "Position"), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("select", {
     id: "select-list-position",
+    className: "move-list-select-list",
     value: selectListPosition,
     onChange: handleSelectListPosition
-  }, listsState.lists.map((list, index) => {
+  }, selectedBoardLists.map((list, index) => {
     return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("option", {
       key: list.id,
       value: `${index + 1}`
     }, currListIndex === index ? `${index + 1} (current)` : `${index + 1}`);
-  })), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("button", {
+  }), board.id !== selectedBoardId ? /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("option", {
+    key: "lastPos",
+    value: `${selectedBoardLists.length + 1}`
+  }, `${selectedBoardLists.length + 1}`) : null), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("div", {
+    className: "move-list-submit-btn-container"
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("button", {
+    className: "move-list-submit-btn",
     type: "submit"
-  }, "Move"))))) : null));
-};
-const mapState = state => {
-  return {
-    board: state.board.board,
-    listsState: state.lists,
-    draggedCard: state.lists.draggedCard,
-    workspaces: state.workspaces,
-    user: state.auth
-  };
+  }, "Move"))))));
 };
 const mapDispatch = dispatch => {
   return {
-    deleteList: (board, list) => dispatch((0,_store_lists__WEBPACK_IMPORTED_MODULE_2__.deleteList)(board, list)),
-    getBoard: (boardId, listPositions) => dispatch((0,_store_board__WEBPACK_IMPORTED_MODULE_3__.getBoard)(boardId, listPositions)),
-    swapListPositions: (boardId, swapListsInfo) => dispatch((0,_store_lists__WEBPACK_IMPORTED_MODULE_2__.swapListPositions)(boardId, swapListsInfo))
+    moveList: (boardId, moveListInfo) => dispatch((0,_store_lists__WEBPACK_IMPORTED_MODULE_2__.moveList)(boardId, moveListInfo))
   };
 };
-/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ((0,react_redux__WEBPACK_IMPORTED_MODULE_1__.connect)(mapState, mapDispatch)(ListTitle));
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ((0,react_redux__WEBPACK_IMPORTED_MODULE_1__.connect)(null, mapDispatch)(ListTitleMoveList));
 
 /***/ }),
 
@@ -4418,7 +4865,7 @@ const Navbar = props => {
   // console.log("Navbar, user:", user);
 
   return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("div", {
-    className: "navbar-main"
+    className: "navbar"
   }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("nav", null, isLoggedIn ? /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("div", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(react_router_dom__WEBPACK_IMPORTED_MODULE_3__.Link, {
     className: "nav-home | text-decoration-none",
     to: "/home"
@@ -4440,7 +4887,8 @@ const Navbar = props => {
  */
 const mapState = state => {
   return {
-    isLoggedIn: !!state.auth.id
+    // isLoggedIn: !!state.auth.id
+    isLoggedIn: !!state.auth.user
   };
 };
 const mapDispatch = dispatch => {
@@ -4491,7 +4939,7 @@ const NavbarContent = props => {
     //If clicked on any other part of the dropdown then do nothing
     while (clicked = clicked.parentElement) {
       if (clicked.className.includes("members-dropdown")) {
-        console.log("clicked within members-dropdown");
+        // console.log("clicked within members-dropdown");
         return;
       }
     }
@@ -4514,7 +4962,7 @@ const NavbarContent = props => {
   };
   const [inviteDropdown, setInviteDropdown] = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(false);
   const handleShareDropdown = () => {
-    console.log("handleShareDropdown");
+    // console.log("handleShareDropdown");
     setInviteDropdown(prev => !prev);
   };
 
@@ -4533,7 +4981,7 @@ const NavbarContent = props => {
   // const [wasInsideShareDropdown, setWasInsideShareDropdown] = useState(false);
   let wasInsideShareDropdown = false;
   const mouseDownEvent = event => {
-    console.log("mouseDownEvent event.target:", event.target);
+    // console.log("mouseDownEvent event.target:", event.target);
     let clickedElem = event.target;
     while (clickedElem = clickedElem.parentElement) {
       if (clickedElem.className.includes("share-board")) {
@@ -4544,20 +4992,21 @@ const NavbarContent = props => {
     }
   };
   const mouseUpEvent = event => {
-    console.log("mouseUpEvent event.target:", event.target, " wasInsideShareDropdown:", wasInsideShareDropdown);
+    // console.log("mouseUpEvent event.target:", event.target, " wasInsideShareDropdown:", wasInsideShareDropdown);
     let clickedElem = event.target;
     while (clickedElem = clickedElem.parentElement) {
       if (clickedElem.className.includes("share-board")) {
         return;
       }
     }
-    console.log("clicked outside of inviteDropdown, wasInsideShareDropdown:", wasInsideShareDropdown);
+
+    // console.log("clicked outside of inviteDropdown, wasInsideShareDropdown:", wasInsideShareDropdown);
     if (wasInsideShareDropdown) {
-      console.log("wasInsideShareDropdown");
+      // console.log("wasInsideShareDropdown");
       wasInsideShareDropdown = false;
       return;
     } else {
-      console.log("else wasInsideShareDropdown");
+      // console.log("else wasInsideShareDropdown");
       setInviteDropdown(false);
       setInviteInput("");
       // setWasInsideShareDropdown(false);
@@ -4594,7 +5043,7 @@ const NavbarContent = props => {
     }
     setInviteInput(event.target.value);
   };
-  const submitShareBoard = inviteInput => {
+  const submitShareBoard = () => {
     const shareBoardInput = document.querySelector("#share-board-input-email");
     const shareBoardErrMsg = document.querySelector(".share-board-err-msg");
     if (shareBoardInput.validity.valueMissing) {
@@ -4627,7 +5076,9 @@ const NavbarContent = props => {
 
   return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("div", {
     id: "board-navbar"
-  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("h3", null, board.title), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("span", null, "|"), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("div", {
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("h3", {
+    className: "board-navbar-h3"
+  }, board.title), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("span", null, "|"), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("div", {
     className: "members-dropdown"
   }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("button", {
     onClick: handleMembersDropdown,
@@ -4670,14 +5121,13 @@ const NavbarContent = props => {
   }, "Please enter an email address"), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("button", {
     type: "button",
     className: "share-submit-btn",
-    onClick: () => submitShareBoard(inviteInput)
+    onClick: submitShareBoard
   }, "Share"))) : null)));
 };
 const mapState = state => {
   return {
-    user: state.auth,
+    user: state.auth.user,
     board: state.board.board,
-    workspace: state.workspace,
     members: state.board.members,
     toInvite: state.board.toInvite,
     errorMsg: state.board.errorMsg,
@@ -4709,9 +5159,10 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "./node_modules/react/index.js");
 /* harmony import */ var react_redux__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! react-redux */ "./node_modules/react-redux/es/index.js");
 /* harmony import */ var _store_workspace__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../store/workspace */ "./client/store/workspace.js");
-/* harmony import */ var react_router_dom__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! react-router-dom */ "./node_modules/react-router-dom/esm/react-router-dom.js");
+/* harmony import */ var react_router_dom__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! react-router-dom */ "./node_modules/react-router-dom/esm/react-router-dom.js");
 /* harmony import */ var _WorkspaceSideDrawer_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./WorkspaceSideDrawer.js */ "./client/components/WorkspaceSideDrawer.js");
-/* harmony import */ var _Navbar__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./Navbar */ "./client/components/Navbar.js");
+/* harmony import */ var _WorkspaceNewBoard__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./WorkspaceNewBoard */ "./client/components/WorkspaceNewBoard.js");
+/* harmony import */ var _Navbar__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./Navbar */ "./client/components/Navbar.js");
 
 
 
@@ -4719,61 +5170,58 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
-// import Navbar from './Navbar';
 
-/*
-Workspace:
-navbar-side content content
-navbar-side content content
-*/
 // Display user's workspace (boards, etc.)
 const Workspace = props => {
   const {
     user,
+    workspaces,
     getWorkspaces,
-    workspaces
+    getBoardsMemberOf
   } = props;
-  // const boards = workspace.boards;
-  // console.log('Workspace, props:', props);
-
   (0,react__WEBPACK_IMPORTED_MODULE_0__.useEffect)(() => {
-    getWorkspaces(user.id);
+    (async () => {
+      const response = await getWorkspaces(user.id);
+      getBoardsMemberOf(user.id);
+    })();
   }, []);
-
-  // const displayWorkspace = (userId) => {
-  //   const workspace = getWorkspace(userId);
-  //   console.log('displayWorkspace, workspace:', workspace);
-  // } 
-
-  // console.log('Workspace, workspace:', workspace);
-
   if (workspaces.length === 0) {
     console.log('workspaces is empty, workspaces:', workspaces);
     return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("div", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("h4", null, "Loading..."));
   }
-  console.log('Workspace, workspaces:', workspaces);
+  console.log('Workspace, user:', user);
   return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("div", {
     className: "workspace-layout-grid"
-  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_Navbar__WEBPACK_IMPORTED_MODULE_4__["default"], {
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_Navbar__WEBPACK_IMPORTED_MODULE_5__["default"], {
     user: user
-  }), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_WorkspaceSideDrawer_js__WEBPACK_IMPORTED_MODULE_3__.WorkspaceSideDrawer, null), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("div", {
-    className: "workspaces-display-section"
+  }), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("div", {
+    className: "navbar-filler"
+  }), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_WorkspaceSideDrawer_js__WEBPACK_IMPORTED_MODULE_3__["default"], null), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("div", {
+    className: "workspaces-display-section |"
   }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("h3", null, "YOUR WORKSPACES"), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("div", {
     className: "workspaces-display-wrapper"
   }, workspaces.map(workspace => {
     return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("div", {
       key: workspace.id,
-      className: "workspaces-display"
+      className: "workspaces-display-container"
     }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("div", {
       className: "workspaces-display-header"
     }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("h4", null, workspace.title)), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("div", {
       className: "workspaces-display-boards"
     }, workspace.boards.map(board => {
-      return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(react_router_dom__WEBPACK_IMPORTED_MODULE_5__.Link, {
+      return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("div", {
+        key: board.id,
+        className: "workspaces-display-board-item | br-025rem pdg-075rem"
+      }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("div", {
+        className: "workspaces-display-board-link-container"
+      }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(react_router_dom__WEBPACK_IMPORTED_MODULE_6__.Link, {
         to: `/board/${board.id}`,
-        key: board.id
-      }, board.title);
-    })));
+        className: "workspaces-display-board-link"
+      }, board.title)));
+    }).concat( /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_WorkspaceNewBoard__WEBPACK_IMPORTED_MODULE_4__["default"], {
+      key: "createNewBoard",
+      boardWorkspace: workspace
+    }))));
   }))));
 };
 
@@ -4782,16 +5230,195 @@ const Workspace = props => {
  */
 const mapState = state => {
   return {
-    user: state.auth,
-    workspaces: state.workspaces
+    user: state.auth.user,
+    workspaces: state.workspaces.workspaces
   };
 };
 const mapDispatch = dispatch => {
   return {
-    getWorkspaces: userId => dispatch((0,_store_workspace__WEBPACK_IMPORTED_MODULE_2__.getWorkspaces)(userId))
+    getWorkspaces: userId => dispatch((0,_store_workspace__WEBPACK_IMPORTED_MODULE_2__.getWorkspaces)(userId)),
+    getBoardsMemberOf: userId => dispatch((0,_store_workspace__WEBPACK_IMPORTED_MODULE_2__.getBoardsMemberOf)(userId))
   };
 };
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ((0,react_redux__WEBPACK_IMPORTED_MODULE_1__.connect)(mapState, mapDispatch)(Workspace));
+
+/***/ }),
+
+/***/ "./client/components/WorkspaceNewBoard.js":
+/*!************************************************!*\
+  !*** ./client/components/WorkspaceNewBoard.js ***!
+  \************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "./node_modules/react/index.js");
+/* harmony import */ var react_redux__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! react-redux */ "./node_modules/react-redux/es/index.js");
+/* harmony import */ var _store_workspace__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../store/workspace */ "./client/store/workspace.js");
+
+
+
+const WorkspaceNewBoard = props => {
+  const {
+    boardWorkspace,
+    createNewBoard,
+    workspaces,
+    submittedNewBoard,
+    user
+  } = props;
+  const dispatch = (0,react_redux__WEBPACK_IMPORTED_MODULE_1__.useDispatch)();
+  const [newBoardMenu, setNewBoardMenu] = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(false);
+  const handleNewBoardMenu = event => {
+    // console.log("handleNewBoardMenu, event.target:", event.target);
+    setNewBoardMenu(prev => !prev);
+  };
+  const handleCloseNewBoardMenu = event => {
+    setNewBoardMenu(false);
+    setBoardTitle("");
+  };
+  const mouseOverCreateNewBoard = event => {
+    // console.log("mouseOverCreateNewBoard")
+    const createNewBoardElem = document.querySelector(`.workspaces-display-create-board.new-board.wkspce${boardWorkspace.id}`);
+    createNewBoardElem.style.backgroundColor = "rgba(161, 206, 202, 0.6)";
+    createNewBoardElem.style.cursor = "pointer";
+  };
+  const mouseOutCreateNewBoard = event => {
+    // console.log("mouseOutCreateNewBoard")
+    const createNewBoardElem = document.querySelector(`.workspaces-display-create-board.new-board.wkspce${boardWorkspace.id}`);
+    createNewBoardElem.style.backgroundColor = "";
+    if (newBoardMenu) {
+      const newBoardMenuElem = document.querySelector(`.workspaces-display.new-board.menu.wkspce${boardWorkspace.id}`);
+      newBoardMenuElem.style.cursor = "auto";
+    }
+  };
+  const mouseOverNewBoardMenu = event => {
+    // console.log("mouseOverNewBoardMenu stop propagation")
+    event.stopPropagation();
+  };
+  const onClickNewBoardMenu = event => {
+    // console.log("onClickNewBoardMenu stop propagation");
+    event.stopPropagation();
+  };
+  const handleClickedOutsideOfMenu = event => {
+    // console.log("handleClickedOutsideOfMenu, event.target.classList:", event.target.classList.contains("new-board"), event.target);
+    const clickedElem = event.target;
+    const clickedElemClasses = clickedElem.classList;
+    if (clickedElemClasses.item(1) === "new-board") {
+      // console.log("clicked a newBoard ")
+      if (!clickedElemClasses.contains(`wkspce${boardWorkspace.id}`)) {
+        // console.log("clicked a newboard, but not original newboard, last class:", clickedElemClasses.item(clickedElemClasses.length - 1));
+        setNewBoardMenu(false);
+      }
+    } else {
+      // conssole.log("clicked not newBoard")
+      setNewBoardMenu(false);
+    }
+  };
+  (0,react__WEBPACK_IMPORTED_MODULE_0__.useEffect)(() => {
+    if (newBoardMenu) {
+      // console.log("useEffect WorkspaceNewBoard adding doc eventListener")
+      document.addEventListener("click", handleClickedOutsideOfMenu);
+      return function cleanUp() {
+        // console.log("cleaning up newBoardMenu doc eventListener ")
+        document.removeEventListener("click", handleClickedOutsideOfMenu);
+      };
+    }
+  }, [newBoardMenu]);
+  const [boardTitle, setBoardTitle] = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)("");
+  const handleBoardTitle = event => {
+    setBoardTitle(event.target.value);
+  };
+  const [selectWorkspace, setSelectWorkspace] = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(boardWorkspace.title);
+  const handleSelectWorkspace = event => {
+    // console.log("handleSelectWorkspace, event.target.selectedOptions:", event.target.selectedOptions);
+    setSelectWorkspace(event.target.value);
+  };
+  const submitCreateBoard = event => {
+    event.preventDefault();
+    // console.log("submitCreateBoard, ")
+    const selectElem = document.querySelector("#create-board-select-workspace");
+    const selectedWorkspaceId = selectElem.selectedOptions[0].dataset.workspaceId;
+    createNewBoard(user.id, selectedWorkspaceId, boardTitle);
+    dispatch({
+      type: "SUBMIT_NEW_BOARD_REDIRECT",
+      boardWorkspaceId: boardWorkspace.id
+    });
+    setBoardTitle("");
+    setNewBoardMenu(false);
+  };
+  (0,react__WEBPACK_IMPORTED_MODULE_0__.useEffect)(() => {
+    if (boardWorkspace.id === submittedNewBoard) {
+      // console.log("submitted board on wkspce, id:", submittedNewBoard, " last board:", boardWorkspace.boards[boardWorkspace.boards.length - 1])
+      const lastBoard = boardWorkspace.boards[boardWorkspace.boards.length - 1];
+      window.location.assign(`board/${lastBoard.id}`);
+    }
+  }, [workspaces]);
+
+  // console.log("WorkspaceNewBoard, ", ` boardWorkspace:`, boardWorkspace);
+
+  return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("div", {
+    className: `workspaces-display-create-board new-board wkspce${boardWorkspace.id} | br-025rem`,
+    onClick: handleNewBoardMenu,
+    onMouseOver: mouseOverCreateNewBoard,
+    onMouseOut: mouseOutCreateNewBoard
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("span", {
+    className: `workspaces-display new-board txt wkspce${boardWorkspace.id}`
+  }, "Create new board"), newBoardMenu ? /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("div", {
+    className: `workspaces-display new-board menu wkspce${boardWorkspace.id} | br-025rem pdg-075rem`,
+    onMouseOver: mouseOverNewBoardMenu,
+    onClick: onClickNewBoardMenu
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("div", {
+    className: `workspaces-display new-board menu-title wkspce${boardWorkspace.id}`
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("span", {
+    className: `create-board-txt new-board wkspce${boardWorkspace.id} | menu-title-clr`
+  }, "Create board"), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("button", {
+    className: `workspaces-display new-board menu-close-btn wkspce${boardWorkspace.id} | bdr-none bg-clr-transparent`,
+    onClick: handleCloseNewBoardMenu
+  }, "\xD7")), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("div", {
+    className: `workspaces-display new-board menu-board-title-input wkspce${boardWorkspace.id}`
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("form", {
+    onSubmit: submitCreateBoard
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("label", {
+    htmlFor: "board-title-input"
+  }, "Board title"), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("input", {
+    id: "board-title-input",
+    type: "text",
+    value: boardTitle,
+    onChange: handleBoardTitle
+  }), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("label", {
+    htmlFor: "create-board-select-workspace"
+  }, "Workspace"), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("select", {
+    id: "create-board-select-workspace",
+    value: selectWorkspace,
+    onChange: handleSelectWorkspace
+  }, workspaces.map(workspace => {
+    return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("option", {
+      key: workspace.id,
+      value: workspace.title,
+      "data-workspace-id": workspace.id
+    }, workspace.title);
+  })), boardTitle.length > 0 ? /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("button", {
+    type: "submit"
+  }, "Create") : /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("button", {
+    disabled: true
+  }, "Create")))) : null);
+};
+const mapState = state => {
+  return {
+    workspaces: state.workspaces.workspaces,
+    submittedNewBoard: state.workspaces.submittedNewBoard,
+    user: state.auth.user
+  };
+};
+const mapDispatch = dispatch => {
+  return {
+    createNewBoard: (userId, workspaceId, boardTitle) => dispatch((0,_store_workspace__WEBPACK_IMPORTED_MODULE_2__.createNewBoard)(userId, workspaceId, boardTitle))
+  };
+};
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ((0,react_redux__WEBPACK_IMPORTED_MODULE_1__.connect)(mapState, mapDispatch)(WorkspaceNewBoard));
 
 /***/ }),
 
@@ -4804,18 +5431,84 @@ const mapDispatch = dispatch => {
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "WorkspaceSideDrawer": () => (/* binding */ WorkspaceSideDrawer)
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
 /* harmony export */ });
 /* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "./node_modules/react/index.js");
-/* harmony import */ var react_redux__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! react-redux */ "./node_modules/react-redux/es/index.js");
+/* harmony import */ var _store_workspace__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../store/workspace */ "./client/store/workspace.js");
+/* harmony import */ var react_redux__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! react-redux */ "./node_modules/react-redux/es/index.js");
 
 
 
 const WorkspaceSideDrawer = props => {
+  const {
+    user,
+    addWorkspace
+  } = props;
+  const [addWorkspacePrompt, setAddWorkspacePrompt] = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(false);
+  const [workspaceName, setWorkspaceName] = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)("");
+  const handleWorkspaceName = event => {
+    setWorkspaceName(event.target.value);
+  };
+  const submitWorkspaceDetails = event => {
+    event.preventDefault();
+    addWorkspace(user.id, workspaceName);
+    setAddWorkspacePrompt(false);
+  };
+
+  // console.log("WorkspaceSideDrawer");
+
   return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("div", {
-    className: "side-drawer"
-  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("ul", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("li", null, "Workspace 1"), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("li", null, "Workspace 2")));
+    className: "workspace-side-drawer"
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("div", {
+    className: "workspace-side-drawer-title"
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("span", null, "Workspaces"), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("button", {
+    className: "add-workspace-btn | bdr-none bg-clr-transparent ",
+    onClick: () => setAddWorkspacePrompt(true)
+  }, "+")), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("div", {
+    className: "workspace-side-drawer-contents"
+  }), addWorkspacePrompt ? /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("div", {
+    className: "add-workspace-backdrop"
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("div", {
+    className: "add-workspace-modal | "
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("button", {
+    className: "add-workspace-modal-close-btn | bdr-none bg-clr-transparent pdg-8x12px",
+    onClick: () => setAddWorkspacePrompt(false)
+  }, "\xD7"), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("div", {
+    className: "add-workspace-form-section"
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("h3", {
+    className: "add-workspace-form-h3"
+  }, "Let's build a Workspace"), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("form", {
+    onSubmit: submitWorkspaceDetails
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("label", {
+    htmlFor: "add-workspace-input",
+    className: "add-workspace-input-label"
+  }, "Workspace name"), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("input", {
+    id: "add-workspace-input",
+    type: "text",
+    value: workspaceName,
+    onChange: handleWorkspaceName
+  }), workspaceName.length > 0 ? /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("div", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("button", {
+    className: "add-workspace-submit-btn | bdr-none br-025rem",
+    type: "submit"
+  }, "Continue")) : /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("div", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("button", {
+    className: "add-workspace-submit-btn-disabled | bdr-none br-025rem",
+    type: "submit",
+    disabled: true
+  }, "Continue")))), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("div", {
+    className: "add-workspace-right-half"
+  }))) : null);
 };
+const mapState = state => {
+  return {
+    user: state.auth.user
+  };
+};
+const mapDispatch = dispatch => {
+  return {
+    addWorkspace: (userId, workspaceName) => dispatch((0,_store_workspace__WEBPACK_IMPORTED_MODULE_1__.addWorkspace)(userId, workspaceName))
+  };
+};
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ((0,react_redux__WEBPACK_IMPORTED_MODULE_2__.connect)(mapState, mapDispatch)(WorkspaceSideDrawer));
 
 /***/ }),
 
@@ -4828,9 +5521,13 @@ const WorkspaceSideDrawer = props => {
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "getLists": () => (/* binding */ getLists),
 /* harmony export */   "parseComment": () => (/* binding */ parseComment)
 /* harmony export */ });
 /* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "./node_modules/react/index.js");
+/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! axios */ "./node_modules/axios/index.js");
+/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(axios__WEBPACK_IMPORTED_MODULE_1__);
+
 
 
 // Used in: CardUserComment.js
@@ -4895,6 +5592,18 @@ const parseComment = strToParse => {
   return parsedStrs;
 };
 
+// Get lists of a board, doesn't change redux state
+const getLists = async boardId => {
+  const {
+    data: lists
+  } = await axios__WEBPACK_IMPORTED_MODULE_1___default()({
+    method: 'get',
+    url: `/api/lists/boardId/${boardId}`
+  });
+  // console.log("cardSideMenu getLists:", lists)
+  return lists;
+};
+
 /***/ }),
 
 /***/ "./client/history.js":
@@ -4927,7 +5636,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "authenticate": () => (/* binding */ authenticate),
 /* harmony export */   "default": () => (/* export default binding */ __WEBPACK_DEFAULT_EXPORT__),
 /* harmony export */   "logout": () => (/* binding */ logout),
-/* harmony export */   "me": () => (/* binding */ me)
+/* harmony export */   "me": () => (/* binding */ me),
+/* harmony export */   "validateUsername": () => (/* binding */ validateUsername)
 /* harmony export */ });
 /* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! axios */ "./node_modules/axios/index.js");
 /* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(axios__WEBPACK_IMPORTED_MODULE_0__);
@@ -4940,6 +5650,7 @@ const TOKEN = 'token';
  * ACTION TYPES
  */
 const SET_AUTH = 'SET_AUTH';
+const VALIDATE_USERNAME = 'VALIDATE_USERNAME';
 
 /**
  * ACTION CREATORS
@@ -4948,6 +5659,12 @@ const setAuth = auth => ({
   type: SET_AUTH,
   auth
 });
+const _validateUsername = user => {
+  return {
+    type: VALIDATE_USERNAME,
+    user
+  };
+};
 
 /**
  * THUNK CREATORS
@@ -4961,7 +5678,9 @@ const me = () => async dispatch => {
       }
     });
     const user = res.data;
-    return dispatch(setAuth(user));
+    return dispatch(setAuth({
+      user
+    }));
   }
 };
 const authenticate = (username, password, email, method) => async dispatch => {
@@ -4974,6 +5693,7 @@ const authenticate = (username, password, email, method) => async dispatch => {
     window.localStorage.setItem(TOKEN, res.data.token);
     dispatch(me());
   } catch (authError) {
+    // console.log("authenticate thunk, authError:", authError.response)
     return dispatch(setAuth({
       error: authError
     }));
@@ -4987,6 +5707,26 @@ const logout = () => {
     auth: {}
   };
 };
+const validateUsername = username => {
+  return async dispatch => {
+    try {
+      const {
+        data: user
+      } = await axios__WEBPACK_IMPORTED_MODULE_0___default()({
+        method: 'get',
+        url: `/auth/username/${username}/validate`
+      });
+      // console.log("validateUsername, response:", user);
+      dispatch(_validateUsername(user));
+      return user;
+    } catch (err) {
+      // console.log("validateUsername, err:", err, " err.response:", err.response);
+      dispatch(setAuth({
+        error: err
+      }));
+    }
+  };
+};
 
 /**
  * REDUCER
@@ -4994,7 +5734,26 @@ const logout = () => {
 /* harmony default export */ function __WEBPACK_DEFAULT_EXPORT__(state = {}, action) {
   switch (action.type) {
     case SET_AUTH:
-      return action.auth;
+      if (action.auth.error) {
+        return {
+          ...state,
+          error: action.auth.error
+        };
+      } else if (action.auth.user) {
+        return {
+          user: action.auth.user
+        };
+      }
+    case VALIDATE_USERNAME:
+      {
+        return {
+          userExists: action.user
+        };
+      }
+    case "CLEAR_AUTH_STATE":
+      {
+        return {};
+      }
     default:
       return state;
   }
@@ -5110,8 +5869,7 @@ const getBoardMembers = boardId => {
 const addBoardMember = (boardId, emailAddr) => {
   return async dispatch => {
     const username = emailAddr.split("@")[0];
-    console.log("addBoardMembers thunk, username:", username, " boardId:", boardId);
-    // const response = await axios.put(`/api/boards/${boardId}/addMember/${username}`);
+    // console.log("addBoardMembers thunk, username:", username, " boardId:", boardId);
     const {
       data: response
     } = await axios__WEBPACK_IMPORTED_MODULE_0___default().put(`/api/boards/${boardId}/addMember/${emailAddr}`);
@@ -5317,7 +6075,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "authenticate": () => (/* reexport safe */ _auth__WEBPACK_IMPORTED_MODULE_2__.authenticate),
 /* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__),
 /* harmony export */   "logout": () => (/* reexport safe */ _auth__WEBPACK_IMPORTED_MODULE_2__.logout),
-/* harmony export */   "me": () => (/* reexport safe */ _auth__WEBPACK_IMPORTED_MODULE_2__.me)
+/* harmony export */   "me": () => (/* reexport safe */ _auth__WEBPACK_IMPORTED_MODULE_2__.me),
+/* harmony export */   "validateUsername": () => (/* reexport safe */ _auth__WEBPACK_IMPORTED_MODULE_2__.validateUsername)
 /* harmony export */ });
 /* harmony import */ var redux__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! redux */ "./node_modules/redux/es/redux.js");
 /* harmony import */ var redux_logger__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! redux-logger */ "./node_modules/redux-logger/dist/redux-logger.js");
@@ -5370,10 +6129,11 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "dropDraggedCard": () => (/* binding */ dropDraggedCard),
 /* harmony export */   "getLists": () => (/* binding */ getLists),
 /* harmony export */   "moveCardToList": () => (/* binding */ moveCardToList),
+/* harmony export */   "moveList": () => (/* binding */ moveList),
 /* harmony export */   "removeACard": () => (/* binding */ removeACard),
-/* harmony export */   "swapListPositions": () => (/* binding */ swapListPositions),
 /* harmony export */   "updateCardDescription": () => (/* binding */ updateCardDescription),
-/* harmony export */   "updateCardTitle": () => (/* binding */ updateCardTitle)
+/* harmony export */   "updateCardTitle": () => (/* binding */ updateCardTitle),
+/* harmony export */   "updateListTitle": () => (/* binding */ updateListTitle)
 /* harmony export */ });
 /* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! axios */ "./node_modules/axios/index.js");
 /* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(axios__WEBPACK_IMPORTED_MODULE_0__);
@@ -5384,20 +6144,13 @@ const DRAG_OVER_CARDS_UP = "DRAG_OVER_CARDS_UP";
 const DRAG_OVER_CARDS_DOWN = "DRAG_OVER_CARDS_DOWN";
 const DROP_DRAGGED_CARD = "DROP_DRAGGED_CARD";
 const UPDATE_CARD = "UPDATE_CARD";
+const UPDATE_LIST_TITLE = "UPDATE_LIST_TITLE";
 const _getLists = lists => {
   return {
     type: GET_LISTS,
     lists
   };
 };
-
-// const _swapListPositions = (listPositions) => {
-//   return {
-//     type: SWAP_LIST_POSITIONS,
-//     listPositions
-//   }
-// }
-
 const _dropDraggedCard = (moveToListIndex, cardIndex) => {
   return {
     type: DROP_DRAGGED_CARD,
@@ -5413,6 +6166,14 @@ const _updateCard = (updatedCard, listIndex, cardId) => {
     updatedCard,
     listIndex,
     cardId
+  };
+};
+const _updateListTitle = (listId, updatedList, currListIndex) => {
+  return {
+    type: UPDATE_LIST_TITLE,
+    listId,
+    currListIndex,
+    updatedList
   };
 };
 const getLists = boardId => {
@@ -5454,19 +6215,20 @@ const deleteList = (board, list) => {
     dispatch(_getLists(lists));
   };
 };
-const swapListPositions = (boardId, swapListsInfo) => {
+const moveList = (boardId, moveListInfo) => {
+  console.log("moveList thunk, boardId:", boardId, " moveListInfo:", moveListInfo);
   return async dispatch => {
     const {
       data: updatedLists
     } = await axios__WEBPACK_IMPORTED_MODULE_0___default()({
       method: 'put',
-      url: `/api/lists/boardId/${boardId}/swapListPositions`,
+      url: `/api/lists/board/${boardId}/moveList`,
       data: {
-        swapListsInfo
+        moveListInfo
       }
     });
-    console.log("updatedLists from swapping:", updatedLists);
-    // sortListsAndCards(board, listPositions);
+    console.log("updatedLists from moveList:", updatedLists);
+    // // sortListsAndCards(board, listPositions);
     dispatch(_getLists(updatedLists));
   };
 };
@@ -5575,6 +6337,21 @@ const dropDraggedCard = dropInfo => {
 
     // dispatch(_dropDraggedCard(dropInfo.moveToListIndex, dropInfo.moveToCardIndex));
     dispatch(_dropDraggedCard(dropInfo.moveToListIndex, dropInfo.cardIndex));
+  };
+};
+const updateListTitle = (listId, newListTitle, currListIndex) => {
+  console.log("updateListTitle thunk, listId:", listId, " newListTitle:", newListTitle, " currListIndex:", currListIndex);
+  return async dispatch => {
+    const {
+      data: updatedList
+    } = await axios__WEBPACK_IMPORTED_MODULE_0___default()({
+      method: 'put',
+      url: `/api/lists/list/${listId}/updateListTitle`,
+      data: {
+        title: newListTitle
+      }
+    });
+    dispatch(_updateListTitle(listId, updatedList, currListIndex));
   };
 };
 const inititalState = {
@@ -5881,18 +6658,6 @@ function listsReducer(state = inititalState, action) {
       }
     case "UPDATE_DRAGGED_LEAVE_INDEXES":
       {
-        // if(state.draggedCard.enterListIndex !== action.leaveListIndex) {
-        //   return { 
-        //     ...state,
-        //     draggedCard: { 
-        //       ...state.draggedCard,
-        //       leaveCardIndex: action.leaveCardIndex,
-        //       // leaveListIndex: action.leaveListIndex
-        //     },
-
-        //   }
-        // }
-
         return {
           ...state,
           draggedCard: {
@@ -5982,17 +6747,15 @@ function listsReducer(state = inititalState, action) {
           lists: newLists
         };
       }
-    // case SWAP_LIST_POSITIONS: {
-    //   const listPositions = action.listPositions;
-    //   const newLists = new Array(state.lists.length);
-    //   state.lists.forEach((list) => {
-    //     const index = listPositions.get(list.id);
-    //     newLists[index] = list;
-    //   });
-    //   // console.log("listsReducer newLists:", newLists);
-    //   return { ...state, lists: newLists, listPositions }
-    // }
-
+    case UPDATE_LIST_TITLE:
+      {
+        const newLists = [...state.lists];
+        newLists.splice(action.currListIndex, 1, action.updatedList);
+        return {
+          ...state,
+          lists: newLists
+        };
+      }
     default:
       {
         return state;
@@ -6011,8 +6774,11 @@ function listsReducer(state = inititalState, action) {
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "addWorkspace": () => (/* binding */ addWorkspace),
 /* harmony export */   "createNewBoard": () => (/* binding */ createNewBoard),
 /* harmony export */   "default": () => (/* binding */ workspacesReducer),
+/* harmony export */   "deleteABoard": () => (/* binding */ deleteABoard),
+/* harmony export */   "getBoardsMemberOf": () => (/* binding */ getBoardsMemberOf),
 /* harmony export */   "getWorkspaces": () => (/* binding */ getWorkspaces)
 /* harmony export */ });
 /* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! axios */ "./node_modules/axios/index.js");
@@ -6023,6 +6789,10 @@ __webpack_require__.r(__webpack_exports__);
  * ACTION TYPES
  */
 const GET_WORKSPACES = 'GET_WORKSPACES';
+const GET_BOARDS_MEMBER_OF = 'GET_BOARDS_MEMBER_OF';
+const ADD_WORKSPACE = 'ADD_WORKSPACE';
+const ADD_BOARD = 'ADD_BOARD';
+const DELETE_BOARD = 'DELETE_BOARD';
 
 /**
  * ACTION CREATORS
@@ -6033,6 +6803,31 @@ const _getWorkspaces = workspaces => {
     workspaces
   };
 };
+const _getBoardsMemberOf = workspaces => {
+  return {
+    type: GET_BOARDS_MEMBER_OF,
+    workspaces
+  };
+};
+const _addWorkspace = newWorkspace => {
+  return {
+    type: ADD_WORKSPACE,
+    newWorkspace
+  };
+};
+const _createNewBoard = updatedWorkspace => {
+  return {
+    type: ADD_BOARD,
+    updatedWorkspace
+  };
+};
+const _deleteBoard = (currWorkspaceIndex, boardId) => {
+  return {
+    type: DELETE_BOARD,
+    currWorkspaceIndex,
+    boardId
+  };
+};
 
 /**
  * THUNK CREATORS
@@ -6041,28 +6836,134 @@ const getWorkspaces = userId => {
   return async dispatch => {
     const response = await axios__WEBPACK_IMPORTED_MODULE_0___default().get(`/api/users/userId/${userId}/workspaces`);
     const workspaces = response.data;
-    // console.log("getWorkpsace thunk, workspaces:", workspaces);
-
-    dispatch(_getWorkspaces(workspaces));
+    console.log("getWorkpsace thunk, workspaces:", workspaces);
+    return dispatch(_getWorkspaces(workspaces));
+  };
+};
+const getBoardsMemberOf = userId => {
+  return async dispatch => {
+    const {
+      data: workspaces
+    } = await axios__WEBPACK_IMPORTED_MODULE_0___default()({
+      method: 'get',
+      url: `/api/workspaces/user/${userId}/boards/memberOf`
+    });
+    console.log("getBoardMembersOf thunk, workspaces:", workspaces);
+    dispatch(_getBoardsMemberOf(workspaces));
+  };
+};
+const addWorkspace = (userId, workspaceName) => {
+  return async dispatch => {
+    const {
+      data: newWorkspace
+    } = await axios__WEBPACK_IMPORTED_MODULE_0___default()({
+      method: 'post',
+      url: `/api/workspaces/newWorkspace/user/${userId}`,
+      data: {
+        title: workspaceName,
+        owner: userId
+      }
+    });
+    console.log("addWorkspace thunk, newWorkspace:", newWorkspace);
+    dispatch(_addWorkspace(newWorkspace));
   };
 };
 const createNewBoard = (userId, workspaceId, boardTitle) => {
+  console.log("createNewBoard thunk userId, workspaceId, boardTitle:", userId, workspaceId, boardTitle);
   return async dispatch => {
-    const updatedWorkspace = await axios__WEBPACK_IMPORTED_MODULE_0___default().post(`/api/boards/newBoard/${userId}/${workspaceId}`, {
+    const {
+      data: updatedWorkspace
+    } = await axios__WEBPACK_IMPORTED_MODULE_0___default().post(`/api/boards/newBoard/user/${userId}/workspace/${workspaceId}`, {
       title: boardTitle
     });
     console.log('createNewBoard, updatedWorkspace:', updatedWorkspace);
-    const response = await axios__WEBPACK_IMPORTED_MODULE_0___default().get(`/api/users/${userId}/workspace`);
-    const workspace = response.data[0];
-    dispatch(_getWorkspace(workspace));
+    dispatch(_createNewBoard(updatedWorkspace));
+    // const { data: response } = await axios.get(`/api/users/userId/${userId}/workspaces`);
+    // const workspaces = response;
+
+    // dispatch(_getWorkspaces(workspaces)); // need to change this?
   };
 };
-const initialState = [];
+
+const deleteABoard = (currWorkspaceIndex, boardId) => {
+  return async dispatch => {
+    const {
+      data: response
+    } = await axios__WEBPACK_IMPORTED_MODULE_0___default()({
+      method: 'delete',
+      url: `/api/boards/board/${boardId}`
+    });
+    // console.log("deleteABoard thunk, response:", response);
+
+    dispatch(_deleteBoard(currWorkspaceIndex, boardId));
+  };
+};
+const initialState = {
+  workspaces: [],
+  submittedNewBoard: 0
+};
+
+// const initialState = [];
+
 function workspacesReducer(state = initialState, action) {
   switch (action.type) {
     case GET_WORKSPACES:
       {
-        return action.workspaces;
+        return {
+          ...state,
+          workspaces: action.workspaces
+        };
+        // return action.workspaces;
+      }
+
+    case ADD_WORKSPACE:
+      {
+        return {
+          ...state,
+          workspaces: [...state.workspaces, action.newWorkspace]
+        };
+      }
+    case "SUBMIT_NEW_BOARD_REDIRECT":
+      {
+        return {
+          ...state,
+          submittedNewBoard: action.boardWorkspaceId
+        };
+      }
+    case ADD_BOARD:
+      {
+        const updatedWorkspaceId = action.updatedWorkspace.id;
+        const newWorkspaces = [...state.workspaces];
+        const workspaceIdx = newWorkspaces.findIndex(workspace => workspace.id === updatedWorkspaceId);
+        newWorkspaces.splice(workspaceIdx, 1, action.updatedWorkspace);
+        return {
+          ...state,
+          workspaces: newWorkspaces
+        };
+      }
+    case DELETE_BOARD:
+      {
+        const currWorkspace = state.workspaces[action.currWorkspaceIndex];
+        const newCurrWorkspace = {
+          ...currWorkspace
+        };
+        const newBoards = [...newCurrWorkspace.boards];
+        const deletedBoardIndex = newBoards.findIndex(board => board.id === action.boardId);
+        newBoards.splice(deletedBoardIndex, 1);
+        newCurrWorkspace.boards = newBoards;
+        const newWorkspaces = [...state.workspaces];
+        newWorkspaces.splice(action.currWorkspaceIndex, 1, newCurrWorkspace);
+        return {
+          ...state,
+          workspaces: newWorkspaces
+        };
+      }
+    case GET_BOARDS_MEMBER_OF:
+      {
+        return {
+          ...state,
+          workspaces: [...state.workspaces, ...action.workspaces]
+        };
       }
     default:
       {
