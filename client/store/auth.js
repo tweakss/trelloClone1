@@ -6,12 +6,20 @@ const TOKEN = 'token'
 /**
  * ACTION TYPES
  */
-const SET_AUTH = 'SET_AUTH'
+const SET_AUTH = 'SET_AUTH';
+const VALIDATE_USERNAME = 'VALIDATE_USERNAME';
 
 /**
  * ACTION CREATORS
  */
 const setAuth = auth => ({type: SET_AUTH, auth})
+
+const _validateUsername = (user) => {
+  return {
+    type: VALIDATE_USERNAME,
+    user
+  }
+}
 
 /**
  * THUNK CREATORS
@@ -26,7 +34,7 @@ export const me = () => async dispatch => {
     })
     
     const user = res.data;
-    return dispatch(setAuth(user))
+    return dispatch(setAuth({user}))
   }
 }
 
@@ -36,6 +44,7 @@ export const authenticate = (username, password, email, method) => async dispatc
     window.localStorage.setItem(TOKEN, res.data.token)
     dispatch(me());
   } catch (authError) {
+    // console.log("authenticate thunk, authError:", authError.response)
     return dispatch(setAuth({error: authError}))
   }
 }
@@ -49,13 +58,45 @@ export const logout = () => {
   }
 }
 
+export const validateUsername = (username) => {
+  return async(dispatch) => {
+    try {
+      const { data: user } = await axios({
+        method: 'get',
+        url: `/auth/username/${username}/validate`
+      });
+      // console.log("validateUsername, response:", user);
+      dispatch(_validateUsername(user));
+      return user;
+    } catch(err) {
+      // console.log("validateUsername, err:", err, " err.response:", err.response);
+      dispatch(setAuth({
+        error: err,
+      }))
+    }
+    
+
+    
+  }
+}
+
 /**
  * REDUCER
  */
 export default function(state = {}, action) {
   switch (action.type) {
     case SET_AUTH:
-      return action.auth
+      if(action.auth.error) {
+        return { ...state, error: action.auth.error }
+      } else if(action.auth.user) {
+        return { user: action.auth.user }
+      }
+    case VALIDATE_USERNAME: {
+      return { userExists: action.user }
+    }
+    case "CLEAR_AUTH_STATE": {
+      return {};
+    }
     default:
       return state
   }

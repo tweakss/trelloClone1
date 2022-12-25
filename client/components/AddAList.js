@@ -69,13 +69,20 @@ export const AddAList = (props) => {
           </div>
         </div> :
         <div className="add-list-wrapper mgn-l-05rem">
-          <button
-            className="add-list btn | usr-slct"
-            type="button"
+          <div
+            className="add-list-btn-container | bdr-none br-025rem"
             onClick={handleNewList}
           >
-            Add another list
-          </button>
+            <span className="add-list-btn-plus-icon">+</span>
+            <button
+              className="add-list-btn | bdr-none bg-clr-transparent usr-slct"
+              type="button"
+              
+            >
+              Add another list
+            </button>
+          </div>
+          
         </div>
       }
       

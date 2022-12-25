@@ -3,24 +3,31 @@ const { models: { Board, User, List, Card, Workspace, Guest }} = require('../db'
 
 // api/boards/...
 
-// router.get('/:boardId/lists', async (req, res, next) => {
-//   const boardId = req.params.boardId;
+// for testing
+router.get('/:boardId/testing', async (req, res, next) => {
+  const boardId = req.params.boardId;
 
-//   try {
-//     const board = await Board.findOne({
-//       where: {
-//         id: boardId
-//       },
-//       include: {
-//         model: List,
-//       }
-//     });
+  try {
+    const workspace = await Workspace.findOne({
+      include: {
+        model: Board,
+        where: {
+          id: boardId
+        }
+      }
+    })
+    const user = await User.findOne({
+      where: {
+        id: 5
+      }
+    })
+    await workspace.removeUsers([user]);
 
-//     res.send(userBoard);
-//   } catch(err) {
-//     next(err);
-//   }
-// });
+    res.send(workspace);
+  } catch(err) {
+    next(err);
+  }
+});
 
 // Get a board
 router.get('/:boardId', async (req, res, next) => {
@@ -85,7 +92,7 @@ router.get('/:boardId/guests', async (req, res, next) => {
 });
 
 // Create a board for a user
-router.post('/newBoard/:userId/:workspaceId', async (req, res, next) => {
+router.post('/newBoard/user/:userId/workspace/:workspaceId', async (req, res, next) => {
   const userId = req.params.userId;
   const workspaceId = req.params.workspaceId;
 
@@ -108,7 +115,11 @@ router.post('/newBoard/:userId/:workspaceId', async (req, res, next) => {
       where: {
         id: workspaceId
       },
-      include: Board
+      include: {
+        model: Board,
+        separate: true,
+        order: [['id', 'ASC']]
+      }
     });
 
     res.send(updatedWorkspace);
@@ -116,6 +127,23 @@ router.post('/newBoard/:userId/:workspaceId', async (req, res, next) => {
     next(err);
   }
 });
+
+// Delete a board
+router.delete('/board/:boardId', async(req, res, next) => {
+  const boardId = req.params.boardId;
+  try {
+    const board = await Board.findOne({
+      where: {
+        id: boardId
+      }
+    });
+
+    const response = await board.destroy();
+    res.send(response);
+  } catch(err) {
+    next(err);
+  }
+})
 
 // Add a user to a board
 router.put('/:boardId/addMember/:emailAddr', async (req, res, next) => {
@@ -140,7 +168,8 @@ router.put('/:boardId/addMember/:emailAddr', async (req, res, next) => {
     }
 
     const response = await board.addUsers([user]);
-    console.log("After adding a user to a board, response:", response);
+
+    // console.log("After adding a user to a board, response:", response);
     if(response) {
       res.send(user);
     } else {

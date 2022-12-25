@@ -92,8 +92,7 @@ export const getBoardMembers = (boardId) => {
 export const addBoardMember = (boardId, emailAddr) => {
   return async (dispatch) => {
     const username = emailAddr.split("@")[0];
-    console.log("addBoardMembers thunk, username:", username, " boardId:", boardId);
-    // const response = await axios.put(`/api/boards/${boardId}/addMember/${username}`);
+    // console.log("addBoardMembers thunk, username:", username, " boardId:", boardId);
     const { data: response } = await axios.put(`/api/boards/${boardId}/addMember/${emailAddr}`);
     console.log("addBoardMember thunk, response:", response);
 

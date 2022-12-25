@@ -22,7 +22,7 @@ const NavbarContent = (props) => {
     //If clicked on any other part of the dropdown then do nothing
     while(clicked = clicked.parentElement) {
       if(clicked.className.includes("members-dropdown")) {
-        console.log("clicked within members-dropdown");
+        // console.log("clicked within members-dropdown");
         return;
       }
     }
@@ -50,7 +50,7 @@ const NavbarContent = (props) => {
 
   const [inviteDropdown, setInviteDropdown] = useState(false);
   const handleShareDropdown = () => {
-    console.log("handleShareDropdown");
+    // console.log("handleShareDropdown");
     setInviteDropdown((prev) => !prev);
   }
 
@@ -69,7 +69,7 @@ const NavbarContent = (props) => {
   // const [wasInsideShareDropdown, setWasInsideShareDropdown] = useState(false);
   let wasInsideShareDropdown = false;
   const mouseDownEvent = (event) => {
-    console.log("mouseDownEvent event.target:", event.target);
+    // console.log("mouseDownEvent event.target:", event.target);
     let clickedElem = event.target;
     while((clickedElem = clickedElem.parentElement) ) {
       if(clickedElem.className.includes("share-board")) {
@@ -80,7 +80,7 @@ const NavbarContent = (props) => {
     }
   }
   const mouseUpEvent = (event) => {
-    console.log("mouseUpEvent event.target:", event.target, " wasInsideShareDropdown:", wasInsideShareDropdown);
+    // console.log("mouseUpEvent event.target:", event.target, " wasInsideShareDropdown:", wasInsideShareDropdown);
     let clickedElem = event.target;
     while((clickedElem = clickedElem.parentElement) ) {
       if(clickedElem.className.includes("share-board")) {
@@ -88,13 +88,13 @@ const NavbarContent = (props) => {
       }
     }
 
-    console.log("clicked outside of inviteDropdown, wasInsideShareDropdown:", wasInsideShareDropdown);
+    // console.log("clicked outside of inviteDropdown, wasInsideShareDropdown:", wasInsideShareDropdown);
     if(wasInsideShareDropdown) {
-      console.log("wasInsideShareDropdown");
+      // console.log("wasInsideShareDropdown");
       wasInsideShareDropdown = false;
       return;
     } else {
-      console.log("else wasInsideShareDropdown");
+      // console.log("else wasInsideShareDropdown");
       setInviteDropdown(false);
       setInviteInput("");
       // setWasInsideShareDropdown(false);
@@ -143,7 +143,7 @@ const NavbarContent = (props) => {
 
   
 
-  const submitShareBoard = (inviteInput) => {
+  const submitShareBoard = () => {
     const shareBoardInput = document.querySelector("#share-board-input-email");
     const shareBoardErrMsg = document.querySelector(".share-board-err-msg");
     if(shareBoardInput.validity.valueMissing) {
@@ -177,7 +177,7 @@ const NavbarContent = (props) => {
 
   return (
     <div id="board-navbar">
-      <h3>{board.title}</h3>
+      <h3 className="board-navbar-h3">{board.title}</h3>
       <span>|</span>
 
       <div className="members-dropdown">
@@ -235,7 +235,7 @@ const NavbarContent = (props) => {
                 <button
                   type="button"
                   className="share-submit-btn"
-                  onClick={() => submitShareBoard(inviteInput)}
+                  onClick={submitShareBoard}
                 >
                   Share
                 </button>
@@ -255,9 +255,8 @@ const NavbarContent = (props) => {
 
 const mapState = (state) => {
   return {
-    user: state.auth,
+    user: state.auth.user,
     board: state.board.board,
-    workspace: state.workspace,
     members: state.board.members,
     toInvite: state.board.toInvite,
     errorMsg: state.board.errorMsg,

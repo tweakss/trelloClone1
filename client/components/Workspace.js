@@ -1,34 +1,26 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import {connect} from 'react-redux'
-import { getWorkspaces } from '../store/workspace';
+import { getWorkspaces, getBoardsMemberOf } from '../store/workspace';
 import { Link } from 'react-router-dom';
-import { WorkspaceSideDrawer } from './WorkspaceSideDrawer.js';
+import WorkspaceSideDrawer from './WorkspaceSideDrawer.js';
+import WorkspaceNewBoard from './WorkspaceNewBoard';
 import Navbar from './Navbar'
 
-// import Navbar from './Navbar';
-
-/*
-Workspace:
-navbar-side content content
-navbar-side content content
-*/
 // Display user's workspace (boards, etc.)
 const Workspace = props => {
-  const { user, getWorkspaces, workspaces } = props
-  // const boards = workspace.boards;
-  // console.log('Workspace, props:', props);
+  const { 
+    user, workspaces,
+    getWorkspaces, getBoardsMemberOf
+  } = props
 
   useEffect(() => {
-    getWorkspaces(user.id);
+    (async() => {
+      const response = await getWorkspaces(user.id);
+      getBoardsMemberOf(user.id);
+    })();
+    
   }, [])
-
-  // const displayWorkspace = (userId) => {
-  //   const workspace = getWorkspace(userId);
-  //   console.log('displayWorkspace, workspace:', workspace);
-  // } 
-
-  // console.log('Workspace, workspace:', workspace);
-
+  
   if(workspaces.length === 0) {
     console.log('workspaces is empty, workspaces:', workspaces);
     return (
@@ -38,20 +30,21 @@ const Workspace = props => {
     );
   }
 
-  console.log('Workspace, workspaces:', workspaces);
+  console.log('Workspace, user:', user);
 
 
   return (
     <div className="workspace-layout-grid">
       <Navbar user={user} />
+      <div className="navbar-filler"></div>
       <WorkspaceSideDrawer />
-      <div className="workspaces-display-section">
+      <div className="workspaces-display-section |">
         <h3>YOUR WORKSPACES</h3>
         <div className="workspaces-display-wrapper">
           {
             workspaces.map((workspace) => {
               return (
-                <div key={workspace.id} className="workspaces-display"> 
+                <div key={workspace.id} className="workspaces-display-container"> 
                   <div className="workspaces-display-header">
                     <h4>{workspace.title}</h4>
                   </div>
@@ -59,9 +52,25 @@ const Workspace = props => {
                     {
                       workspace.boards.map((board) => {
                         return (
-                          <Link to={`/board/${board.id}`} key={board.id}>{board.title}</Link>
+                          <div
+                            key={board.id}
+                            className="workspaces-display-board-item | br-025rem pdg-075rem"
+                          >
+                            <div className="workspaces-display-board-link-container">
+                              <Link 
+                                to={`/board/${board.id}`}
+                                className="workspaces-display-board-link"
+                              >
+                                {board.title}
+                              </Link>
+                            </div>
+                          </div>  
                         )
-                      })
+                      }).concat(
+                        <WorkspaceNewBoard key={"createNewBoard"}
+                          boardWorkspace={workspace}
+                        />
+                      )
                     }
                   </div>
                 </div>
@@ -70,22 +79,7 @@ const Workspace = props => {
           }
         </div>
       </div>
-      
 
-      {/* <div className="grid-board-links">
-        <h4> Boards </h4>
-        {
-          workspaces[0].boards.map((board) => {
-            return (
-              <div className="board-link" key={board.id}>
-                <Link to={`/board/${board.id}`}>{board.title}</Link>
-              </div>
-            )
-          })
-        }
-      </div> */}
-      
-          
            
     </div>
   )
@@ -96,14 +90,15 @@ const Workspace = props => {
  */
 const mapState = state => {
   return {
-    user: state.auth,
-    workspaces: state.workspaces
+    user: state.auth.user,
+    workspaces: state.workspaces.workspaces,
   }
 }
 
 const mapDispatch = (dispatch) => {
   return {
     getWorkspaces: (userId) => dispatch(getWorkspaces(userId)),
+    getBoardsMemberOf: (userId) => dispatch(getBoardsMemberOf(userId)), 
   }
 }
 

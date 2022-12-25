@@ -55,7 +55,9 @@ router.get('/userId/:userId/workspaces', async(req, res, next) => {
           }
         },
         {
-          model: Board
+          model: Board,
+          separate: true,
+          order: [['id', 'ASC']]
         }
       ],
       
