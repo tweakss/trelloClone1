@@ -8,10 +8,10 @@ In general it allows one or more people to create lists of tasks and share them 
 Before trying it out, please note that some parts of the app might seem unfinished (ex: the appearance), but they are left like that on purpose. If you want to know more then scroll down to "If you want to know more..." section then to "Overall Goal/Explanation".
 ## Quickly try it out ()
 If you don't want to create an account, you can use the below two accounts. The password is 123 for both accounts.
-Usernames: 
-- murphy
-- ben
-Pw: 123
+- Usernames: 
+  - murphy
+  - ben
+- Pw: 123
 
 1. Sign up and log in with your account.
 2. Create your own board or use the already created board.
@@ -31,8 +31,8 @@ You should be able to do the following:
 1. Sign up and log in with your account.
 2. Create a board or workspace and delete them.
 3. Create lists and their cards and delete them.
-  - Move a list around (another board or position)
-  - Move cards around (drag and drop, another list/board)
+    - Move a list around (another board or position)
+    - Move cards around (drag and drop, another list/board)
 4. Write/post a comment in a card, edit or delete the comment. 
 
 ### Overall Goal/Explanation
