@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from 'react'
 import {connect } from 'react-redux'
 import { Link } from 'react-router-dom';
-import { deleteABoard } from '../store/workspace';
+import { deleteABoard } from '../store/board';
 
 const BoardSideDrawerBoardLink = (props) => {
   const {
     board, boardIndex, currWorkspaceIndex, currBoard,
     deleteABoard
   } = props;
+  const match = props.match;
 
   const [deleteBoardMenu, setDeleteBoardMenu] = useState(false);
   const handleDeleteBoardMenu = () => {
@@ -22,6 +23,9 @@ const BoardSideDrawerBoardLink = (props) => {
   const closeDeleteBoardMenu = () => {
     const actionsBtn = document.querySelector(`.board-side-drawer-board-link-actions-btn.idx${boardIndex}`);
     actionsBtn.style.visibility = "hidden";
+    const boardLinkContainer = document.querySelector(`.board-side-drawer-board-link-container.idx${boardIndex}`);
+    boardLinkContainer.style.backgroundColor = "";
+
     setDeleteBoardMenu(false);
   }
 
@@ -60,13 +64,15 @@ const BoardSideDrawerBoardLink = (props) => {
   }
 
   const handleDeleteABoard = () => {
+    console.log("handleDeleteABoard, currWorkspaceIndex:", currWorkspaceIndex)
     deleteABoard(currWorkspaceIndex, board.id);
-    if(board.id === currBoard.id) {
+    const paramsBoardId = parseInt(match.params.boardId, 10);
+    if(board.id === paramsBoardId) {
       window.location.assign(`/workspace`);
     }
-    
+
     handleDeleteBoardMenu();
-    
+    // window.location.assign(`/workspace`);
   }
 
   const mouseOverBoardLink = () => {
@@ -90,7 +96,7 @@ const BoardSideDrawerBoardLink = (props) => {
     event.stopPropagation();
   }
 
-  // console.log("BoardSideDrawerBoardLink, deleteBoardMenu:", deleteBoardMenu, " deleteConfirm:", deleteConfirm);
+  // console.log("BoardSideDrawerBoardLink, board:", board, " match:", match);
 
   return (
     <div
@@ -168,10 +174,10 @@ const BoardSideDrawerBoardLink = (props) => {
                   </div>
                 </div>
                 <div className="board-side-drawer-board-link-delete-board-menu-actions">
-                  <div className="board-side-drawer-board-link-delete-board-menu-actions-del">
-                    <button className="board-side-drawer-board-link-delete-board-menu-actions-del-btn | bdr-none bg-clr-transparent"
-                      onClick={() => setDeleteConfirm(true)}
-                    >
+                  <div className="board-side-drawer-board-link-delete-board-menu-actions-del"
+                    onClick={() => setDeleteConfirm(true)}
+                  >
+                    <button className="board-side-drawer-board-link-delete-board-menu-actions-del-btn | bdr-none bg-clr-transparent">
                       Delete Board
                     </button>
                     <button className="board-side-drawer-board-link-delete-board-menu-actions-del-btn-right | bdr-none bg-clr-transparent">

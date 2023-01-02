@@ -50,7 +50,7 @@ router.get('/username/:username/validate', async(req, res, next) => {
   const username = req.params.username;
   try {
     const user = await User.findOne({where: { username }});
-    console.log("user:", user)
+    // console.log("user:", user)
     if(!user) {
       const error = Error("Username doesn't exist");
       error.status = 401;

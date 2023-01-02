@@ -6,8 +6,9 @@ import axios from 'axios'
 const GET_WORKSPACES = 'GET_WORKSPACES';
 const GET_BOARDS_MEMBER_OF = 'GET_BOARDS_MEMBER_OF';
 const ADD_WORKSPACE = 'ADD_WORKSPACE';
-const ADD_BOARD = 'ADD_BOARD';
-const DELETE_BOARD = 'DELETE_BOARD';
+const DELETE_WORKSPACE = 'DELETE_WORKSPACE';
+const ADD_BOARD_OWN_WRKSPCE = 'ADD_BOARD_OWN_WRKSPCE';
+// const DELETE_BOARD = 'DELETE_BOARD';
 
 
 /**
@@ -34,20 +35,27 @@ const _addWorkspace = (newWorkspace) => {
   }
 }
 
-const _createNewBoard = (updatedWorkspace) => {
+const _deleteWorkspace = (workspaceId) => {
   return {
-    type: ADD_BOARD,
+    type: DELETE_WORKSPACE,
+    workspaceId
+  }
+}
+
+const _createNewBoardInOwnWrkspce = (updatedWorkspace) => {
+  return {
+    type: ADD_BOARD_OWN_WRKSPCE,
     updatedWorkspace
   }
 }
 
-const _deleteBoard = (currWorkspaceIndex, boardId) => {
-  return {
-    type: DELETE_BOARD,
-    currWorkspaceIndex,
-    boardId
-  }
-}
+// const _deleteABoard = (currWorkspaceIndex, boardId) => {
+//   return {
+//     type: DELETE_BOARD,
+//     currWorkspaceIndex,
+//     boardId
+//   }
+// }
 
 
 /**
@@ -57,7 +65,7 @@ export const getWorkspaces = (userId) => {
   return async (dispatch) => {
     const response = await axios.get(`/api/users/userId/${userId}/workspaces`);
     const workspaces = response.data;
-    console.log("getWorkpsace thunk, workspaces:", workspaces);
+    // console.log("getWorkpsace thunk, workspaces:", workspaces);
 
     return dispatch(_getWorkspaces(workspaces));
   }
@@ -85,39 +93,49 @@ export const addWorkspace = (userId, workspaceName) => {
         owner: userId
       }
     });
-    console.log("addWorkspace thunk, newWorkspace:", newWorkspace);
+    // console.log("addWorkspace thunk, newWorkspace:", newWorkspace);
 
     dispatch(_addWorkspace(newWorkspace));
   }
 }
 
-export const createNewBoard = (userId, workspaceId, boardTitle) => {
-  console.log("createNewBoard thunk userId, workspaceId, boardTitle:", userId, workspaceId, boardTitle);
+export const deleteWorkspace = (workspaceId) => {
+  return async(dispatch) => {
+    const { data: response } = await axios({
+      method: 'delete',
+      url: `/api/workspaces/workspace/${workspaceId}`
+    });
+    // console.log("deleteWorkspace thunk, response:", response);
+
+    dispatch(_deleteWorkspace(workspaceId));
+    return response;
+  }
+}
+
+export const createNewBoardInOwnWrkspce = (userId, workspaceId, boardTitle) => {
+  // console.log("createNewBoard thunk userId, workspaceId, boardTitle:", userId, workspaceId, boardTitle);
   return async (dispatch) => {
     const { data: updatedWorkspace } = await axios.post(`/api/boards/newBoard/user/${userId}/workspace/${workspaceId}`, {
       title: boardTitle
     });
-    console.log('createNewBoard, updatedWorkspace:', updatedWorkspace);
+    // console.log('createNewBoard, updatedWorkspace:', updatedWorkspace);
 
-    dispatch(_createNewBoard(updatedWorkspace));
-    // const { data: response } = await axios.get(`/api/users/userId/${userId}/workspaces`);
-    // const workspaces = response;
-
-    // dispatch(_getWorkspaces(workspaces)); // need to change this?
+    dispatch(_createNewBoardInOwnWrkspce(updatedWorkspace));
+    return updatedWorkspace;
   }
 }
 
-export const deleteABoard = (currWorkspaceIndex, boardId) => {
-  return async(dispatch) => {
-    const { data: response } = await axios({
-      method: 'delete',
-      url: `/api/boards/board/${boardId}`
-    });
-    // console.log("deleteABoard thunk, response:", response);
+// export const deleteABoard = (currWorkspaceIndex, boardId) => {
+//   return async(dispatch) => {
+//     const { data: response } = await axios({
+//       method: 'delete',
+//       url: `/api/boards/board/${boardId}`
+//     });
+//     // console.log("deleteABoard thunk, response:", response);
 
-    dispatch(_deleteBoard(currWorkspaceIndex, boardId));
-  }
-}
+//     dispatch(_deleteABoard(currWorkspaceIndex, boardId));
+//   }
+// }
 
 
 const initialState = {
@@ -136,10 +154,15 @@ export default function workspacesReducer(state = initialState, action) {
     case ADD_WORKSPACE: {
       return { ...state, workspaces: [ ...state.workspaces, action.newWorkspace ] }
     }
-    case "SUBMIT_NEW_BOARD_REDIRECT": {
-      return { ...state, submittedNewBoard: action.boardWorkspaceId }
+    case DELETE_WORKSPACE: {
+      const newWorkspaces = [ ...state.workspaces ];
+      const toDeleteIdx = newWorkspaces.findIndex((workspace) => workspace.id === action.workspaceId);
+      newWorkspaces.splice(toDeleteIdx, 1);
+
+      return { ...state, workspaces: newWorkspaces };
+
     }
-    case ADD_BOARD: {
+    case ADD_BOARD_OWN_WRKSPCE: {
       const updatedWorkspaceId = action.updatedWorkspace.id;
       const newWorkspaces = [ ...state.workspaces ];
       const workspaceIdx = newWorkspaces.findIndex((workspace) => workspace.id === updatedWorkspaceId);
@@ -147,21 +170,27 @@ export default function workspacesReducer(state = initialState, action) {
 
       return { ...state, workspaces: newWorkspaces };
     }
-    case DELETE_BOARD: {
-      const currWorkspace = state.workspaces[action.currWorkspaceIndex]
-      const newCurrWorkspace = { ...currWorkspace };
-      const newBoards = [ ...newCurrWorkspace.boards ];
-      const deletedBoardIndex = newBoards.findIndex((board) => board.id === action.boardId)
-      newBoards.splice(deletedBoardIndex, 1);
-      newCurrWorkspace.boards = newBoards;
+    // case DELETE_BOARD: {
+    //   const currWorkspace = state.workspaces[action.currWorkspaceIndex]
+    //   const newCurrWorkspace = { ...currWorkspace };
+    //   const newBoards = [ ...newCurrWorkspace.boards ];
+    //   const deletedBoardIndex = newBoards.findIndex((board) => board.id === action.boardId)
+    //   newBoards.splice(deletedBoardIndex, 1);
+    //   newCurrWorkspace.boards = newBoards;
 
-      const newWorkspaces = [ ...state.workspaces ];
-      newWorkspaces.splice(action.currWorkspaceIndex, 1, newCurrWorkspace);
-      return { ...state, workspaces: newWorkspaces };
+    //   const newWorkspaces = [ ...state.workspaces ];
+    //   newWorkspaces.splice(action.currWorkspaceIndex, 1, newCurrWorkspace);
+    //   return { ...state, workspaces: newWorkspaces };
       
-    }
+    // }
     case GET_BOARDS_MEMBER_OF: {
       return { ...state, workspaces: [ ...state.workspaces, ...action.workspaces ]}
+    }
+    case "UPDATE_WORKSPACES_AFTER_NEW_BOARD": {
+      const newWorkspaces = [ ...state.workspaces ];
+      newWorkspaces.splice(action.currWorkspaceIndex, 1, action.updatedWorkspace);
+
+      return { ...state, workspaces: newWorkspaces };
     }
     default: {
       return state;

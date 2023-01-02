@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import {connect, useDispatch } from 'react-redux'
+import {connect } from 'react-redux'
 import { Link } from 'react-router-dom';
 import { createNewBoard } from '../store/board';
 import { getBoardWorkspace } from '../store/board';
@@ -7,28 +7,24 @@ import BoardSideDrawerBoardLink from './BoardSideDrawerBoardLink';
 
 const BoardSideDrawer = (props) => {
   const {
-    user, currBoard, workspaces,
-    createNewBoard, getBoardWorkspace, boardWorkspace,
-    match,
+    user, currWorkspace, match, workspaces,
+    createNewBoard, getBoardWorkspace, boardWorkspace
   } = props;
-  const dispatch = useDispatch();
+  
   
   const localStorage = window.localStorage;
   const [open, setOpen] = useState(parseInt(localStorage.getItem("sideDrawerOpen"), 10));
   
   useEffect(() => {
-    const sideDrawer = document.querySelector('.board-side-drawer-wrapper');
-    // const openCloseDrawerBtn = document.querySelector('.board-side-drawer-handle');
-    const gridBoard = document.getElementById('grid-board');
+    const sideDrawer = document.querySelector('.wrkspce-settings-side-drawer-wrapper');
+    const wrkspceSettingsGrid = document.querySelector(".workspace-settings-layout-grid");
     
     if(open) {
-      gridBoard.style.gridTemplateColumns = '240px';
+      wrkspceSettingsGrid.style.gridTemplateColumns = '240px';
       sideDrawer.style.width = '240px';
-      // openCloseDrawerBtn.style.left = '100%' // originally at 80%
     } else {
       sideDrawer.style.width = '30px';
-      // openCloseDrawerBtn.style.left = 'calc(30% - 8px)';
-      gridBoard.style.gridTemplateColumns = '30px';
+      wrkspceSettingsGrid.style.gridTemplateColumns = '30px';
     }
     
   })
@@ -49,45 +45,39 @@ const BoardSideDrawer = (props) => {
     setNewBoardModal((prev) => !prev);
   }
 
-  const handleCloseNewBoardModal = () => {
-    setNewBoardModal(false);
-    setNewBoardTitle("");
-  }
-
   const [newBoardTitle, setNewBoardTitle] = useState("");
   const handleNewBoardTitle = (event) => {
     setNewBoardTitle(event.target.value);
+  }
+
+  const handleCloseNewBoardModal = () => {
+    setNewBoardModal(false);
+    setNewBoardTitle("");
   }
 
   const currWorkspaceIndex = workspaces.findIndex((workspace) => workspace.id === boardWorkspace.id);
   // const boardWorkspace = workspaces[currWorkspaceIndex]; // this is assuming u are in the same workspace as the board 
   
   useEffect(() => {
-    if(currBoard.id) {
-      // console.log("getBoardWorkspace useEffect, currBoard:", currBoard);
-      getBoardWorkspace(currBoard.workspaceId, user.id);
+    if(currWorkspace.id) {
+      console.log("getBoardWorkspace useEffect, currWorkspace:", currWorkspace);
+      getBoardWorkspace(currWorkspace.id, user.id);
     }
-  }, [currBoard]);
+  }, [currWorkspace]);
 
-  const handleCreateNewBoard = async(event) => {
+  const handleCreateNewBoard = (event) => {
     event.preventDefault();
 
-    const updatedWorkspace = await createNewBoard(user.id, boardWorkspace.id, newBoardTitle);
-    console.log("handleCreateNewBoard, response:", updatedWorkspace, " currWorkspaceIndex:", currWorkspaceIndex);
-    dispatch({
-      type: "UPDATE_WORKSPACES_AFTER_NEW_BOARD",
-      updatedWorkspace, currWorkspaceIndex,
-    });
-
+    createNewBoard(user.id, boardWorkspace.id, newBoardTitle);
     handleCloseNewBoardModal();
   }
 
   
   
-  // console.log('BoardSideDrawer, currBoard:', currBoard, " boardWorkspace:", boardWorkspace, " workspaces:", workspaces);
+  console.log("WorkspaceSettingsSideDrawer, boardWorkspace:", boardWorkspace);
 
   return (
-    <div className="board-side-drawer-wrapper">
+    <div className="wrkspce-settings-side-drawer-wrapper">
     {
       (open && boardWorkspace.id) ? 
       <div>
@@ -119,7 +109,7 @@ const BoardSideDrawer = (props) => {
             newBoardModal ? 
             
             <div 
-              className={`board-side-drawer new-board menu wkspce${boardWorkspace.id} | br-025rem pdg-075rem`}
+              className={`wrkspce-settings-side-drawer new-board menu wkspce${boardWorkspace.id} | br-025rem pdg-075rem`}
             >
               <div className={`workspaces-display new-board menu-title wkspce${boardWorkspace.id}`}>
                 <span
@@ -168,6 +158,7 @@ const BoardSideDrawer = (props) => {
             </div> : null
             
           }
+        
         </div>
 
         <div className="board-side-drawer-board-links">
@@ -200,7 +191,7 @@ const BoardSideDrawer = (props) => {
         </button>
 
       </div>
-    } 
+    }
     
     </div>
   );
@@ -208,7 +199,6 @@ const BoardSideDrawer = (props) => {
 
 const mapState = (state) => {
   return {
-    currBoard: state.board.board,
     boardWorkspace: state.board.workspace,
     user: state.auth.user,
     workspaces: state.workspaces.workspaces

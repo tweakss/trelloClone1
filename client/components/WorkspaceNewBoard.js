@@ -1,11 +1,15 @@
 import React, { useEffect, useState } from 'react'
 import {connect, useDispatch} from 'react-redux'
-import { createNewBoard } from "../store/workspace"
+import history from '../history';
+import { createNewBoardInOwnWrkspce } from "../store/workspace";
+import { createNewBoard } from "../store/board";
+
 
 const WorkspaceNewBoard = (props) => {
   const {
     boardWorkspace, 
-    createNewBoard, workspaces, submittedNewBoard, user,
+    createNewBoard, createNewBoardInOwnWrkspce, 
+    workspaces, user,
   } = props;
   const dispatch = useDispatch();
 
@@ -90,32 +94,35 @@ const WorkspaceNewBoard = (props) => {
     setSelectWorkspace(event.target.value);
   }
   
-  const submitCreateBoard = (event) => {
+  const [submittedNewBoard, setSubmittedNewBoard] = useState(false);
+
+  const submitCreateBoard = async(event) => {
     event.preventDefault();
     // console.log("submitCreateBoard, ")
     const selectElem = document.querySelector("#create-board-select-workspace");
     const selectedWorkspaceId = selectElem.selectedOptions[0].dataset.workspaceId;
     
-    createNewBoard(user.id, selectedWorkspaceId, boardTitle);
-    dispatch({
-      type: "SUBMIT_NEW_BOARD_REDIRECT",
-      boardWorkspaceId: boardWorkspace.id
-    });
-    
+    let response;
+    if(user.id === workspaces[0].owner) {
+      response = await createNewBoardInOwnWrkspce(user.id, selectedWorkspaceId, boardTitle);
+    } else {
+      response = await createNewBoard(user.id, selectedWorkspaceId, boardTitle);
+    }
+
+    setSubmittedNewBoard(true);
     setBoardTitle("");
     setNewBoardMenu(false);
   }
+
   useEffect(() => {
-    if(boardWorkspace.id === submittedNewBoard) {
-      // console.log("submitted board on wkspce, id:", submittedNewBoard, " last board:", boardWorkspace.boards[boardWorkspace.boards.length - 1])
-      const lastBoard = boardWorkspace.boards[boardWorkspace.boards.length - 1]
-      window.location.assign(`board/${lastBoard.id}`);
+    if(submittedNewBoard) {
+      const lastBoard = boardWorkspace.boards[boardWorkspace.boards.length - 1];
+      history.push(`/board/${lastBoard.id}`);
     }
-    
-  }, [workspaces])
+  }, [submittedNewBoard])
 
 
-  // console.log("WorkspaceNewBoard, ", ` boardWorkspace:`, boardWorkspace);
+  // console.log("WorkspaceNewBoard, ", ` boardWorkspace:`, boardWorkspace, " submittedNewBoard:", submittedNewBoard);
 
   return (
     <div
@@ -220,7 +227,7 @@ const WorkspaceNewBoard = (props) => {
 const mapState = (state) => {
   return {
     workspaces: state.workspaces.workspaces,
-    submittedNewBoard: state.workspaces.submittedNewBoard,
+    // submittedNewBoard: state.workspaces.submittedNewBoard,
     user: state.auth.user,
   }
 }
@@ -228,6 +235,7 @@ const mapState = (state) => {
 const mapDispatch = (dispatch) => {
   return {
     createNewBoard: (userId, workspaceId, boardTitle) => dispatch(createNewBoard(userId, workspaceId, boardTitle)),
+    createNewBoardInOwnWrkspce: (userId, workspaceId, boardTitle) => dispatch(createNewBoardInOwnWrkspce(userId, workspaceId, boardTitle)),
   }
 }
 

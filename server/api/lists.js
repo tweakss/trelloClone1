@@ -1,5 +1,5 @@
 const router = require('express').Router();
-const { models: { List, Card, Board }} = require('../db');
+const { models: { List, Card, Board, Comment }} = require('../db');
 
 // api/lists/...
 
@@ -155,25 +155,21 @@ router.delete('/:listId/removeCard/:cardId', async(req, res, next) => {
   const cardId = req.params.cardId;
 
   try {
-    const list = await List.findOne({
-      where: {
-        id: listId
-      }
-    });
-
     const card = await Card.findOne({
       where: {
         id: cardId
       }
     });
     
-    if(card === null) {
-      res.send("The card doesn't exist");
-    } else {
-      const response = await card.destroy();
-      // console.log("response:", response);
-      res.send("The card is deleted");
-    }
+    await Comment.destroy({
+      where: {
+        cardId
+      }
+    });
+    const response = await card.destroy();
+    // console.log("response:", response);
+    res.send("The card and its comments are deleted");
+    
   } catch(err) {
     next(err);
   }
@@ -220,36 +216,28 @@ router.delete('/:boardId/deleteList/:listId', async(req, res, next) => {
   const listId = req.params.listId;
 
   try {
-    const board = await Board.findOne({
-      where: {
-        id: boardId
-      }
-    });
     const list = await List.findOne({
       where: {
         id: listId
       }
     });
-    
-
-    if(list === null) {
-      // console.log("list === null");
-      res.send("The list to be deleted doesn't exist");
-    } else {
-      console.log("Before removing, countLists:", await board.countLists())
-      // await board.removeList(list);
-      const numOfCardsDeleted = await Card.destroy({
+    const cards = await list.getCards();
+    const commentsDeleted = await Promise.all(cards.map((card) => {
+      const numOfRowsDeleted = Comment.destroy({
         where: {
-          listId
+          cardId: card.id
         }
       });
-      const response = await list.destroy(); // response is [] 
-      console.log("After removing, countLists:", await board.countLists())
-      console.log("Successfully deleted list, response:", response);
-      res.send("List deleted");
-    }
-
+      return numOfRowsDeleted;
+    }));
+    const cardsDeleted = await Card.destroy({
+      where: {
+        listId
+      }
+    });
+    const response = await list.destroy(); // response is [] 
     
+    res.send("List deleted");
   } catch(err) {
     next(err);
   }
