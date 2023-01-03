@@ -26,6 +26,7 @@ router.post('/signup', async (req, res, next) => {
       title: `${newUser.dataValues.username}'s board`
     });
     await newWorkspace.addBoards([newBoard]);
+    await newBoard.addUsers([newUser]);
     
     res.send({token: await newUser.generateToken()})
   } catch (err) {

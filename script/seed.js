@@ -162,17 +162,17 @@ async function seed() {
   // cody, murphy, ben
   await cody.addBoards([boards[0]]);
   await cody.addBoards([boards[1]]);
-  await murphy.addBoards([boards[1]]);
+  await murphy.addBoards([boards[1], boards[4]]);
   await boards[0].addUsers([murphy]);
-  await ben.addBoards([boards[2]]);
+  await ben.addBoards([boards[2], boards[3]]);
 
-  await workspaces[0].addUsers([cody]);
+  await workspaces[0].addUsers([cody]); // wkspce1', owner: cody 
   await workspaces[0].addBoards([boards[0]]);
-  await workspaces[1].addUsers([murphy, cody]);
+  await workspaces[1].addUsers([murphy, cody]); // wkspce2', owner: murphy
   await workspaces[1].addBoards([boards[1], boards[2]]);
-  await workspaces[2].addUsers([cody, ben]);
+  await workspaces[2].addUsers([cody, ben]); // wkspce3', owner: ben
   await workspaces[2].addBoards([boards[3]]);
-  await workspaces[3].addUsers([murphy]);
+  await workspaces[3].addUsers([murphy]); // my workspace', owner: murphy
   await workspaces[3].addBoards([boards[4]]);
 
   await boards[0].addLists([lists[0], lists[1], lists[2]]);
