@@ -15,14 +15,15 @@ If you don't want to create an account, you can use the below two accounts. The 
 1. Sign up and log in with your account.
 2. Create your own board or use the already created board.
 3. Create a list and a task (card).
-4. In your newly created card, give it a description and put down a comment.
+4. In your newly created card, give it a description and put down a comment. Reply to a comment if there is one.
+5. Try moving cards and lists around, or **hover over the right side/top right corner of a card**.
 
 Continue below to test with sharing your board to another person.
 
-5. Log out and create another account, then log back in with your first
+1. Log out and create another account, then log back in with your first
 account and share your board with your second account.
-6. Log out and log into your second account and post a comment on the same list inside the board that was just shared.
-7. You should see your comment and the comment from your first account.
+2. Log out and log into your second account and post a comment on the same list inside the board that was just shared.
+3. You should see your comment and the comment from your first account.
 
 ##
 ## If you want to know more...
