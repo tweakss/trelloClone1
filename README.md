@@ -6,12 +6,11 @@ In general it allows one or more people to create lists of tasks and share them 
 
 #### Note
 Before trying it out, please note that some parts of the app might seem unfinished (ex: the appearance), but they are left like that on purpose. If you want to know more then scroll down to "If you want to know more..." section then to "Overall Goal/Explanation".
-## Quickly try it out ()
+## Quickly try it out
 If you don't want to create an account, you can use the below two accounts. The password is 123 for both accounts.
-- Usernames: 
-  - murphy
-  - ben
-- Pw: 123
+- Username/pw: 
+    - murphy/123
+    - ben/123
 
 1. Sign up and log in with your account.
 2. Create your own board or use the already created board.
@@ -25,6 +24,7 @@ account and share your board with your second account.
 6. Log out and log into your second account and post a comment on the same list inside the board that was just shared.
 7. You should see your comment and the comment from your first account.
 
+##
 ## If you want to know more...
 ### Basic functionalities and features
 You should be able to do the following:
