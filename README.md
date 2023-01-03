@@ -16,7 +16,7 @@ If you don't want to create an account, you can use the below two accounts. The 
 2. Create your own board or use the already created board.
 3. Create a list and a task (card).
 4. In your newly created card, give it a description and put down a comment. Reply to a comment if there is one.
-5. Try moving cards and lists around, or **hover over the right side/top right corner of a card**.
+5. Try moving cards and lists around, like hovering over the right side/top right corner of a card.
 
 Continue below to test with sharing your board to another person.
 
@@ -34,7 +34,7 @@ You should be able to do the following:
 3. Create lists and their cards and delete them.
     - Move a list around (another board or position)
     - Move cards around (drag and drop, another list/board)
-4. Write/post a comment in a card, edit or delete the comment. 
+4. Write/post a comment in a card, edit, delete the comment and reply to a comment. 
 
 ### Overall Goal/Explanation
 You might notice that this website or app doesn't seem appealing and maybe uninteresting. I agree with you, it is uninteresting and not appealing. My goal was to build something simple, but functional using the bare minimum of tools and building this app with the bare minimum of tools meant that each/every part had to be built/made from the ground up.
