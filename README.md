@@ -1,7 +1,7 @@
 # TrelloClone1
 Made from *scratch* using React, Redux, Javascript, HTML and CSS. 
 
-## App's purpose (if unfamiliar with Trello)
+## App's purpose
 In general it allows one or more people to create lists of tasks and share them with others for collaboration. But of course these "lists" and "tasks" doesn't have to be your to do lists, they could be anything you want.
 
 #### Note
