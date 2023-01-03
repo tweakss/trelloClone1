@@ -6,7 +6,7 @@ In general it allows one or more people to create lists of tasks and share them 
 
 #### Note
 Before trying it out, please note that some parts of the app might seem unfinished (ex: the appearance), but they are left like that on purpose. If you want to know more then scroll down to "If you want to know more..." section then to "Overall Goal/Explanation".
-## Quickly try it out -> [https://trelloclone1-v1.onrender.com]
+## Quickly try it out - [TrelloClone1](https://trelloclone1-v1.onrender.com)
 If you don't want to create an account, you can use the below two accounts. The password is 123 for both accounts.
 - Username/pw: 
     - murphy/123
