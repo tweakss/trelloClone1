@@ -5,6 +5,7 @@ import { Login, Signup } from './components/AuthForm';
 import Workspace from './components/Workspace';
 import Board from './components/Board';
 import {me} from './store'
+import WorkspaceSettings from './components/WorkspaceSettings';
 
 
 /**
@@ -22,9 +23,10 @@ class Routes extends Component {
       <div id="route">
         {isLoggedIn ? (
           <Switch>
-            <Route path="/workspace" component={Workspace} />
+            <Route path="/workspaces" component={Workspace} />
+            <Route path="/workspace/:workspaceId/settings" component={WorkspaceSettings} />
             <Route path="/board/:boardId" component={Board} />
-            <Redirect to="/workspace" />
+            <Redirect to="/workspaces" />
           </Switch>
         ) : (
           <Switch>

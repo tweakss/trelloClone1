@@ -342,7 +342,7 @@ const Card = (props) => {
   }
 
 
-  console.log('Card RENDER');
+  // console.log('Card RENDER');
   
   return (
     <div className={`card-btn-wrapper list${listIndex}-card-${cardIndex}`}>

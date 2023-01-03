@@ -244,7 +244,7 @@ const ListTitle = (props) => {
   }, [listTitle, listTitleFocused]);
 
 
-  console.log("ListTitle render, listTitle:", listTitle, " listTitleFocused:", listTitleFocused);
+  // console.log("ListTitle render, listTitle:", listTitle, " listTitleFocused:", listTitleFocused);
 
 
   return (
@@ -311,7 +311,7 @@ const ListTitle = (props) => {
 
         {
           
-          <div className="list-title-dropdown">
+          <div className="delete-list-prompt-wrapper">
             <dialog className={`delete-list-prompt idx${currListIndex}`}>
               <p>Delete the list: {listTitle}?</p>
               <form method="dialog">

@@ -22,6 +22,8 @@ const AuthForm = props => {
     setUsernameInput(event.target.value);
   }
 
+  const [validatedUsername, setValidatedUsername] = useState(false);
+
   const handleValidateUsername = async() => {
     if(usernameInput.length === 0) {
       return;
@@ -29,12 +31,19 @@ const AuthForm = props => {
 
     const response = await validateUsername(usernameInput);
     // console.log("handleValidateUsername, response:", response);
-    if(response) {
+    if(response.id) {
+      setValidatedUsername(true);
       setShowPwInput(true);
       setShowUsernameInput(false);
     }
-    
+
   }
+
+  useEffect(() => {
+    if(validatedUsername && showPwInput) {
+      document.querySelector(".auth-form-input-pw").focus();
+    }
+  }, [validatedUsername, showPwInput]);
 
   const [pwInput, setPwInput] = useState("");
   const handlePwInput = (event) => {
@@ -48,8 +57,14 @@ const AuthForm = props => {
 
   const handleSubmit = (event) => {
     event.preventDefault();
-    const formName = event.target.name;
-    handleAuthenticate(usernameInput, pwInput, emailInput, formName)
+
+    // console.log("handleSubmit, event.target:", event.target.name);
+    const formNameAttrib = event.target.name;
+    if(validatedUsername || formNameAttrib === "signup") {
+      const formName = event.target.name;
+      handleAuthenticate(usernameInput, pwInput, emailInput, formName)
+    }
+    
   }
 
   const handleToSignup = () => {
@@ -59,6 +74,8 @@ const AuthForm = props => {
   }
 
   const handleToLogin = () => {
+    setValidatedUsername(false);
+    setPwInput("");
     setShowPwInput(false);
     setShowUsernameInput(true);
 
@@ -67,7 +84,7 @@ const AuthForm = props => {
     });
   }
 
-  console.log("AuthForm RENDER, auth.error:", error)
+  // console.log("AuthForm RENDER, auth.error:", error, " pwInput:", pwInput, " validatedUsername:", validatedUsername)
 
   return (
     <div id="login-signup-page">
@@ -129,7 +146,7 @@ const AuthForm = props => {
                 !showPwInput && name === "login" ?
                 <div>
                   <button
-                    type="button"
+                    type="submit"
                     className="auth-form-continue-btn | bdr-none br-025rem"
                     onClick={handleValidateUsername}
                   >

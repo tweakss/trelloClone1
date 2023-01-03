@@ -2105,11 +2105,13 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ });
 /* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "./node_modules/react/index.js");
 /* harmony import */ var react_redux__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! react-redux */ "./node_modules/react-redux/es/index.js");
-/* harmony import */ var react_router_dom__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! react-router-dom */ "./node_modules/react-router/esm/react-router.js");
+/* harmony import */ var react_router_dom__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! react-router-dom */ "./node_modules/react-router/esm/react-router.js");
 /* harmony import */ var _components_AuthForm__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./components/AuthForm */ "./client/components/AuthForm.js");
 /* harmony import */ var _components_Workspace__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./components/Workspace */ "./client/components/Workspace.js");
 /* harmony import */ var _components_Board__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./components/Board */ "./client/components/Board.js");
 /* harmony import */ var _store__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./store */ "./client/store/index.js");
+/* harmony import */ var _components_WorkspaceSettings__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./components/WorkspaceSettings */ "./client/components/WorkspaceSettings.js");
+
 
 
 
@@ -2131,22 +2133,25 @@ class Routes extends react__WEBPACK_IMPORTED_MODULE_0__.Component {
     } = this.props;
     return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("div", {
       id: "route"
-    }, isLoggedIn ? /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(react_router_dom__WEBPACK_IMPORTED_MODULE_6__.Switch, null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(react_router_dom__WEBPACK_IMPORTED_MODULE_6__.Route, {
-      path: "/workspace",
+    }, isLoggedIn ? /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(react_router_dom__WEBPACK_IMPORTED_MODULE_7__.Switch, null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(react_router_dom__WEBPACK_IMPORTED_MODULE_7__.Route, {
+      path: "/workspaces",
       component: _components_Workspace__WEBPACK_IMPORTED_MODULE_3__["default"]
-    }), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(react_router_dom__WEBPACK_IMPORTED_MODULE_6__.Route, {
+    }), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(react_router_dom__WEBPACK_IMPORTED_MODULE_7__.Route, {
+      path: "/workspace/:workspaceId/settings",
+      component: _components_WorkspaceSettings__WEBPACK_IMPORTED_MODULE_6__["default"]
+    }), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(react_router_dom__WEBPACK_IMPORTED_MODULE_7__.Route, {
       path: "/board/:boardId",
       component: _components_Board__WEBPACK_IMPORTED_MODULE_4__["default"]
-    }), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(react_router_dom__WEBPACK_IMPORTED_MODULE_6__.Redirect, {
-      to: "/workspace"
-    })) : /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(react_router_dom__WEBPACK_IMPORTED_MODULE_6__.Switch, null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(react_router_dom__WEBPACK_IMPORTED_MODULE_6__.Route, {
+    }), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(react_router_dom__WEBPACK_IMPORTED_MODULE_7__.Redirect, {
+      to: "/workspaces"
+    })) : /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(react_router_dom__WEBPACK_IMPORTED_MODULE_7__.Switch, null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(react_router_dom__WEBPACK_IMPORTED_MODULE_7__.Route, {
       path: "/",
       exact: true,
       component: _components_AuthForm__WEBPACK_IMPORTED_MODULE_2__.Login
-    }), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(react_router_dom__WEBPACK_IMPORTED_MODULE_6__.Route, {
+    }), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(react_router_dom__WEBPACK_IMPORTED_MODULE_7__.Route, {
       path: "/login",
       component: _components_AuthForm__WEBPACK_IMPORTED_MODULE_2__.Login
-    }), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(react_router_dom__WEBPACK_IMPORTED_MODULE_6__.Route, {
+    }), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(react_router_dom__WEBPACK_IMPORTED_MODULE_7__.Route, {
       path: "/signup",
       component: _components_AuthForm__WEBPACK_IMPORTED_MODULE_2__.Signup
     })));
@@ -2174,7 +2179,7 @@ const mapDispatch = dispatch => {
 
 // The `withRouter` wrapper makes sure that updates are not blocked
 // when the url changes
-/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ((0,react_router_dom__WEBPACK_IMPORTED_MODULE_6__.withRouter)((0,react_redux__WEBPACK_IMPORTED_MODULE_1__.connect)(mapState, mapDispatch)(Routes)));
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ((0,react_router_dom__WEBPACK_IMPORTED_MODULE_7__.withRouter)((0,react_redux__WEBPACK_IMPORTED_MODULE_1__.connect)(mapState, mapDispatch)(Routes)));
 
 /***/ }),
 
@@ -2427,17 +2432,24 @@ const AuthForm = props => {
   const handleUsernameInput = event => {
     setUsernameInput(event.target.value);
   };
+  const [validatedUsername, setValidatedUsername] = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(false);
   const handleValidateUsername = async () => {
     if (usernameInput.length === 0) {
       return;
     }
     const response = await validateUsername(usernameInput);
     // console.log("handleValidateUsername, response:", response);
-    if (response) {
+    if (response.id) {
+      setValidatedUsername(true);
       setShowPwInput(true);
       setShowUsernameInput(false);
     }
   };
+  (0,react__WEBPACK_IMPORTED_MODULE_0__.useEffect)(() => {
+    if (validatedUsername && showPwInput) {
+      document.querySelector(".auth-form-input-pw").focus();
+    }
+  }, [validatedUsername, showPwInput]);
   const [pwInput, setPwInput] = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)("");
   const handlePwInput = event => {
     setPwInput(event.target.value);
@@ -2448,8 +2460,13 @@ const AuthForm = props => {
   };
   const handleSubmit = event => {
     event.preventDefault();
-    const formName = event.target.name;
-    handleAuthenticate(usernameInput, pwInput, emailInput, formName);
+
+    // console.log("handleSubmit, event.target:", event.target.name);
+    const formNameAttrib = event.target.name;
+    if (validatedUsername || formNameAttrib === "signup") {
+      const formName = event.target.name;
+      handleAuthenticate(usernameInput, pwInput, emailInput, formName);
+    }
   };
   const handleToSignup = () => {
     dispatch({
@@ -2457,13 +2474,17 @@ const AuthForm = props => {
     });
   };
   const handleToLogin = () => {
+    setValidatedUsername(false);
+    setPwInput("");
     setShowPwInput(false);
     setShowUsernameInput(true);
     dispatch({
       type: "CLEAR_AUTH_STATE"
     });
   };
-  console.log("AuthForm RENDER, auth.error:", error);
+
+  // console.log("AuthForm RENDER, auth.error:", error, " pwInput:", pwInput, " validatedUsername:", validatedUsername)
+
   return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("div", {
     id: "login-signup-page"
   }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("div", {
@@ -2500,7 +2521,7 @@ const AuthForm = props => {
   }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("span", {
     className: "auth-form-input-username-after"
   }, usernameInput)), !showPwInput && name === "login" ? /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("div", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("button", {
-    type: "button",
+    type: "submit",
     className: "auth-form-continue-btn | bdr-none br-025rem",
     onClick: handleValidateUsername
   }, "Continue")) : null, showPwInput || name === "signup" ? /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("div", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("input", {
@@ -2626,6 +2647,7 @@ const Board = props => {
     listsState,
     getLists
   } = props;
+  const match = props.match;
   const boardId = props.match.params.boardId;
   (0,react__WEBPACK_IMPORTED_MODULE_0__.useEffect)(() => {
     // console.log('Board, useEffect, boardId:', boardId);
@@ -2676,17 +2698,7 @@ const Board = props => {
     }
   }, [board]);
 
-  // const [swapListTargetIdx, setSwapListTargetIdx] = useState({
-  //   swapToIndex: null,
-  //   currListIndex: null,
-  // });
-
-  // const handleSwapListTargetIdx = (swapToIndex, currListIndex) => {
-
-  //   setSwapListTargetIdx({ swapToIndex, currListIndex });
-  // }
-
-  // console.log("Board RENDER, lists:", lists);
+  // console.log("Board RENDER, boardId:", boardId, " board:", board);
 
   if (!board.id) {
     // console.log('!board.id || !boards');
@@ -2697,7 +2709,7 @@ const Board = props => {
   }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_Navbar__WEBPACK_IMPORTED_MODULE_9__["default"], {
     user: user
   }), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_BoardSideDrawer__WEBPACK_IMPORTED_MODULE_11__["default"], {
-    boardWorkspaceId: board.workspaceId
+    match: match
   }), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_NavbarContent__WEBPACK_IMPORTED_MODULE_10__["default"], null), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("div", {
     id: "grid-board-lists"
   }, lists.map((list, listIndex) => {
@@ -2713,8 +2725,7 @@ const Board = props => {
     }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_ListTitle__WEBPACK_IMPORTED_MODULE_7__["default"], {
       currList: list,
       currListIndex: listIndex,
-      board: board,
-      workspaces: workspaces
+      board: board
       // swapListTargetPos={
       //   swapListTargetIdx.swapToIndex === listIndex ? swapListTargetIdx.currListIndex + 1 : null 
       // }
@@ -2773,8 +2784,9 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ });
 /* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "./node_modules/react/index.js");
 /* harmony import */ var react_redux__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! react-redux */ "./node_modules/react-redux/es/index.js");
-/* harmony import */ var _store_workspace__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../store/workspace */ "./client/store/workspace.js");
+/* harmony import */ var _store_board__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../store/board */ "./client/store/board.js");
 /* harmony import */ var _BoardSideDrawerBoardLink__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./BoardSideDrawerBoardLink */ "./client/components/BoardSideDrawerBoardLink.js");
+
 
 
 
@@ -2785,13 +2797,16 @@ const BoardSideDrawer = props => {
     user,
     currBoard,
     workspaces,
-    boardWorkspaceId,
-    createNewBoard
+    createNewBoard,
+    getBoardWorkspace,
+    boardWorkspace,
+    match
   } = props;
+  const dispatch = (0,react_redux__WEBPACK_IMPORTED_MODULE_1__.useDispatch)();
   const localStorage = window.localStorage;
   const [open, setOpen] = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(parseInt(localStorage.getItem("sideDrawerOpen"), 10));
   (0,react__WEBPACK_IMPORTED_MODULE_0__.useEffect)(() => {
-    const sideDrawer = document.querySelector('.board-side-drawer');
+    const sideDrawer = document.querySelector('.board-side-drawer-wrapper');
     // const openCloseDrawerBtn = document.querySelector('.board-side-drawer-handle');
     const gridBoard = document.getElementById('grid-board');
     if (open) {
@@ -2818,22 +2833,40 @@ const BoardSideDrawer = props => {
   const handleNewBoardModal = () => {
     setNewBoardModal(prev => !prev);
   };
+  const handleCloseNewBoardModal = () => {
+    setNewBoardModal(false);
+    setNewBoardTitle("");
+  };
   const [newBoardTitle, setNewBoardTitle] = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)("");
   const handleNewBoardTitle = event => {
     setNewBoardTitle(event.target.value);
   };
-  const currWorkspaceIndex = workspaces.findIndex(workspace => workspace.id === boardWorkspaceId);
-  const boardWorkspace = workspaces[currWorkspaceIndex];
-  const handleCreateNewBoard = () => {
-    handleNewBoardModal();
-    createNewBoard(user.id, boardWorkspace.id, newBoardTitle);
+  const currWorkspaceIndex = workspaces.findIndex(workspace => workspace.id === boardWorkspace.id);
+  // const boardWorkspace = workspaces[currWorkspaceIndex]; // this is assuming u are in the same workspace as the board 
+
+  (0,react__WEBPACK_IMPORTED_MODULE_0__.useEffect)(() => {
+    if (currBoard.id) {
+      // console.log("getBoardWorkspace useEffect, currBoard:", currBoard);
+      getBoardWorkspace(currBoard.workspaceId, user.id);
+    }
+  }, [currBoard]);
+  const handleCreateNewBoard = async event => {
+    event.preventDefault();
+    const updatedWorkspace = await createNewBoard(user.id, boardWorkspace.id, newBoardTitle);
+    console.log("handleCreateNewBoard, response:", updatedWorkspace, " currWorkspaceIndex:", currWorkspaceIndex);
+    dispatch({
+      type: "UPDATE_WORKSPACES_AFTER_NEW_BOARD",
+      updatedWorkspace,
+      currWorkspaceIndex
+    });
+    handleCloseNewBoardModal();
   };
 
-  // console.log('BoardSideDrawer, workspaces:', workspaces, " boardWorkspaceId:", boardWorkspaceId, " boardWorkspace:", boardWorkspace);
+  // console.log('BoardSideDrawer, currBoard:', currBoard, " boardWorkspace:", boardWorkspace, " workspaces:", workspaces);
 
   return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("div", {
-    className: "board-side-drawer"
-  }, open && workspaces.length ? /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("div", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("div", {
+    className: "board-side-drawer-wrapper"
+  }, open && boardWorkspace.id ? /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("div", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("div", {
     className: "board-side-drawer-header"
   }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("span", {
     className: "board-side-drawer-wkspce-title | mgn-05rem"
@@ -2848,7 +2881,31 @@ const BoardSideDrawer = props => {
     className: "board-side-drawer-new-board-btn | mgn-05rem br-025rem bdr-none bg-clr-transparent",
     type: "button",
     onClick: handleNewBoardModal
-  }, "+")), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("div", {
+  }, "+"), newBoardModal ? /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("div", {
+    className: `board-side-drawer new-board menu wkspce${boardWorkspace.id} | br-025rem pdg-075rem`
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("div", {
+    className: `workspaces-display new-board menu-title wkspce${boardWorkspace.id}`
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("span", {
+    className: `create-board-txt new-board wkspce${boardWorkspace.id} | menu-title-clr`
+  }, "Create board"), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("button", {
+    className: `workspaces-display new-board menu-close-btn wkspce${boardWorkspace.id} | bdr-none bg-clr-transparent`,
+    onClick: handleCloseNewBoardModal
+  }, "\xD7")), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("div", {
+    className: `workspaces-display new-board menu-board-title-input wkspce${boardWorkspace.id}`
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("form", {
+    onSubmit: handleCreateNewBoard
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("label", {
+    htmlFor: "board-title-input"
+  }, "Board title"), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("input", {
+    id: "board-title-input",
+    type: "text",
+    value: newBoardTitle,
+    onChange: handleNewBoardTitle
+  }), newBoardTitle.length > 0 ? /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("button", {
+    type: "submit"
+  }, "Create") : /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("button", {
+    disabled: true
+  }, "Create")))) : null), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("div", {
     className: "board-side-drawer-board-links"
   }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("ul", {
     className: "board-side-drawer-board-links-ul"
@@ -2860,7 +2917,7 @@ const BoardSideDrawer = props => {
       board: board,
       currWorkspaceIndex: currWorkspaceIndex,
       boardIndex: index,
-      currBoard: currBoard
+      match: match
     }));
   }) : null))) : /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("div", {
     className: "board-side-drawer-closed"
@@ -2868,41 +2925,20 @@ const BoardSideDrawer = props => {
     className: "board-side-drawer-open-btn | mgn-05rem bdr-none",
     type: "button",
     onClick: handleDrawerOpenClose
-  }, `>`)), newBoardModal ? /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("div", {
-    id: "new-board-modal"
-  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("dialog", {
-    id: "new-board-modal-content",
-    open: newBoardModal ? "open" : null
-  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("div", {
-    id: "new-board-modal-header"
-  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("button", {
-    id: "new-board-modal-closeBtn",
-    type: "button",
-    onClick: handleNewBoardModal
-  }, "\xD7")), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("label", {
-    className: "board-title-label",
-    htmlFor: "new-board-title"
-  }, "Board Title"), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("input", {
-    id: "new-board-title",
-    type: "text",
-    value: newBoardTitle,
-    onChange: handleNewBoardTitle
-  }), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("div", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("button", {
-    type: "button",
-    id: "create-board-btn",
-    onClick: handleCreateNewBoard
-  }, "Create Board")))) : null);
+  }, `>`)));
 };
 const mapState = state => {
   return {
     currBoard: state.board.board,
+    boardWorkspace: state.board.workspace,
     user: state.auth.user,
     workspaces: state.workspaces.workspaces
   };
 };
 const mapDispatch = dispatch => {
   return {
-    createNewBoard: (userId, boardWorkspaceId, boardTitle) => dispatch((0,_store_workspace__WEBPACK_IMPORTED_MODULE_2__.createNewBoard)(userId, boardWorkspaceId, boardTitle))
+    createNewBoard: (userId, boardWorkspaceId, boardTitle) => dispatch((0,_store_board__WEBPACK_IMPORTED_MODULE_2__.createNewBoard)(userId, boardWorkspaceId, boardTitle)),
+    getBoardWorkspace: (workspaceId, userId) => dispatch((0,_store_board__WEBPACK_IMPORTED_MODULE_2__.getBoardWorkspace)(workspaceId, userId))
   };
 };
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ((0,react_redux__WEBPACK_IMPORTED_MODULE_1__.connect)(mapState, mapDispatch)(BoardSideDrawer));
@@ -2923,7 +2959,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "./node_modules/react/index.js");
 /* harmony import */ var react_redux__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! react-redux */ "./node_modules/react-redux/es/index.js");
 /* harmony import */ var react_router_dom__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! react-router-dom */ "./node_modules/react-router-dom/esm/react-router-dom.js");
-/* harmony import */ var _store_workspace__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../store/workspace */ "./client/store/workspace.js");
+/* harmony import */ var _store_board__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../store/board */ "./client/store/board.js");
 
 
 
@@ -2936,6 +2972,7 @@ const BoardSideDrawerBoardLink = props => {
     currBoard,
     deleteABoard
   } = props;
+  const match = props.match;
   const [deleteBoardMenu, setDeleteBoardMenu] = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(false);
   const handleDeleteBoardMenu = () => {
     // Close every other menu that is opened
@@ -2947,6 +2984,8 @@ const BoardSideDrawerBoardLink = props => {
   const closeDeleteBoardMenu = () => {
     const actionsBtn = document.querySelector(`.board-side-drawer-board-link-actions-btn.idx${boardIndex}`);
     actionsBtn.style.visibility = "hidden";
+    const boardLinkContainer = document.querySelector(`.board-side-drawer-board-link-container.idx${boardIndex}`);
+    boardLinkContainer.style.backgroundColor = "";
     setDeleteBoardMenu(false);
   };
   const handleClickedOutsideOfDeleteBoardMenu = event => {
@@ -2978,12 +3017,16 @@ const BoardSideDrawerBoardLink = props => {
     setDeleteConfirm(false);
   };
   const handleDeleteABoard = () => {
+    console.log("handleDeleteABoard, currWorkspaceIndex:", currWorkspaceIndex);
     deleteABoard(currWorkspaceIndex, board.id);
-    if (board.id === currBoard.id) {
+    const paramsBoardId = parseInt(match.params.boardId, 10);
+    if (board.id === paramsBoardId) {
       window.location.assign(`/workspace`);
     }
     handleDeleteBoardMenu();
+    // window.location.assign(`/workspace`);
   };
+
   const mouseOverBoardLink = () => {
     // console.log("mouseOverBoardLink, event.target:", event.target);
     const actionsBtn = document.querySelector(`.board-side-drawer-board-link-actions-btn.idx${boardIndex}`);
@@ -3001,7 +3044,7 @@ const BoardSideDrawerBoardLink = props => {
     event.stopPropagation();
   };
 
-  // console.log("BoardSideDrawerBoardLink, deleteBoardMenu:", deleteBoardMenu, " deleteConfirm:", deleteConfirm);
+  // console.log("BoardSideDrawerBoardLink, board:", board, " match:", match);
 
   return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("div", {
     className: `board-side-drawer-board-link-container idx${boardIndex}`,
@@ -3049,17 +3092,17 @@ const BoardSideDrawerBoardLink = props => {
   }, "\xD7"))), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("div", {
     className: "board-side-drawer-board-link-delete-board-menu-actions"
   }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("div", {
-    className: "board-side-drawer-board-link-delete-board-menu-actions-del"
-  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("button", {
-    className: "board-side-drawer-board-link-delete-board-menu-actions-del-btn | bdr-none bg-clr-transparent",
+    className: "board-side-drawer-board-link-delete-board-menu-actions-del",
     onClick: () => setDeleteConfirm(true)
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("button", {
+    className: "board-side-drawer-board-link-delete-board-menu-actions-del-btn | bdr-none bg-clr-transparent"
   }, "Delete Board"), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("button", {
     className: "board-side-drawer-board-link-delete-board-menu-actions-del-btn-right | bdr-none bg-clr-transparent"
   }))))) : null));
 };
 const mapDispatch = dispatch => {
   return {
-    deleteABoard: (currWorkspaceIndex, boardId) => dispatch((0,_store_workspace__WEBPACK_IMPORTED_MODULE_2__.deleteABoard)(currWorkspaceIndex, boardId))
+    deleteABoard: (currWorkspaceIndex, boardId) => dispatch((0,_store_board__WEBPACK_IMPORTED_MODULE_2__.deleteABoard)(currWorkspaceIndex, boardId))
   };
 };
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ((0,react_redux__WEBPACK_IMPORTED_MODULE_1__.connect)(null, mapDispatch)(BoardSideDrawerBoardLink));
@@ -3385,7 +3428,9 @@ const Card = props => {
     }
     txtArea.style.height = txtArea.scrollHeight + offset + 'px';
   };
-  console.log('Card RENDER');
+
+  // console.log('Card RENDER');
+
   return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("div", {
     className: `card-btn-wrapper list${listIndex}-card-${cardIndex}`
   }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_CardSideMenu__WEBPACK_IMPORTED_MODULE_4__["default"], {
@@ -4586,7 +4631,9 @@ const ListTitle = props => {
       };
     }
   }, [listTitle, listTitleFocused]);
-  console.log("ListTitle render, listTitle:", listTitle, " listTitleFocused:", listTitleFocused);
+
+  // console.log("ListTitle render, listTitle:", listTitle, " listTitleFocused:", listTitleFocused);
+
   return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("div", {
     className: `list-title wrapper | mgn-l-05rem | idx${currListIndex}`,
     "data-list-index": `${currListIndex}`,
@@ -4626,7 +4673,7 @@ const ListTitle = props => {
     className: "list-actions-move-list btn",
     onClick: handleListTitleDropdown
   }, "Move List")))) : null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("div", {
-    className: "list-title-dropdown"
+    className: "delete-list-prompt-wrapper"
   }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("dialog", {
     className: `delete-list-prompt idx${currListIndex}`
   }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("p", null, "Delete the list: ", listTitle, "?"), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("form", {
@@ -4699,15 +4746,6 @@ const ListTitleMoveList = props => {
     handleMoveListBackBtn,
     moveList
   } = props;
-  (0,react__WEBPACK_IMPORTED_MODULE_0__.useEffect)(() => {
-    // Repositions menu if it goes over right side of screen
-    const rootElemWidth = document.documentElement.clientWidth;
-    const moveListElem = document.querySelector(".list-title-dropdown-move-list");
-    const rightWidthPos = moveListElem.getBoundingClientRect().right;
-    if (rightWidthPos > rootElemWidth) {
-      moveListElem.style.right = "10px";
-    }
-  }, []);
   const [selectBoard, setSelectBoard] = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(board.title);
   const [selectedBoardId, setSelectedBoardId] = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(board.id);
   const [selectedBoardLists, setSelectedBoardLists] = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(currLists);
@@ -5180,6 +5218,7 @@ const Workspace = props => {
     getBoardsMemberOf
   } = props;
   (0,react__WEBPACK_IMPORTED_MODULE_0__.useEffect)(() => {
+    // console.log("Workspace useEffect, getWorkspaces, getBoardsMemberOf");
     (async () => {
       const response = await getWorkspaces(user.id);
       getBoardsMemberOf(user.id);
@@ -5189,15 +5228,17 @@ const Workspace = props => {
     console.log('workspaces is empty, workspaces:', workspaces);
     return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("div", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("h4", null, "Loading..."));
   }
-  console.log('Workspace, user:', user);
+  console.log('Workspace, workspaces:', workspaces);
   return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("div", {
     className: "workspace-layout-grid"
   }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_Navbar__WEBPACK_IMPORTED_MODULE_5__["default"], {
     user: user
   }), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("div", {
     className: "navbar-filler"
-  }), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_WorkspaceSideDrawer_js__WEBPACK_IMPORTED_MODULE_3__["default"], null), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("div", {
-    className: "workspaces-display-section |"
+  }), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_WorkspaceSideDrawer_js__WEBPACK_IMPORTED_MODULE_3__["default"], {
+    workspaces: workspaces
+  }), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("div", {
+    className: "workspaces-display-section"
   }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("h3", null, "YOUR WORKSPACES"), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("div", {
     className: "workspaces-display-wrapper"
   }, workspaces.map(workspace => {
@@ -5257,7 +5298,11 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ });
 /* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "./node_modules/react/index.js");
 /* harmony import */ var react_redux__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! react-redux */ "./node_modules/react-redux/es/index.js");
-/* harmony import */ var _store_workspace__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../store/workspace */ "./client/store/workspace.js");
+/* harmony import */ var _history__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../history */ "./client/history.js");
+/* harmony import */ var _store_workspace__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../store/workspace */ "./client/store/workspace.js");
+/* harmony import */ var _store_board__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../store/board */ "./client/store/board.js");
+
+
 
 
 
@@ -5265,8 +5310,8 @@ const WorkspaceNewBoard = props => {
   const {
     boardWorkspace,
     createNewBoard,
+    createNewBoardInOwnWrkspce,
     workspaces,
-    submittedNewBoard,
     user
   } = props;
   const dispatch = (0,react_redux__WEBPACK_IMPORTED_MODULE_1__.useDispatch)();
@@ -5336,28 +5381,30 @@ const WorkspaceNewBoard = props => {
     // console.log("handleSelectWorkspace, event.target.selectedOptions:", event.target.selectedOptions);
     setSelectWorkspace(event.target.value);
   };
-  const submitCreateBoard = event => {
+  const [submittedNewBoard, setSubmittedNewBoard] = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(false);
+  const submitCreateBoard = async event => {
     event.preventDefault();
     // console.log("submitCreateBoard, ")
     const selectElem = document.querySelector("#create-board-select-workspace");
     const selectedWorkspaceId = selectElem.selectedOptions[0].dataset.workspaceId;
-    createNewBoard(user.id, selectedWorkspaceId, boardTitle);
-    dispatch({
-      type: "SUBMIT_NEW_BOARD_REDIRECT",
-      boardWorkspaceId: boardWorkspace.id
-    });
+    let response;
+    if (user.id === workspaces[0].owner) {
+      response = await createNewBoardInOwnWrkspce(user.id, selectedWorkspaceId, boardTitle);
+    } else {
+      response = await createNewBoard(user.id, selectedWorkspaceId, boardTitle);
+    }
+    setSubmittedNewBoard(true);
     setBoardTitle("");
     setNewBoardMenu(false);
   };
   (0,react__WEBPACK_IMPORTED_MODULE_0__.useEffect)(() => {
-    if (boardWorkspace.id === submittedNewBoard) {
-      // console.log("submitted board on wkspce, id:", submittedNewBoard, " last board:", boardWorkspace.boards[boardWorkspace.boards.length - 1])
+    if (submittedNewBoard) {
       const lastBoard = boardWorkspace.boards[boardWorkspace.boards.length - 1];
-      window.location.assign(`board/${lastBoard.id}`);
+      _history__WEBPACK_IMPORTED_MODULE_2__["default"].push(`/board/${lastBoard.id}`);
     }
-  }, [workspaces]);
+  }, [submittedNewBoard]);
 
-  // console.log("WorkspaceNewBoard, ", ` boardWorkspace:`, boardWorkspace);
+  // console.log("WorkspaceNewBoard, ", ` boardWorkspace:`, boardWorkspace, " submittedNewBoard:", submittedNewBoard);
 
   return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("div", {
     className: `workspaces-display-create-board new-board wkspce${boardWorkspace.id} | br-025rem`,
@@ -5409,16 +5456,319 @@ const WorkspaceNewBoard = props => {
 const mapState = state => {
   return {
     workspaces: state.workspaces.workspaces,
-    submittedNewBoard: state.workspaces.submittedNewBoard,
+    // submittedNewBoard: state.workspaces.submittedNewBoard,
     user: state.auth.user
   };
 };
 const mapDispatch = dispatch => {
   return {
-    createNewBoard: (userId, workspaceId, boardTitle) => dispatch((0,_store_workspace__WEBPACK_IMPORTED_MODULE_2__.createNewBoard)(userId, workspaceId, boardTitle))
+    createNewBoard: (userId, workspaceId, boardTitle) => dispatch((0,_store_board__WEBPACK_IMPORTED_MODULE_4__.createNewBoard)(userId, workspaceId, boardTitle)),
+    createNewBoardInOwnWrkspce: (userId, workspaceId, boardTitle) => dispatch((0,_store_workspace__WEBPACK_IMPORTED_MODULE_3__.createNewBoardInOwnWrkspce)(userId, workspaceId, boardTitle))
   };
 };
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ((0,react_redux__WEBPACK_IMPORTED_MODULE_1__.connect)(mapState, mapDispatch)(WorkspaceNewBoard));
+
+/***/ }),
+
+/***/ "./client/components/WorkspaceSettings.js":
+/*!************************************************!*\
+  !*** ./client/components/WorkspaceSettings.js ***!
+  \************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "./node_modules/react/index.js");
+/* harmony import */ var react_redux__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! react-redux */ "./node_modules/react-redux/es/index.js");
+/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! axios */ "./node_modules/axios/index.js");
+/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(axios__WEBPACK_IMPORTED_MODULE_2__);
+/* harmony import */ var _store_workspace__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../store/workspace */ "./client/store/workspace.js");
+/* harmony import */ var _Navbar__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./Navbar */ "./client/components/Navbar.js");
+/* harmony import */ var _WorkspaceSettingsSideDrawer__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./WorkspaceSettingsSideDrawer */ "./client/components/WorkspaceSettingsSideDrawer.js");
+
+
+
+
+
+
+const WorkspaceSettings = props => {
+  const {
+    deleteWorkspace,
+    user
+  } = props;
+  const currWorkspaceId = props.match.params.workspaceId;
+  const match = props.match;
+  const [currWorkspace, setCurrWorkspace] = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)({});
+  (0,react__WEBPACK_IMPORTED_MODULE_0__.useEffect)(() => {
+    (async () => {
+      const {
+        data: workspace
+      } = await axios__WEBPACK_IMPORTED_MODULE_2___default()({
+        method: 'get',
+        url: `/api/workspaces/workspace/${currWorkspaceId}`
+      });
+      setCurrWorkspace(workspace);
+    })();
+  }, []);
+  const [deleteWkspcePrompt, setDeleteWkspcePrompt] = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(false);
+  const handleDeleteWkspcePrompt = () => {
+    setDeleteWkspcePrompt(prev => !prev);
+  };
+  const [wkspceName, setWkspceName] = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)("");
+  const handleWkspceName = event => {
+    setWkspceName(event.target.value);
+  };
+  const handleCloseDeleteWkspcePrompt = () => {
+    setDeleteWkspcePrompt(false);
+    setWkspceName("");
+  };
+  const submitDeleteWorkspace = async event => {
+    event.preventDefault();
+    const response = await deleteWorkspace(currWorkspace.id);
+    console.log("submitDeleteWorkspace response:", response);
+    window.location.assign(`/workspaces`);
+
+    // handleCloseDeleteWkspcePrompt();
+  };
+
+  console.log("WorkspaceSettings, currWorkspace:", currWorkspace, " props.match:", props.match);
+  return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("div", {
+    className: "workspace-settings-layout-grid"
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_Navbar__WEBPACK_IMPORTED_MODULE_4__["default"], {
+    user: user
+  }), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_WorkspaceSettingsSideDrawer__WEBPACK_IMPORTED_MODULE_5__["default"], {
+    currWorkspace: currWorkspace,
+    match: match
+  }), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("div", {
+    className: "workspace-settings-wrapper"
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("div", {
+    className: "workspace-settings-header-wrapper"
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("h2", {
+    className: "workspace-settings-header"
+  }, `${currWorkspace.title}`)), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("hr", {
+    className: "workspace-settings-header-btm-hr"
+  }), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("div", {
+    className: "workspace-settings-container"
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("div", {
+    className: "workspace-settings"
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("div", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("h4", {
+    className: "workspace-settings-title"
+  }, "Settings")), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("div", {
+    className: "workspace-settings-del-wkspce-wrapper"
+  }, user.id === currWorkspace.owner ? /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("button", {
+    className: "workspace-settings-del-wkspce-btn | bdr-none bg-clr-transparent",
+    onClick: handleDeleteWkspcePrompt
+  }, "Delete this Workspace?") : /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("div", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("span", null, "Cannot delete this workspace, you are not the owner.")), deleteWkspcePrompt ? /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("div", {
+    className: "workspace-settings-del-wkspce-modal-wrapper | br-025rem pdg-075rem"
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("div", {
+    className: `workspace-settings-del-wkspce-title`
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("span", {
+    className: `workspace-settings-del-wkspce-title-txt | menu-title-clr`
+  }, "Delete Workspace?"), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("button", {
+    className: `workspaces-settings-del-wkspce-close-btn | bdr-none bg-clr-transparent`,
+    onClick: handleCloseDeleteWkspcePrompt
+  }, "\xD7")), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("div", {
+    className: `workspace-settings-del-wkspce-input-wrapper`
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("h3", {
+    className: "workspace-settings-del-wkspce-h3"
+  }, `Enter the Workspace name "${currWorkspace.title}" to delete`), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("p", {
+    className: "fnt-sz-14px"
+  }, "Things to know:"), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("ul", {
+    className: "workspace-settings-del-wkspce-ul"
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("li", null, "This is permanent and can't be undone."), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("li", null, "All boards in this Workspace will be gone.")), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("form", {
+    onSubmit: submitDeleteWorkspace
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("label", {
+    htmlFor: "wkspce-title-input",
+    className: "workspace-settings-del-wkspce-input-label"
+  }, "Enter the Workspace name to delete"), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("input", {
+    id: "wkspce-title-input",
+    className: "workspace-settings-del-wkspce-input | br-025rem",
+    type: "text",
+    value: wkspceName,
+    onChange: handleWkspceName
+  }), wkspceName === currWorkspace.title ? /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("button", {
+    type: "submit",
+    className: "workspace-settings-del-wkspce-submit-btn | bdr-none br-025rem"
+  }, "Delete Workspace") : /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("button", {
+    disabled: true,
+    className: "workspace-settings-del-wkspce-submit-btn-disabled | bdr-none br-025rem"
+  }, "Delete Workspace")))) : null)))));
+};
+const mapState = state => {
+  return {
+    user: state.auth.user
+  };
+};
+const mapDispatch = dispatch => {
+  return {
+    deleteWorkspace: workspaceId => dispatch((0,_store_workspace__WEBPACK_IMPORTED_MODULE_3__.deleteWorkspace)(workspaceId))
+  };
+};
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ((0,react_redux__WEBPACK_IMPORTED_MODULE_1__.connect)(mapState, mapDispatch)(WorkspaceSettings));
+
+/***/ }),
+
+/***/ "./client/components/WorkspaceSettingsSideDrawer.js":
+/*!**********************************************************!*\
+  !*** ./client/components/WorkspaceSettingsSideDrawer.js ***!
+  \**********************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "./node_modules/react/index.js");
+/* harmony import */ var react_redux__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! react-redux */ "./node_modules/react-redux/es/index.js");
+/* harmony import */ var _store_board__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../store/board */ "./client/store/board.js");
+/* harmony import */ var _BoardSideDrawerBoardLink__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./BoardSideDrawerBoardLink */ "./client/components/BoardSideDrawerBoardLink.js");
+
+
+
+
+
+
+const BoardSideDrawer = props => {
+  const {
+    user,
+    currWorkspace,
+    match,
+    workspaces,
+    createNewBoard,
+    getBoardWorkspace,
+    boardWorkspace
+  } = props;
+  const localStorage = window.localStorage;
+  const [open, setOpen] = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(parseInt(localStorage.getItem("sideDrawerOpen"), 10));
+  (0,react__WEBPACK_IMPORTED_MODULE_0__.useEffect)(() => {
+    const sideDrawer = document.querySelector('.wrkspce-settings-side-drawer-wrapper');
+    const wrkspceSettingsGrid = document.querySelector(".workspace-settings-layout-grid");
+    if (open) {
+      wrkspceSettingsGrid.style.gridTemplateColumns = '240px';
+      sideDrawer.style.width = '240px';
+    } else {
+      sideDrawer.style.width = '30px';
+      wrkspceSettingsGrid.style.gridTemplateColumns = '30px';
+    }
+  });
+  const handleDrawerOpenClose = () => {
+    const sideDrawerState = localStorage.getItem("sideDrawerOpen");
+    if (sideDrawerState === "1") {
+      localStorage.setItem("sideDrawerOpen", "0");
+      setOpen(parseInt(localStorage.getItem("sideDrawerOpen"), 10));
+    } else {
+      localStorage.setItem("sideDrawerOpen", "1");
+      setOpen(parseInt(localStorage.getItem("sideDrawerOpen"), 10));
+    }
+  };
+  const [newBoardModal, setNewBoardModal] = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(false);
+  const handleNewBoardModal = () => {
+    setNewBoardModal(prev => !prev);
+  };
+  const [newBoardTitle, setNewBoardTitle] = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)("");
+  const handleNewBoardTitle = event => {
+    setNewBoardTitle(event.target.value);
+  };
+  const handleCloseNewBoardModal = () => {
+    setNewBoardModal(false);
+    setNewBoardTitle("");
+  };
+  const currWorkspaceIndex = workspaces.findIndex(workspace => workspace.id === boardWorkspace.id);
+  // const boardWorkspace = workspaces[currWorkspaceIndex]; // this is assuming u are in the same workspace as the board 
+
+  (0,react__WEBPACK_IMPORTED_MODULE_0__.useEffect)(() => {
+    if (currWorkspace.id) {
+      console.log("getBoardWorkspace useEffect, currWorkspace:", currWorkspace);
+      getBoardWorkspace(currWorkspace.id, user.id);
+    }
+  }, [currWorkspace]);
+  const handleCreateNewBoard = event => {
+    event.preventDefault();
+    createNewBoard(user.id, boardWorkspace.id, newBoardTitle);
+    handleCloseNewBoardModal();
+  };
+  console.log("WorkspaceSettingsSideDrawer, boardWorkspace:", boardWorkspace);
+  return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("div", {
+    className: "wrkspce-settings-side-drawer-wrapper"
+  }, open && boardWorkspace.id ? /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("div", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("div", {
+    className: "board-side-drawer-header"
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("span", {
+    className: "board-side-drawer-wkspce-title | mgn-05rem"
+  }, boardWorkspace ? boardWorkspace.title : "Loading..."), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("button", {
+    className: "board-side-drawer-close-btn | mgn-05rem br-025rem bdr-none bg-clr-transparent",
+    onClick: handleDrawerOpenClose
+  })), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("div", {
+    className: "board-side-drawer-list-boards"
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("span", {
+    className: "board-side-drawer-list-boards-title | mgn-05rem"
+  }, "Your boards"), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("button", {
+    className: "board-side-drawer-new-board-btn | mgn-05rem br-025rem bdr-none bg-clr-transparent",
+    type: "button",
+    onClick: handleNewBoardModal
+  }, "+"), newBoardModal ? /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("div", {
+    className: `wrkspce-settings-side-drawer new-board menu wkspce${boardWorkspace.id} | br-025rem pdg-075rem`
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("div", {
+    className: `workspaces-display new-board menu-title wkspce${boardWorkspace.id}`
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("span", {
+    className: `create-board-txt new-board wkspce${boardWorkspace.id} | menu-title-clr`
+  }, "Create board"), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("button", {
+    className: `workspaces-display new-board menu-close-btn wkspce${boardWorkspace.id} | bdr-none bg-clr-transparent`,
+    onClick: handleCloseNewBoardModal
+  }, "\xD7")), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("div", {
+    className: `workspaces-display new-board menu-board-title-input wkspce${boardWorkspace.id}`
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("form", {
+    onSubmit: handleCreateNewBoard
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("label", {
+    htmlFor: "board-title-input"
+  }, "Board title"), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("input", {
+    id: "board-title-input",
+    type: "text",
+    value: newBoardTitle,
+    onChange: handleNewBoardTitle
+  }), newBoardTitle.length > 0 ? /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("button", {
+    type: "submit"
+  }, "Create") : /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("button", {
+    disabled: true
+  }, "Create")))) : null), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("div", {
+    className: "board-side-drawer-board-links"
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("ul", {
+    className: "board-side-drawer-board-links-ul"
+  }, boardWorkspace ? boardWorkspace.boards.map((board, index) => {
+    return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("li", {
+      className: "board-side-drawer-board-links-li",
+      key: board.id
+    }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_BoardSideDrawerBoardLink__WEBPACK_IMPORTED_MODULE_3__["default"], {
+      board: board,
+      currWorkspaceIndex: currWorkspaceIndex,
+      boardIndex: index,
+      match: match
+    }));
+  }) : null))) : /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("div", {
+    className: "board-side-drawer-closed"
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("button", {
+    className: "board-side-drawer-open-btn | mgn-05rem bdr-none",
+    type: "button",
+    onClick: handleDrawerOpenClose
+  }, `>`)));
+};
+const mapState = state => {
+  return {
+    boardWorkspace: state.board.workspace,
+    user: state.auth.user,
+    workspaces: state.workspaces.workspaces
+  };
+};
+const mapDispatch = dispatch => {
+  return {
+    createNewBoard: (userId, boardWorkspaceId, boardTitle) => dispatch((0,_store_board__WEBPACK_IMPORTED_MODULE_2__.createNewBoard)(userId, boardWorkspaceId, boardTitle)),
+    getBoardWorkspace: (workspaceId, userId) => dispatch((0,_store_board__WEBPACK_IMPORTED_MODULE_2__.getBoardWorkspace)(workspaceId, userId))
+  };
+};
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ((0,react_redux__WEBPACK_IMPORTED_MODULE_1__.connect)(mapState, mapDispatch)(BoardSideDrawer));
 
 /***/ }),
 
@@ -5434,15 +5784,20 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
 /* harmony export */ });
 /* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "./node_modules/react/index.js");
-/* harmony import */ var _store_workspace__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../store/workspace */ "./client/store/workspace.js");
-/* harmony import */ var react_redux__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! react-redux */ "./node_modules/react-redux/es/index.js");
+/* harmony import */ var react_router_dom__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! react-router-dom */ "./node_modules/react-router-dom/esm/react-router-dom.js");
+/* harmony import */ var react_redux__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! react-redux */ "./node_modules/react-redux/es/index.js");
+/* harmony import */ var _WorkspaceSettings__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./WorkspaceSettings */ "./client/components/WorkspaceSettings.js");
+/* harmony import */ var _store_workspace__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../store/workspace */ "./client/store/workspace.js");
+
+
 
 
 
 const WorkspaceSideDrawer = props => {
   const {
     user,
-    addWorkspace
+    addWorkspace,
+    workspaces
   } = props;
   const [addWorkspacePrompt, setAddWorkspacePrompt] = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(false);
   const [workspaceName, setWorkspaceName] = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)("");
@@ -5454,9 +5809,7 @@ const WorkspaceSideDrawer = props => {
     addWorkspace(user.id, workspaceName);
     setAddWorkspacePrompt(false);
   };
-
-  // console.log("WorkspaceSideDrawer");
-
+  console.log("WorkspaceSideDrawer, RENDER");
   return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("div", {
     className: "workspace-side-drawer"
   }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("div", {
@@ -5466,7 +5819,16 @@ const WorkspaceSideDrawer = props => {
     onClick: () => setAddWorkspacePrompt(true)
   }, "+")), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("div", {
     className: "workspace-side-drawer-contents"
-  }), addWorkspacePrompt ? /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("div", {
+  }, workspaces.map(workspace => {
+    return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("div", {
+      key: workspace.id
+    }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("div", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("span", {
+      className: "workspace-side-drawer-wkspce-title-txt"
+    }, workspace.title)), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("div", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(react_router_dom__WEBPACK_IMPORTED_MODULE_4__.Link, {
+      to: `/workspace/${workspace.id}/settings`,
+      className: "workspace-side-drawer-settings-link"
+    }, "Settings")));
+  })), addWorkspacePrompt ? /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("div", {
     className: "add-workspace-backdrop"
   }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("div", {
     className: "add-workspace-modal | "
@@ -5505,10 +5867,10 @@ const mapState = state => {
 };
 const mapDispatch = dispatch => {
   return {
-    addWorkspace: (userId, workspaceName) => dispatch((0,_store_workspace__WEBPACK_IMPORTED_MODULE_1__.addWorkspace)(userId, workspaceName))
+    addWorkspace: (userId, workspaceName) => dispatch((0,_store_workspace__WEBPACK_IMPORTED_MODULE_3__.addWorkspace)(userId, workspaceName))
   };
 };
-/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ((0,react_redux__WEBPACK_IMPORTED_MODULE_2__.connect)(mapState, mapDispatch)(WorkspaceSideDrawer));
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ((0,react_redux__WEBPACK_IMPORTED_MODULE_1__.connect)(mapState, mapDispatch)(WorkspaceSideDrawer));
 
 /***/ }),
 
@@ -5771,9 +6133,12 @@ const validateUsername = username => {
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "addBoardMember": () => (/* binding */ addBoardMember),
+/* harmony export */   "createNewBoard": () => (/* binding */ createNewBoard),
 /* harmony export */   "default": () => (/* binding */ boardReducer),
+/* harmony export */   "deleteABoard": () => (/* binding */ deleteABoard),
 /* harmony export */   "getBoard": () => (/* binding */ getBoard),
 /* harmony export */   "getBoardMembers": () => (/* binding */ getBoardMembers),
+/* harmony export */   "getBoardWorkspace": () => (/* binding */ getBoardWorkspace),
 /* harmony export */   "getUsersToInvite": () => (/* binding */ getUsersToInvite),
 /* harmony export */   "removeBoardMember": () => (/* binding */ removeBoardMember)
 /* harmony export */ });
@@ -5781,40 +6146,17 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(axios__WEBPACK_IMPORTED_MODULE_0__);
 
 
-// Functions used for below
-// const sortListsAndCards = (board, listPositions) => {
-//   console.log("At sortListsAndCards, listPositions:", listPositions);
-//   const sortedLists = board.lists.sort((list1, list2) => {
-//     return list1.id - list2.id;
-//   });
-
-//   sortedLists.forEach((list) => {
-//     list.cards.sort((card1, card2) => {
-//       return card1.id - card2.id;
-//     })
-//   });
-//   // console.log("after regular sort, sortedLists:", sortedLists);
-
-//   if(listPositions) {
-//     const currListPositionIndex = listPositions.currListPosition - 1;
-//     const moveToIndex = parseInt(listPositions.moveTo, 10) - 1;
-//     console.log("listPositions currListPositionIndex:", currListPositionIndex, " moveToIndex:", moveToIndex);
-//     const temp = sortedLists[currListPositionIndex];
-//     sortedLists[currListPositionIndex] = sortedLists[moveToIndex];
-//     // console.log("after first swap sortedLists:", sortedLists);
-//     sortedLists[moveToIndex] = temp;
-//   }
-//   console.log("sortListsAndCards sortedLists:", sortedLists);
-// }
-
 /**
  * ACTION TYPES
  */
 const GET_BOARD = 'GET_BOARD';
 const GET_BOARD_MEMBERS = "GET_BOARD_MEMBERS";
 const ADD_BOARD_MEMBER = "ADD_BOARD_MEMBER";
+const ADD_BOARD = "ADD_BOARD";
+const DELETE_A_BOARD = 'DELETE_A_BOARD';
 const GET_USER_TO_INVITE = "GET_USER_TO_INVITE";
 const SET_ERROR_MSG = "SET_ERROR_MSG";
+const GET_BOARD_WORKSPACE = "GET_BOARD_WORKSPACE";
 
 /**
  * ACTION CREATORS
@@ -5844,10 +6186,26 @@ const _setErrorMsg = errorMsg => {
     errorMsg
   };
 };
-
-/**
- * THUNK CREATORS
- */
+const _getBoardWorkspace = workspace => {
+  return {
+    type: GET_BOARD_WORKSPACE,
+    workspace
+  };
+};
+const _createNewBoard = updatedWorkspace => {
+  return {
+    type: ADD_BOARD,
+    updatedWorkspace
+  };
+};
+const _deleteABoard = (currWorkspaceIndex, boardId) => {
+  return {
+    type: DELETE_A_BOARD,
+    currWorkspaceIndex,
+    // don't need this?
+    boardId
+  };
+};
 const getBoard = boardId => {
   return async dispatch => {
     const {
@@ -5904,22 +6262,58 @@ const getUsersToInvite = usernameOrEmail => {
     dispatch(_getUsersToInvite(users));
   };
 };
+const getBoardWorkspace = (workspaceId, userId) => {
+  return async dispatch => {
+    const {
+      data: workspace
+    } = await axios__WEBPACK_IMPORTED_MODULE_0___default()({
+      method: 'get',
+      url: `/api/boards/workspace/${workspaceId}/user/${userId}`
+    });
+    // console.log("getBoardWorkspace thunk, response:", workspace);
+
+    dispatch(_getBoardWorkspace(workspace));
+  };
+};
+const createNewBoard = (userId, workspaceId, boardTitle) => {
+  // console.log("createNewBoard thunk userId, workspaceId, boardTitle:", userId, workspaceId, boardTitle);
+  return async dispatch => {
+    const {
+      data: updatedWorkspace
+    } = await axios__WEBPACK_IMPORTED_MODULE_0___default().post(`/api/boards/newBoard/user/${userId}/workspace/${workspaceId}`, {
+      title: boardTitle
+    });
+    // console.log('createNewBoard, updatedWorkspace:', updatedWorkspace);
+
+    dispatch(_createNewBoard(updatedWorkspace));
+    return updatedWorkspace;
+  };
+};
+const deleteABoard = (currWorkspaceIndex, boardId) => {
+  return async dispatch => {
+    const {
+      data: response
+    } = await axios__WEBPACK_IMPORTED_MODULE_0___default()({
+      method: 'delete',
+      url: `/api/boards/board/${boardId}`
+    });
+    // console.log("deleteABoard thunk, response:", response);
+
+    dispatch(_deleteABoard(currWorkspaceIndex, boardId));
+  };
+};
 const initialState = {
   board: {},
   members: [],
   guests: [],
   toInvite: [],
-  errorMsg: null
+  errorMsg: null,
+  workspace: {}
 };
 function boardReducer(state = initialState, action) {
   switch (action.type) {
     case GET_BOARD:
       {
-        // if(action.listPositions) {
-
-        // } else {
-
-        // }
         return {
           ...state,
           board: action.board
@@ -5944,6 +6338,35 @@ function boardReducer(state = initialState, action) {
         return {
           ...state,
           errorMsg: action.errorMsg
+        };
+      }
+    case GET_BOARD_WORKSPACE:
+      {
+        return {
+          ...state,
+          workspace: action.workspace
+        };
+      }
+    case ADD_BOARD:
+      {
+        return {
+          ...state,
+          workspace: action.updatedWorkspace
+        };
+      }
+    case DELETE_A_BOARD:
+      {
+        const currWorkspace = state.workspace;
+        const newCurrWorkspace = {
+          ...currWorkspace
+        };
+        const newBoards = [...newCurrWorkspace.boards];
+        const deletedBoardIndex = newBoards.findIndex(board => board.id === action.boardId);
+        newBoards.splice(deletedBoardIndex, 1);
+        newCurrWorkspace.boards = newBoards;
+        return {
+          ...state,
+          workspace: newCurrWorkspace
         };
       }
     default:
@@ -6775,9 +7198,9 @@ function listsReducer(state = inititalState, action) {
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "addWorkspace": () => (/* binding */ addWorkspace),
-/* harmony export */   "createNewBoard": () => (/* binding */ createNewBoard),
+/* harmony export */   "createNewBoardInOwnWrkspce": () => (/* binding */ createNewBoardInOwnWrkspce),
 /* harmony export */   "default": () => (/* binding */ workspacesReducer),
-/* harmony export */   "deleteABoard": () => (/* binding */ deleteABoard),
+/* harmony export */   "deleteWorkspace": () => (/* binding */ deleteWorkspace),
 /* harmony export */   "getBoardsMemberOf": () => (/* binding */ getBoardsMemberOf),
 /* harmony export */   "getWorkspaces": () => (/* binding */ getWorkspaces)
 /* harmony export */ });
@@ -6791,8 +7214,9 @@ __webpack_require__.r(__webpack_exports__);
 const GET_WORKSPACES = 'GET_WORKSPACES';
 const GET_BOARDS_MEMBER_OF = 'GET_BOARDS_MEMBER_OF';
 const ADD_WORKSPACE = 'ADD_WORKSPACE';
-const ADD_BOARD = 'ADD_BOARD';
-const DELETE_BOARD = 'DELETE_BOARD';
+const DELETE_WORKSPACE = 'DELETE_WORKSPACE';
+const ADD_BOARD_OWN_WRKSPCE = 'ADD_BOARD_OWN_WRKSPCE';
+// const DELETE_BOARD = 'DELETE_BOARD';
 
 /**
  * ACTION CREATORS
@@ -6815,19 +7239,26 @@ const _addWorkspace = newWorkspace => {
     newWorkspace
   };
 };
-const _createNewBoard = updatedWorkspace => {
+const _deleteWorkspace = workspaceId => {
   return {
-    type: ADD_BOARD,
+    type: DELETE_WORKSPACE,
+    workspaceId
+  };
+};
+const _createNewBoardInOwnWrkspce = updatedWorkspace => {
+  return {
+    type: ADD_BOARD_OWN_WRKSPCE,
     updatedWorkspace
   };
 };
-const _deleteBoard = (currWorkspaceIndex, boardId) => {
-  return {
-    type: DELETE_BOARD,
-    currWorkspaceIndex,
-    boardId
-  };
-};
+
+// const _deleteABoard = (currWorkspaceIndex, boardId) => {
+//   return {
+//     type: DELETE_BOARD,
+//     currWorkspaceIndex,
+//     boardId
+//   }
+// }
 
 /**
  * THUNK CREATORS
@@ -6836,7 +7267,8 @@ const getWorkspaces = userId => {
   return async dispatch => {
     const response = await axios__WEBPACK_IMPORTED_MODULE_0___default().get(`/api/users/userId/${userId}/workspaces`);
     const workspaces = response.data;
-    console.log("getWorkpsace thunk, workspaces:", workspaces);
+    // console.log("getWorkpsace thunk, workspaces:", workspaces);
+
     return dispatch(_getWorkspaces(workspaces));
   };
 };
@@ -6864,40 +7296,52 @@ const addWorkspace = (userId, workspaceName) => {
         owner: userId
       }
     });
-    console.log("addWorkspace thunk, newWorkspace:", newWorkspace);
+    // console.log("addWorkspace thunk, newWorkspace:", newWorkspace);
+
     dispatch(_addWorkspace(newWorkspace));
   };
 };
-const createNewBoard = (userId, workspaceId, boardTitle) => {
-  console.log("createNewBoard thunk userId, workspaceId, boardTitle:", userId, workspaceId, boardTitle);
+const deleteWorkspace = workspaceId => {
+  return async dispatch => {
+    const {
+      data: response
+    } = await axios__WEBPACK_IMPORTED_MODULE_0___default()({
+      method: 'delete',
+      url: `/api/workspaces/workspace/${workspaceId}`
+    });
+    // console.log("deleteWorkspace thunk, response:", response);
+
+    dispatch(_deleteWorkspace(workspaceId));
+    return response;
+  };
+};
+const createNewBoardInOwnWrkspce = (userId, workspaceId, boardTitle) => {
+  // console.log("createNewBoard thunk userId, workspaceId, boardTitle:", userId, workspaceId, boardTitle);
   return async dispatch => {
     const {
       data: updatedWorkspace
     } = await axios__WEBPACK_IMPORTED_MODULE_0___default().post(`/api/boards/newBoard/user/${userId}/workspace/${workspaceId}`, {
       title: boardTitle
     });
-    console.log('createNewBoard, updatedWorkspace:', updatedWorkspace);
-    dispatch(_createNewBoard(updatedWorkspace));
-    // const { data: response } = await axios.get(`/api/users/userId/${userId}/workspaces`);
-    // const workspaces = response;
+    // console.log('createNewBoard, updatedWorkspace:', updatedWorkspace);
 
-    // dispatch(_getWorkspaces(workspaces)); // need to change this?
+    dispatch(_createNewBoardInOwnWrkspce(updatedWorkspace));
+    return updatedWorkspace;
   };
 };
 
-const deleteABoard = (currWorkspaceIndex, boardId) => {
-  return async dispatch => {
-    const {
-      data: response
-    } = await axios__WEBPACK_IMPORTED_MODULE_0___default()({
-      method: 'delete',
-      url: `/api/boards/board/${boardId}`
-    });
-    // console.log("deleteABoard thunk, response:", response);
+// export const deleteABoard = (currWorkspaceIndex, boardId) => {
+//   return async(dispatch) => {
+//     const { data: response } = await axios({
+//       method: 'delete',
+//       url: `/api/boards/board/${boardId}`
+//     });
+//     // console.log("deleteABoard thunk, response:", response);
 
-    dispatch(_deleteBoard(currWorkspaceIndex, boardId));
-  };
-};
+//     dispatch(_deleteABoard(currWorkspaceIndex, boardId));
+//   }
+// }
+
 const initialState = {
   workspaces: [],
   submittedNewBoard: 0
@@ -6923,14 +7367,17 @@ function workspacesReducer(state = initialState, action) {
           workspaces: [...state.workspaces, action.newWorkspace]
         };
       }
-    case "SUBMIT_NEW_BOARD_REDIRECT":
+    case DELETE_WORKSPACE:
       {
+        const newWorkspaces = [...state.workspaces];
+        const toDeleteIdx = newWorkspaces.findIndex(workspace => workspace.id === action.workspaceId);
+        newWorkspaces.splice(toDeleteIdx, 1);
         return {
           ...state,
-          submittedNewBoard: action.boardWorkspaceId
+          workspaces: newWorkspaces
         };
       }
-    case ADD_BOARD:
+    case ADD_BOARD_OWN_WRKSPCE:
       {
         const updatedWorkspaceId = action.updatedWorkspace.id;
         const newWorkspaces = [...state.workspaces];
@@ -6941,28 +7388,33 @@ function workspacesReducer(state = initialState, action) {
           workspaces: newWorkspaces
         };
       }
-    case DELETE_BOARD:
-      {
-        const currWorkspace = state.workspaces[action.currWorkspaceIndex];
-        const newCurrWorkspace = {
-          ...currWorkspace
-        };
-        const newBoards = [...newCurrWorkspace.boards];
-        const deletedBoardIndex = newBoards.findIndex(board => board.id === action.boardId);
-        newBoards.splice(deletedBoardIndex, 1);
-        newCurrWorkspace.boards = newBoards;
-        const newWorkspaces = [...state.workspaces];
-        newWorkspaces.splice(action.currWorkspaceIndex, 1, newCurrWorkspace);
-        return {
-          ...state,
-          workspaces: newWorkspaces
-        };
-      }
+    // case DELETE_BOARD: {
+    //   const currWorkspace = state.workspaces[action.currWorkspaceIndex]
+    //   const newCurrWorkspace = { ...currWorkspace };
+    //   const newBoards = [ ...newCurrWorkspace.boards ];
+    //   const deletedBoardIndex = newBoards.findIndex((board) => board.id === action.boardId)
+    //   newBoards.splice(deletedBoardIndex, 1);
+    //   newCurrWorkspace.boards = newBoards;
+
+    //   const newWorkspaces = [ ...state.workspaces ];
+    //   newWorkspaces.splice(action.currWorkspaceIndex, 1, newCurrWorkspace);
+    //   return { ...state, workspaces: newWorkspaces };
+
+    // }
     case GET_BOARDS_MEMBER_OF:
       {
         return {
           ...state,
           workspaces: [...state.workspaces, ...action.workspaces]
+        };
+      }
+    case "UPDATE_WORKSPACES_AFTER_NEW_BOARD":
+      {
+        const newWorkspaces = [...state.workspaces];
+        newWorkspaces.splice(action.currWorkspaceIndex, 1, action.updatedWorkspace);
+        return {
+          ...state,
+          workspaces: newWorkspaces
         };
       }
     default:

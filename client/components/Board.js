@@ -19,7 +19,8 @@ const Board = (props) => {
     user, workspaces, getWorkspaces,
     lists, listsState, getLists,
   } = props;
-  
+  const match = props.match;
+
   const boardId = props.match.params.boardId;
   useEffect(() => {
     // console.log('Board, useEffect, boardId:', boardId);
@@ -74,24 +75,8 @@ const Board = (props) => {
     }
   }, [board]);
   
-    
 
-   
-  
-
-  // const [swapListTargetIdx, setSwapListTargetIdx] = useState({
-  //   swapToIndex: null,
-  //   currListIndex: null,
-  // });
-
-  // const handleSwapListTargetIdx = (swapToIndex, currListIndex) => {
-    
-  //   setSwapListTargetIdx({ swapToIndex, currListIndex });
-  // }
-
-  
-
-  // console.log("Board RENDER, lists:", lists);
+  // console.log("Board RENDER, boardId:", boardId, " board:", board);
 
 
   if(!board.id) {
@@ -106,7 +91,7 @@ const Board = (props) => {
   return (
     <div id="grid-board">
       <Navbar user={user} />
-      <BoardSideDrawer boardWorkspaceId={board.workspaceId} />
+      <BoardSideDrawer match={match}/>
       <NavbarContent />
 
       
@@ -125,7 +110,6 @@ const Board = (props) => {
                   <div className={`flex-board-list idx${listIndex}` }>
                     <ListTitle 
                       currList={list} currListIndex={listIndex} board={board} 
-                      workspaces={workspaces}
                       // swapListTargetPos={
                       //   swapListTargetIdx.swapToIndex === listIndex ? swapListTargetIdx.currListIndex + 1 : null 
                       // }

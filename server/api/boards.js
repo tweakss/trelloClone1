@@ -1,5 +1,5 @@
 const router = require('express').Router();
-const { models: { Board, User, List, Card, Workspace, Guest }} = require('../db');
+const { models: { Board, User, List, Card, Workspace, Guest, Comment }} = require('../db');
 
 // api/boards/...
 
@@ -91,6 +91,34 @@ router.get('/:boardId/guests', async (req, res, next) => {
   }
 });
 
+// Get a workspace and its boards that the user is a member of
+router.get('/workspace/:workspaceId/user/:userId', async(req, res, next) => {
+  const workspaceId = req.params.workspaceId;
+  const userId = req.params.userId;
+  try {
+    const workspace = await Workspace.findOne({
+      where: {
+        id: workspaceId,
+      },
+      include: {
+        model: Board,
+        separate: true,
+        order: [['id', 'ASC']],
+        include: {
+          model: User,
+          where: {
+            id: userId
+          }
+        }
+      }
+    });
+
+    res.send(workspace);
+  } catch(err) {
+    next(err);
+  }
+})
+
 // Create a board for a user
 router.post('/newBoard/user/:userId/workspace/:workspaceId', async (req, res, next) => {
   const userId = req.params.userId;
@@ -113,12 +141,18 @@ router.post('/newBoard/user/:userId/workspace/:workspaceId', async (req, res, ne
 
     const updatedWorkspace = await Workspace.findOne({
       where: {
-        id: workspaceId
+        id: workspaceId,
       },
       include: {
         model: Board,
         separate: true,
-        order: [['id', 'ASC']]
+        order: [['id', 'ASC']],
+        include: {
+          model: User,
+          where: {
+            id: userId
+          }
+        }
       }
     });
 
@@ -135,6 +169,35 @@ router.delete('/board/:boardId', async(req, res, next) => {
     const board = await Board.findOne({
       where: {
         id: boardId
+      }
+    });
+    const boardLists = await board.getLists();
+    const eachListCards = await Promise.all(boardLists.map((list) => {
+      return list.getCards();
+    }));
+    const totalCards = eachListCards.flat(1);
+    
+    const commentsDeleted = await Promise.all(totalCards.map((card) => {
+      const numOfRowsDeleted = Comment.destroy({
+        where: {
+          cardId: card.id
+        }
+      });
+      
+      return numOfRowsDeleted;
+    }));
+    const cardsDeleted = await Promise.all(boardLists.map((list) => {
+      const numOfRowsDeleted = Card.destroy({
+        where: {
+          listId: list.id
+        }
+      });
+
+      return numOfRowsDeleted;
+    }));
+    const listsDeleted = await List.destroy({
+      where: {
+        boardId
       }
     });
 
@@ -217,30 +280,40 @@ router.delete('/:boardId/deleteList/:listId', async(req, res, next) => {
   const listId = req.params.listId;
 
   try {
-    const board = await Board.findOne({
-      where: {
-        id: boardId
-      }
-    });
+    // const board = await Board.findOne({
+    //   where: {
+    //     id: boardId
+    //   }
+    // });
     const list = await List.findOne({
       where: {
         id: listId
       }
     });
-    
-
     if(list === null) {
-      // console.log("list === null");
       res.send("The list to be deleted doesn't exist");
-    } else {
-      console.log("Before removing, countLists:", await board.countLists())
-      // await board.removeList(list);
-      const response = await list.destroy(); // response is [] 
-      console.log("After removing, countLists:", await board.countLists())
-      console.log("Successfully deleted list, response:", response);
-      res.send("List deleted");
-    }
+    } 
+    
+    const listCards = await list.getCards();
+    const commentsDeleted = Promise.all(listCards.map((card) => {
+      const numOfRowsDeleted = Comment.destroy({
+        where: {
+          cardId: card.id
+        }
+      });
 
+      return numOfRowsDeleted;
+    }));
+    const cardsDeleted = await Card.destroy({
+      where: {
+        listId
+      }
+    });
+      
+    const response = await list.destroy(); // response is [] 
+    
+    res.send("List deleted");
+    
     
   } catch(err) {
     next(err);

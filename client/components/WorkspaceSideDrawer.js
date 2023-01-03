@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react'
-import { addWorkspace } from '../store/workspace';
+import { Link, Route, Switch, useRouteMatch } from 'react-router-dom'
 import {connect} from 'react-redux'
-
+import WorkspaceSettings from './WorkspaceSettings';
+import { addWorkspace } from '../store/workspace';
 
 const WorkspaceSideDrawer = (props) => {
   const {
     user, addWorkspace,
+    workspaces,
   } = props;
 
   const [addWorkspacePrompt, setAddWorkspacePrompt] = useState(false);
@@ -21,7 +23,7 @@ const WorkspaceSideDrawer = (props) => {
     setAddWorkspacePrompt(false); 
   }
 
-  // console.log("WorkspaceSideDrawer");
+  console.log("WorkspaceSideDrawer, RENDER");
 
   return (
     <div className="workspace-side-drawer">
@@ -36,7 +38,27 @@ const WorkspaceSideDrawer = (props) => {
       </div>
 
       <div className="workspace-side-drawer-contents">
-
+        {
+          workspaces.map((workspace) => {
+            return (
+              <div key={workspace.id}>
+                <div>
+                  <span className="workspace-side-drawer-wkspce-title-txt">
+                    {workspace.title}
+                  </span>
+                </div>
+                <div>
+                  <Link
+                    to={`/workspace/${workspace.id}/settings`}
+                    className="workspace-side-drawer-settings-link"
+                  >
+                    Settings
+                  </Link>
+                </div>
+              </div>
+            )
+          })
+        }
       </div>
 
       {
@@ -103,7 +125,6 @@ const WorkspaceSideDrawer = (props) => {
           </div>
         </div> : null
       }
-      
 
     </div>
   );

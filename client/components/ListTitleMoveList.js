@@ -11,17 +11,6 @@ const ListTitleMoveList = (props) => {
     moveList,
   } = props;
 
-  useEffect(() => {
-    // Repositions menu if it goes over right side of screen
-    const rootElemWidth = document.documentElement.clientWidth;
-    const moveListElem = document.querySelector(".list-title-dropdown-move-list");
-    const rightWidthPos = moveListElem.getBoundingClientRect().right;
-    if(rightWidthPos > rootElemWidth) {
-      moveListElem.style.right = "10px";
-    }
-  }, []);
-
-
   const [selectBoard, setSelectBoard] = useState(board.title);
   const [selectedBoardId, setSelectedBoardId] = useState(board.id);
   const [selectedBoardLists, setSelectedBoardLists] = useState(currLists)

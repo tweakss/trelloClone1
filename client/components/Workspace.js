@@ -13,7 +13,9 @@ const Workspace = props => {
     getWorkspaces, getBoardsMemberOf
   } = props
 
+
   useEffect(() => {
+    // console.log("Workspace useEffect, getWorkspaces, getBoardsMemberOf");
     (async() => {
       const response = await getWorkspaces(user.id);
       getBoardsMemberOf(user.id);
@@ -30,15 +32,16 @@ const Workspace = props => {
     );
   }
 
-  console.log('Workspace, user:', user);
+  console.log('Workspace, workspaces:', workspaces);
 
 
   return (
     <div className="workspace-layout-grid">
       <Navbar user={user} />
       <div className="navbar-filler"></div>
-      <WorkspaceSideDrawer />
-      <div className="workspaces-display-section |">
+      <WorkspaceSideDrawer workspaces={workspaces} />
+      
+      <div className="workspaces-display-section">
         <h3>YOUR WORKSPACES</h3>
         <div className="workspaces-display-wrapper">
           {
@@ -79,7 +82,6 @@ const Workspace = props => {
           }
         </div>
       </div>
-
            
     </div>
   )

@@ -1,40 +1,17 @@
 import axios from 'axios'
 
 
-// Functions used for below
-// const sortListsAndCards = (board, listPositions) => {
-//   console.log("At sortListsAndCards, listPositions:", listPositions);
-//   const sortedLists = board.lists.sort((list1, list2) => {
-//     return list1.id - list2.id;
-//   });
-  
-//   sortedLists.forEach((list) => {
-//     list.cards.sort((card1, card2) => {
-//       return card1.id - card2.id;
-//     })
-//   });
-//   // console.log("after regular sort, sortedLists:", sortedLists);
-
-//   if(listPositions) {
-//     const currListPositionIndex = listPositions.currListPosition - 1;
-//     const moveToIndex = parseInt(listPositions.moveTo, 10) - 1;
-//     console.log("listPositions currListPositionIndex:", currListPositionIndex, " moveToIndex:", moveToIndex);
-//     const temp = sortedLists[currListPositionIndex];
-//     sortedLists[currListPositionIndex] = sortedLists[moveToIndex];
-//     // console.log("after first swap sortedLists:", sortedLists);
-//     sortedLists[moveToIndex] = temp;
-//   }
-//   console.log("sortListsAndCards sortedLists:", sortedLists);
-// }
-
 /**
  * ACTION TYPES
  */
 const GET_BOARD = 'GET_BOARD';
 const GET_BOARD_MEMBERS = "GET_BOARD_MEMBERS";
 const ADD_BOARD_MEMBER = "ADD_BOARD_MEMBER";
+const ADD_BOARD = "ADD_BOARD";
+const DELETE_A_BOARD = 'DELETE_A_BOARD';
 const GET_USER_TO_INVITE = "GET_USER_TO_INVITE";
 const SET_ERROR_MSG = "SET_ERROR_MSG";
+const GET_BOARD_WORKSPACE = "GET_BOARD_WORKSPACE";
 
 /**
  * ACTION CREATORS
@@ -68,11 +45,29 @@ const _setErrorMsg = (errorMsg) => {
   }
 }
 
+const _getBoardWorkspace = (workspace) => {
+  return {
+    type: GET_BOARD_WORKSPACE,
+    workspace
+  }
+}
+
+const _createNewBoard = (updatedWorkspace) => {
+  return {
+    type: ADD_BOARD,
+    updatedWorkspace
+  }
+}
+
+const _deleteABoard = (currWorkspaceIndex, boardId) => {
+  return {
+    type: DELETE_A_BOARD,
+    currWorkspaceIndex, // don't need this?
+    boardId
+  }
+}
 
 
-/**
- * THUNK CREATORS
- */
 export const getBoard = (boardId) => {
   return async (dispatch) => {
     const { data: board } = await axios.get(`/api/boards/${boardId}`);
@@ -126,6 +121,42 @@ export const getUsersToInvite = (usernameOrEmail) => {
   }
 }
 
+export const getBoardWorkspace = (workspaceId, userId) => {
+  return async(dispatch) => {
+    const { data: workspace } = await axios({
+      method: 'get',
+      url: `/api/boards/workspace/${workspaceId}/user/${userId}`
+    });
+    // console.log("getBoardWorkspace thunk, response:", workspace);
+
+    dispatch(_getBoardWorkspace(workspace));
+  }
+}
+
+export const createNewBoard = (userId, workspaceId, boardTitle) => {
+  // console.log("createNewBoard thunk userId, workspaceId, boardTitle:", userId, workspaceId, boardTitle);
+  return async (dispatch) => {
+    const { data: updatedWorkspace } = await axios.post(`/api/boards/newBoard/user/${userId}/workspace/${workspaceId}`, {
+      title: boardTitle
+    });
+    // console.log('createNewBoard, updatedWorkspace:', updatedWorkspace);
+
+    dispatch(_createNewBoard(updatedWorkspace))
+    return updatedWorkspace;
+  }
+}
+
+export const deleteABoard = (currWorkspaceIndex, boardId) => {
+  return async(dispatch) => {
+    const { data: response } = await axios({
+      method: 'delete',
+      url: `/api/boards/board/${boardId}`
+    });
+    // console.log("deleteABoard thunk, response:", response);
+
+    dispatch(_deleteABoard(currWorkspaceIndex, boardId));
+  }
+}
 
 
 const initialState = {
@@ -133,17 +164,13 @@ const initialState = {
   members: [],
   guests: [],
   toInvite: [],
-  errorMsg: null
+  errorMsg: null,
+  workspace: {}
 };
 
 export default function boardReducer(state = initialState, action) {
   switch(action.type) {
     case GET_BOARD: {
-      // if(action.listPositions) {
-
-      // } else {
-
-      // }
       return { ...state, board: action.board };
     }
     case GET_BOARD_MEMBERS: {
@@ -154,6 +181,23 @@ export default function boardReducer(state = initialState, action) {
     }
     case SET_ERROR_MSG: {
       return { ...state, errorMsg: action.errorMsg };
+    }
+    case GET_BOARD_WORKSPACE: {
+      return { ...state, workspace: action.workspace };
+    }
+    case ADD_BOARD: {
+      return { ...state, workspace: action.updatedWorkspace };
+    }
+    case DELETE_A_BOARD: {
+      const currWorkspace = state.workspace;
+      const newCurrWorkspace = { ...currWorkspace };
+      const newBoards = [ ...newCurrWorkspace.boards ];
+      const deletedBoardIndex = newBoards.findIndex((board) => board.id === action.boardId)
+      newBoards.splice(deletedBoardIndex, 1);
+      newCurrWorkspace.boards = newBoards;
+
+      return { ...state, workspace: newCurrWorkspace };
+      
     }
     default: {
       return state;
