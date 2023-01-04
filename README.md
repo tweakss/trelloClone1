@@ -18,7 +18,7 @@ If you don't want to create an account, you can use the below two accounts. The 
 4. In your newly created card, give it a description and put down a comment. Reply to a comment if there is one.
 5. Try moving cards and lists around, like hovering over the right side/top right corner of a card.
 
-Continue below to test with sharing your board to another person.
+Continue below to test sharing your board to another person.
 
 1. Log out and create another account, then log back in with your first
 account and share your board with your second account.
